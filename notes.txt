@@ -1,0 +1,9 @@
+
+
+* Only call callback on each new event, ignore identical messages
+  in between. For example, a new power event should come on each crank rotation.
+
+* Log time of each bicycle power message.
+
+* Startup message sometimes times-out after calling reset. Must have something to do with
+  the driver, because it only happens in Node.start and never in Node.stop.
