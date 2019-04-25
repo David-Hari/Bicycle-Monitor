@@ -20,19 +20,19 @@ import logging
 
 
 def devicePaired(deviceProfile, channelId):
-	print('Connected to %s (%s)' % (deviceProfile.name, channelId))
+	print(f'Connected to {deviceProfile.name} ({channelId})')
 
 def powerMonitorPaired(deviceProfile, channelId):
 	devicePaired(deviceProfile, channelId)
 	deviceProfile.setCrankLength(config.crankLength)
 
 def searchTimedOut(deviceProfile):
-	msg = 'Time-out trying to connect to %s' % deviceProfile.name
+	msg = f'Time-out trying to connect to {deviceProfile.name}'
 	print(msg)
 	display.showStatusText(msg)
 
 def channelClosed(deviceProfile):
-	print('Channel closed for %s' % deviceProfile.name)
+	print(f'Channel closed for {deviceProfile.name}')
 
 def heartRateData(heartRate, eventTime, interval):
 	logging.writeHeartRateEvent(eventTime, heartRate)

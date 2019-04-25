@@ -33,12 +33,12 @@ def closeFiles():
 
 
 def writeHeartRateEvent(eventTime, heartRate):
-	heartRateFile.write('%s,%s\n' % (eventTime, heartRate))
+	heartRateFile.write(f'{eventTime},{heartRate}\n')
 
 
 def writePowerEvent(eventTime, instantaneousPower, accumulatedPower, ratio, cadence):
-	powerFile.write('%s,%s,%s,%s,%s\n' % (eventTime, instantaneousPower, accumulatedPower, ratio, cadence))
+	powerFile.write(f'{eventTime},{instantaneousPower},{accumulatedPower},{ratio},{cadence}\n')
 
 
 def writeTorqueEvent(eventTime, leftTorque, rightTorque, leftPedalSmoothness, rightPedalSmoothness):
-	torqueFile.write('%s,%s,%s,%s,%s\n' % (eventTime, leftTorque, rightTorque, leftPedalSmoothness, rightPedalSmoothness))
+	torqueFile.write(f'{eventTime},{leftTorque},{rightTorque},{leftPedalSmoothness},{rightPedalSmoothness}\n')
