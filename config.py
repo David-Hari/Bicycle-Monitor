@@ -10,13 +10,13 @@ heartRatePairing = (21741, 120, 1)
 powerPairing = (2920, 11, 5)
 
 # Files to log data to
-heartRateFileName = "./heart-rate.csv"
-powerFileName = "./power.csv"
-torqueFileName = "./torque.csv"
+heartRateFileName = "./data/heart-rate.csv"
+powerFileName = "./data/power.csv"
+torqueFileName = "./data/torque.csv"
 
 # Bike parameters
-crankLength = 145.0 #mm
+crankLength = 145.0 # mm
 
-powerGoal = 200 #Watts
-powerGreenRange = 10 #+/- Watts, the high and low bounds of the green (good) area
-powerRedRange = 50 #+/- Watts, the high and low bounds of the bar chart
+powerGoal = 200       # Watts. Power output to try to achieve
+powerRange = 50       # Watts. Show this much more/less than the goal
+powerIdealRange = 10  # Watts. Actual power output should be within this range
