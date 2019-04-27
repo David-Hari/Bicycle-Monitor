@@ -5,7 +5,6 @@
 """
 
 import time
-from PIL import Image
 from ant.core import driver
 from ant.core.node import Node, Network, ChannelID
 from ant.core.constants import *
