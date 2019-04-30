@@ -13,7 +13,7 @@ from ant.plus.power import *
 
 import config
 import display
-import logging
+import data_logging
 
 
 
@@ -34,23 +34,23 @@ def channelClosed(deviceProfile):
 	print(f'Channel closed for {deviceProfile.name}')
 
 def heartRateData(heartRate, eventTime, interval):
-	logging.writeHeartRateEvent(eventTime, heartRate)
+	data_logging.writeHeartRateEvent(eventTime, heartRate)
 
 def powerData(eventCount, pedalDifferentiation, pedalPowerRatio, cadence, accumulatedPower, instantaneousPower):
 	ratio = '' if pedalPowerRatio is None else pedalPowerRatio
-	logging.writePowerEvent(0, instantaneousPower, accumulatedPower, ratio, cadence)
+	data_logging.writePowerEvent(0, instantaneousPower, accumulatedPower, ratio, cadence)
 
 	#TODO
 	#lock power:
 	#   power = instantaneousPower
 
 def torqueAndPedalData(eventCount, leftTorque, rightTorque, leftPedalSmoothness, rightPedalSmoothness):
-	logging.writeTorqueEvent(0, leftTorque, rightTorque, leftPedalSmoothness, rightPedalSmoothness)
+	data_logging.writeTorqueEvent(0, leftTorque, rightTorque, leftPedalSmoothness, rightPedalSmoothness)
 
 
 
 
-logging.openFiles()
+data_logging.openFiles()
 display.start()
 
 print('Starting up... ', end='')
@@ -86,6 +86,6 @@ while True:
 
 
 print('Shutting down... ', end='')
-logging.closeFiles()
+data_logging.closeFiles()
 antNode.stop()
 print('Done')
