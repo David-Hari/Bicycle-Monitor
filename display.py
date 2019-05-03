@@ -23,6 +23,7 @@ camera.exposure_mode = 'sports'  # To reduce motion blur
 camera.framerate = 49  # Highest supported by mode 5
 ## For more information about camera modes, see
 ## https://picamera.readthedocs.io/en/release-1.13/fov.html#sensor-modes
+## Note that the mini ("spy") camera only comes in a V1 module.
 
 
 def start():
