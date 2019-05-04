@@ -1,4 +1,10 @@
 
+Bicycle-Monitor TODO:
+
+* Ant seems to fail to start back up again once it's been shut down.
+  Perhaps the shutdown does not happen properly.
+
+Python-Ant TODO:
 
 * Only call callback on each new event, ignore identical messages
   in between. For example, a new power event should come on each crank rotation.
