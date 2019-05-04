@@ -33,6 +33,7 @@ def searchTimedOut(deviceProfile):
 def channelClosed(deviceProfile):
 	print(f'Channel closed for {deviceProfile.name}')
 
+
 def heartRateData(heartRate, eventTime, interval):
 	data_logging.writeHeartRateEvent(eventTime, heartRate)
 
@@ -80,6 +81,7 @@ while True:
 		#TODO
 		#lock power:
 		#    display.drawPowerBar(power, config.powerGoal, config.powerRange, config.powerIdealRange)
+
 		time.sleep(1)
 	except KeyboardInterrupt:
 		break

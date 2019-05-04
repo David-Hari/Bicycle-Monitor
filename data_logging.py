@@ -18,12 +18,12 @@ def openFiles():
 	global torqueFile
 
 	heartRateFile = open(config.heartRateFileName, 'w', encoding='utf-8')
-	heartRateFile.write('Time,Heart Rate (bpm)')
+	heartRateFile.write('Time,Heart Rate (bpm)\n')
 	powerFile = open(config.powerFileName, 'w', encoding='utf-8')
-	powerFile.write('Time,Instantaneous Power (W),Accumulated Power (W),Pedal Power Ratio,Cadence (rpm)')
+	powerFile.write('Time,Instantaneous Power (W),Accumulated Power (W),Pedal Power Ratio,Cadence (rpm)\n')
 	torqueFile = open(config.torqueFileName, 'w', encoding='utf-8')
-	torqueFile.write('Time,Torque Effectiveness,,Pedal Smoothness,')
-	torqueFile.write(',left,right,left,right')
+	torqueFile.write('Time,Torque Effectiveness,,Pedal Smoothness,\n')
+	torqueFile.write(',left,right,left,right\n')
 
 
 def closeFiles():

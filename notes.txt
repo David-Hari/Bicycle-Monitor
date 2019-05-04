@@ -1,8 +1,11 @@
 
 Bicycle-Monitor TODO:
 
-* Ant seems to fail to start back up again once it's been shut down.
+* Use a lock
+
+* Ant sometimes fails to start back up again once it's been shut down.
   Perhaps the shutdown does not happen properly.
+
 
 Python-Ant TODO:
 
