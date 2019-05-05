@@ -5,14 +5,11 @@ videoDisplayResolution = (1920, 1080)
 # Resolution in which to record camera's output (not the resolution the camera is displaying)
 videoRecordResolution = (1920, 1080)
 
+displayUpdateInterval = 0.250 # Seconds. How often to update data on screen
+
 # Channel IDs for each paired device. Set to None to enable searching.
 heartRatePairing = (21741, 120, 1)
 powerPairing = (2920, 11, 5)
-
-# Files to log data to
-heartRateFileName = "./data/heart-rate.csv"
-powerFileName = "./data/power.csv"
-torqueFileName = "./data/torque.csv"
 
 # Bike parameters
 crankLength = 145.0 # mm

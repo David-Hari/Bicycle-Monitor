@@ -43,12 +43,15 @@ def addOverlay(image, position):
 	return camera.add_overlay(image.tobytes(), layer = 3, format = 'rgba', size = image.size, fullscreen = False, window = position)
 
 
-def showStatusText(text, timeout=10):
+def showStatusText(text, timeout=10, status='info'):
 	"""
 	Draws `text` near the bottom of the screen, then hides it after `timeout` seconds.
 	"""
 	global statusTimer
 	global statusOverlay
+
+	print(text)  # For debugging/logging purposes
+
 	if statusTimer is not None:
 		statusTimer.cancel()
 

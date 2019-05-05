@@ -1,7 +1,13 @@
 
 Bicycle-Monitor TODO:
 
-* Use a lock
+* Show multiple lines of status on screen.
+  Keep each line in an list. Each one will have a time-out, after which it will
+  be removed from the list.
+  Also have status levels: 'info', 'warning' and 'error'. They will be displayed
+  with different colours, defined in a dict.
+
+* Use a mutex lock when updating all data and when drawing it to screen.
 
 * Ant sometimes fails to start back up again once it's been shut down.
   Perhaps the shutdown does not happen properly.
