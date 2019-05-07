@@ -84,6 +84,7 @@ powerMonitor = BicyclePower(antNode, network,
 #heartRateMonitor.open(ChannelID(*config.heartRatePairing))
 powerMonitor.open(ChannelID(*config.powerPairing))
 
+tempWarning = None
 counter = 0
 while True:
 	try:
@@ -92,16 +93,20 @@ while True:
 		#    display.drawPowerBar(power, config.powerGoal, config.powerRange, config.powerIdealRange)
 		#    display.drawGPSStuff()
 
-		#TODO
-		# Check CPU temperature once a second
-		#if counter % 4 == 0:
-		#    temperature = getCPUTemperature()
-		#    data_logging.writeCPUTemperature(temperature)
-		#    if temperature > 80:
-		#        display.showStatusText('CPU temperature at {temperature}°C', status='warning')
+		# Check CPU temperature once every 8 second
+		if counter % 32 == 0:
+			temperature = getCPUTemperature()
+			
+			## For diagnostics
+			data_logging.writeCPUTemperature(temperature)
+			################
+			
+			if temperature > 80:
+				tempWarning = display.updateStatusText(tempWarning, 'CPU temperature at {temperature}°C',
+				                                       status=('error' if y > 90 else 'warning'), timeout=10)
 
 		counter = counter + 1
-		time.sleep(config.displayUpdateInterval)
+		time.sleep(0.250)  # 250ms
 	except KeyboardInterrupt:
 		break
 
