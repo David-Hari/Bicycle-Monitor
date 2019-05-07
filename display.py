@@ -17,6 +17,7 @@ StatusOverlay = recordclass('StatusOverlay', 'overlay timer yPos')
 fontPath = '/usr/share/fonts/truetype/roboto/Roboto-Regular.ttf'
 statusFont = ImageFont.truetype(fontPath, 30)
 powerBarFont = ImageFont.truetype(fontPath, 30)
+statusOverlaySize = (960, 160)   # Width must be a multiple of 32, height a multiple of 16
 statusBackgroundColour = (20,20,20,128)
 statusColours = {
 	'info': (255,255,255),
@@ -25,6 +26,7 @@ statusColours = {
 }
 statusOverlays = {}
 statusIdCounter = 0
+maxStatusOverlays = 4   # Don't flood the screen with messages
 powerBarOverlay = None
 
 camera = picamera.PiCamera()

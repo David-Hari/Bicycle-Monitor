@@ -18,6 +18,32 @@ Bicycle-Monitor TODO:
   Perhaps the shutdown does not happen properly.
 
 
+Useful commands:
+
+* Check temperature of CPU:
+  > vcgencmd measure_temp
+  or
+  > cat /sys/class/thermal/thermal_zone0/temp
+
+* Check if GPS daemon is running:
+  > sudo systemctl status gpsd.socket
+
+* Test/debug GPS daemon:
+  > sudo systemctl stop gpsd.socket
+  > sudo gpsd /dev/ttyUSB1 -F /var/run/gpsd.sock
+  > cgps -s
+  > sudo killall gpsd
+
+
+
+
+
+
+
+
+
+
+
 Python-Ant TODO:
 
 * Only call callback on each new event, ignore identical messages
