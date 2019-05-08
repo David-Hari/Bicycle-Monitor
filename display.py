@@ -46,6 +46,22 @@ def start():
 	powerBarOverlay = addOverlay(Image.new('RGBA', (320, 240)), (20, 20, 320, 240))
 
 
+##########
+#
+# Sometimes the following error occurs when showing or updating text.
+# Could be because there are too many overlays on screen.
+#
+#Traceback (most recent call last):
+#  File "_ctypes/callbacks.c", line 232, in 'calling callback function'
+#  File "/usr/local/lib/python3.7/site-packages/picamera/mmalobj.py", line 1227, in wrapper
+#    self._pool.send_buffer(block=False)
+#  File "/usr/local/lib/python3.7/site-packages/picamera/mmalobj.py", line 1931, in send_buffer
+#>>>     super(MMALPortPool, self).send_buffer(port, block, timeout)
+#  File "/usr/local/lib/python3.7/site-packages/picamera/mmalobj.py", line 1881, in send_buffer
+#    raise PiCameraMMALError(mmal.MMAL_EAGAIN, 'no buffers available')
+#picamera.exc.PiCameraMMALError: no buffers available: Resource temporarily unavailable; try again later
+#
+##########
 def showStatusText(text, timeout=10, level='info'):
 	"""
 	Draws status text near the bottom of the screen.
@@ -67,14 +83,17 @@ def showStatusText(text, timeout=10, level='info'):
 
 	# Push existing overlays up OR calculate y pos of this one
 
+	thisId = statusIdCounter
+	statusIdCounter = statusIdCounter + 1
 	status = StatusOverlay(
 		overlay = addOverlay(image, (x, y, image.width, image.height)),
-		timer = Timer(timeout, hideStatusText, args=statusIdCounter),
+		timer = Timer(timeout, hideStatusText, args=[thisId]),
 		yPos = y
 	)
-	statusOverlays[statusIdCounter] = status
-	statusIdCounter = statusIdCounter + 1
+	statusOverlays[thisId] = status
 	status.timer.start()
+
+	return thisId
 
 
 def updateStatusText(statusId, text, timeout=10, level='info'):
@@ -97,8 +116,8 @@ def updateStatusText(statusId, text, timeout=10, level='info'):
 	existingStatus = statusOverlays[statusId]
 	existingStatus.timer.cancel()
 	image = makeStatusTextImage(text, statusColours[level])
-	existingStatus.overlay = addOverlay(image, (0, existingStatus.yPos, image.width, image.height)),
-	existingStatus.timer = Timer(timeout, hideStatusText, args=statusId),
+	updateOverlay(existingStatus.overlay, image)
+	existingStatus.timer = Timer(timeout, hideStatusText, args=[statusId])
 	existingStatus.timer.start()
 
 	return statusId
@@ -111,7 +130,10 @@ def hideStatusText(statusId):
 	"""
 	global statusOverlays
 	if statusId in statusOverlays:
-		camera.remove_overlay(statusOverlays[statusId].overlay)
+		existingStatus = statusOverlays[statusId]
+		camera.remove_overlay(existingStatus.overlay)
+		if existingStatus.timer:
+			existingStatus.timer.cancel()  # Make sure timer is stopped
 		del statusOverlays[statusId]
 
 
