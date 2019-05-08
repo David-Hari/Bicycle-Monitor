@@ -14,10 +14,11 @@ import config
 
 StatusOverlay = recordclass('StatusOverlay', 'overlay timer yPos')
 
+camera = None
 fontPath = '/usr/share/fonts/truetype/roboto/Roboto-Regular.ttf'
 statusFont = ImageFont.truetype(fontPath, 30)
 powerBarFont = ImageFont.truetype(fontPath, 30)
-statusOverlaySize = (960, 160)   # Width must be a multiple of 32, height a multiple of 16
+statusOverlaySize = (960, 160)   # Size of image for overlay. Width must be a multiple of 32, height a multiple of 16.
 statusBackgroundColour = (20,20,20,128)
 statusColours = {
 	'info': (255,255,255),
@@ -29,16 +30,18 @@ statusIdCounter = 0
 maxStatusOverlays = 4   # Don't flood the screen with messages
 powerBarOverlay = None
 
-camera = picamera.PiCamera()
-camera.exposure_mode = 'sports'  # To reduce motion blur
-camera.framerate = 49  # Highest supported by mode 5
-## For more information about camera modes, see
-## https://picamera.readthedocs.io/en/release-1.13/fov.html#sensor-modes
-## Note that the mini ("spy") camera only comes in a V1 module.
-
 
 def start():
+	global camera
 	global powerBarOverlay
+	
+	camera = picamera.PiCamera()
+	camera.exposure_mode = 'sports'  # To reduce motion blur
+	camera.framerate = 49  # Highest supported by mode 5
+	## For more information about camera modes, see
+	## https://picamera.readthedocs.io/en/release-1.13/fov.html#sensor-modes
+	## Note that the mini ("spy") camera only comes in a V1 module.
+
 	camera.start_preview()
 	powerBarOverlay = addOverlay(Image.new('RGBA', (320, 240)), (20, 20, 320, 240))
 
@@ -54,24 +57,16 @@ def showStatusText(text, timeout=10, level='info'):
 	"""
 	global statusOverlays
 	global statusIdCounter
-	global statusBackgroundColour
 	global statusColours
 
 	print(text)  # For debugging/logging purposes
 
-	# TODO: Most of this will be done by makeStatusTextImage
-	image = Image.new('RGBA', (config.videoDisplayResolution[0], 160))
-	draw = ImageDraw.Draw(image)
-	width, height = draw.textsize(text, font=statusFont)
-	width += 60  # Add some padding
-	height += 40
-	x = (config.videoDisplayResolution[0] - width) // 2
-	draw.rectangle([x,0,x+width,height], fill=statusBackgroundColour)
-	draw.text((x+30,20), text, font=statusFont, fill=statusColours[level])
+	image = makeStatusTextImage(text, statusColours[level])
+	x = (config.videoDisplayResolution[0] - image.width) // 2
 	y = config.videoDisplayResolution[1] - image.height
-
-	image = makeStatusTextImage(text, bg=statusBackgroundColour, fg=statusColours[level])
-
+	
+	# Push existing overlays up OR calculate y pos of this one
+	
 	status = StatusOverlay(
 		overlay = addOverlay(image, (0, y, image.width, image.height)),
 		timer = Timer(timeout, hideStatusText, args=statusIdCounter),
@@ -92,13 +87,19 @@ def updateStatusText(statusId, text, timeout=10, level='info'):
 	:param level: Status level if new overlay. One of: 'info', 'warning' or 'error'.
 	:return: The id of the new or existing status
 	"""
+	global statusColours
+	
 	print(text)  # For debugging/logging purposes
 
 	if statusId is None or statusId not in statusOverlays:
 		return showStatusText(text, timeout, level)
 
 	existingStatus = statusOverlays[statusId]
-	# draw new text
+	existingStatus.timer.cancel()
+	image = makeStatusTextImage(text, statusColours[level])
+	existingStatus.overlay = addOverlay(image, (0, existingStatus.yPos, image.width, image.height)),
+	existingStatus.timer = Timer(timeout, hideStatusText, args=statusId),
+	existingStatus.timer.start()
 
 	return statusId
 
@@ -160,22 +161,22 @@ def updateOverlay(overlay, image):
 	overlay.update(image.tobytes())
 
 
-def makeStatusTextImage(text, bg, fg):
+def makeStatusTextImage(text, colour):
 	"""
 	Creates an image and draws the given text to it.
 	"""
 	global statusFont
+	global statusOverlaySize
+	global statusBackgroundColour
 
-	# TODO keep just the stuff that's needed here
-	image = Image.new('RGBA', (config.videoDisplayResolution[0], 160))
+	image = Image.new('RGBA', statusOverlaySize)
 	draw = ImageDraw.Draw(image)
-	width, height = draw.textsize(text, font=statusFont)
-	width += 60  # Add some padding
-	height += 40
-	x = (config.videoDisplayResolution[0] - width) // 2
-	draw.rectangle([x,0,x+width,height], fill=bg)
-	drawShadowedText(draw, (x+30,20), text, font=statusFont, fill=fg)
-	y = config.videoDisplayResolution[1] - image.height
+	textWidth, textHeight = draw.textsize(text, font=statusFont)
+	textWidth += 60  # Add some padding
+	textHeight += 40
+	x = (statusOverlaySize[0] - textWidth) // 2
+	draw.rectangle([x,0,x+textWidth,textHeight], fill=statusBackgroundColour)
+	drawShadowedText(draw, (x+30,20), text, font=statusFont, fill=colour)
 	return image
 
 
