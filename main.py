@@ -93,17 +93,22 @@ while True:
 		#    display.drawPowerBar(power, config.powerGoal, config.powerRange, config.powerIdealRange)
 		#    display.drawGPSStuff()
 
+		# Check GPS stuff once a second
+		#if counter % 32 == 0:
+		#    gsp get speed
+		#    update display
+
 		# Check CPU temperature once every 8 second
 		if counter % 32 == 0:
 			temperature = getCPUTemperature()
-			
+
 			## For diagnostics
 			data_logging.writeCPUTemperature(temperature)
 			################
-			
+
 			if temperature > 80:
 				tempWarning = display.updateStatusText(tempWarning, 'CPU temperature at {temperature}°C',
-				                                       status=('error' if y > 90 else 'warning'), timeout=10)
+				                            level=('error' if temperature > 90 else 'warning'), timeout=10)
 
 		counter = counter + 1
 		time.sleep(0.250)  # 250ms

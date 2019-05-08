@@ -4,9 +4,6 @@
 
 """
 
-import config
-
-
 heartRateFileName = './data/heart-rate.csv'
 powerFileName = './data/power.csv'
 torqueFileName = './data/torque.csv'

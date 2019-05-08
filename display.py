@@ -34,7 +34,7 @@ powerBarOverlay = None
 def start():
 	global camera
 	global powerBarOverlay
-	
+
 	camera = picamera.PiCamera()
 	camera.exposure_mode = 'sports'  # To reduce motion blur
 	camera.framerate = 49  # Highest supported by mode 5
@@ -64,11 +64,11 @@ def showStatusText(text, timeout=10, level='info'):
 	image = makeStatusTextImage(text, statusColours[level])
 	x = (config.videoDisplayResolution[0] - image.width) // 2
 	y = config.videoDisplayResolution[1] - image.height
-	
+
 	# Push existing overlays up OR calculate y pos of this one
-	
+
 	status = StatusOverlay(
-		overlay = addOverlay(image, (0, y, image.width, image.height)),
+		overlay = addOverlay(image, (x, y, image.width, image.height)),
 		timer = Timer(timeout, hideStatusText, args=statusIdCounter),
 		yPos = y
 	)
@@ -88,7 +88,7 @@ def updateStatusText(statusId, text, timeout=10, level='info'):
 	:return: The id of the new or existing status
 	"""
 	global statusColours
-	
+
 	print(text)  # For debugging/logging purposes
 
 	if statusId is None or statusId not in statusOverlays:
