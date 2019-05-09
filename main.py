@@ -9,6 +9,7 @@ import time
 from ant.core import driver
 from ant.core.node import Node, Network, ChannelID
 from ant.core.constants import *
+from ant.core.exceptions import *
 from ant.plus.heartrate import *
 from ant.plus.power import *
 
@@ -17,9 +18,12 @@ import display
 import data_logging
 
 
+cpuWarnTemperature = 80  # Degrees C
+cpuBadTemperature = 90
+
 
 def devicePaired(deviceProfile, channelId):
-	display.showStatusText(f'Connected to {deviceProfile.name} ({channelId})')
+	display.showStatusText(f'Connected to {deviceProfile.name} ({channelId.deviceNumber})')
 
 def powerMonitorPaired(deviceProfile, channelId):
 	devicePaired(deviceProfile, channelId)
@@ -36,16 +40,12 @@ def heartRateData(heartRate, eventTime, interval):
 	data_logging.writeHeartRateEvent(eventTime, heartRate)
 
 def powerData(eventCount, pedalDifferentiation, pedalPowerRatio, cadence, accumulatedPower, instantaneousPower):
-	print('powerData start    ', end='', flush=True)
-
 	ratio = '' if pedalPowerRatio is None else pedalPowerRatio
 	data_logging.writePowerEvent(0, instantaneousPower, accumulatedPower, ratio, cadence)
 
 	#TODO
 	#lock displayUpdateMutex:
 	#   power = instantaneousPower   <-- calculate average since last displayed
-
-	print('    powerData end', flush=True)
 
 def torqueAndPedalData(eventCount, leftTorque, rightTorque, leftPedalSmoothness, rightPedalSmoothness):
 	data_logging.writeTorqueEvent(0, leftTorque, rightTorque, leftPedalSmoothness, rightPedalSmoothness)
@@ -62,27 +62,30 @@ def getCPUTemperature():
 data_logging.openFiles()
 display.start()
 
-print('Starting up... ', end='', flush=True)
+print('Starting up...')
 antNode = Node(driver.USB2Driver())
-antNode.start()
-network = Network(key=NETWORK_KEY_ANT_PLUS, name='N:ANT+')
-antNode.setNetworkKey(NETWORK_NUMBER_PUBLIC, network)
-print('Done.')
+try:
+	antNode.start()
+	network = Network(key=NETWORK_KEY_ANT_PLUS, name='N:ANT+')
+	antNode.setNetworkKey(NETWORK_NUMBER_PUBLIC, network)
+	print('Done.')
 
-heartRateMonitor = HeartRate(antNode, network,
-                     {'onDevicePaired': devicePaired,
-                      'onSearchTimeout': searchTimedOut,
-                      'onChannelClosed': channelClosed,
-                      'onHeartRateData': heartRateData})
-powerMonitor = BicyclePower(antNode, network,
-                     {'onDevicePaired': powerMonitorPaired,
-                      'onSearchTimeout': searchTimedOut,
-                      'onChannelClosed': channelClosed,
-                      'onPowerData': powerData,
-                      'onTorqueAndPedalData': torqueAndPedalData})
+	heartRateMonitor = HeartRate(antNode, network,
+	                     {'onDevicePaired': devicePaired,
+	                      'onSearchTimeout': searchTimedOut,
+	                      'onChannelClosed': channelClosed,
+	                      'onHeartRateData': heartRateData})
+	powerMonitor = BicyclePower(antNode, network,
+	                     {'onDevicePaired': powerMonitorPaired,
+	                      'onSearchTimeout': searchTimedOut,
+	                      'onChannelClosed': channelClosed,
+	                      'onPowerData': powerData,
+	                      'onTorqueAndPedalData': torqueAndPedalData})
 
-#heartRateMonitor.open(ChannelID(*config.heartRatePairing))
-powerMonitor.open(ChannelID(*config.powerPairing))
+	#heartRateMonitor.open(ChannelID(*config.heartRatePairing))
+	powerMonitor.open(ChannelID(*config.powerPairing))
+except ANTException as err:
+	display.showStatusText(f'Could not start ANT.\n{err}')
 
 tempWarning = None
 counter = 0
@@ -106,9 +109,10 @@ while True:
 			data_logging.writeCPUTemperature(temperature)
 			################
 
-			if temperature > 80:
-				tempWarning = display.updateStatusText(tempWarning, 'CPU temperature at {temperature}°C',
-				                            level=('error' if temperature > 90 else 'warning'), timeout=10)
+			if temperature > cpuWarnTemperature:
+				statusLevel = 'error' if temperature > cpuBadTemperature else 'warning'
+				tempWarning = display.updateStatusText(tempWarning, f'CPU temperature at {temperature}°C',
+				                                       level=statusLevel, timeout=10)
 
 		counter = counter + 1
 		time.sleep(0.250)  # 250ms
@@ -116,7 +120,10 @@ while True:
 		break
 
 
-print('Shutting down... ', end='', flush=True)
+print('Shutting down...')
 data_logging.closeFiles()
-antNode.stop()
-print('Done')
+try:
+	antNode.stop()
+	print('Done.')
+except ANTException as err:
+	display.showStatusText(f'Could not stop ANT.\n{err}')
