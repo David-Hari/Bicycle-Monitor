@@ -34,6 +34,13 @@ Useful commands:
   > cgps -s
   > sudo killall gpsd
 
+* Test video display:
+  list supported modes:
+  > tvservice –m CEA
+  > tvservice –m DMT
+  show current state:
+  > tvservice -s
+
 
 
 
