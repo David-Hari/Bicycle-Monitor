@@ -20,26 +20,27 @@ Bicycle-Monitor TODO:
 
 Useful commands:
 
-* Check temperature of CPU:
-  > vcgencmd measure_temp
-  or
-  > cat /sys/class/thermal/thermal_zone0/temp
+### Check temperature of CPU ###
+> vcgencmd measure_temp
+or
+> cat /sys/class/thermal/thermal_zone0/temp
 
-* Check if GPS daemon is running:
-  > sudo systemctl status gpsd.socket
+### Check if GPS daemon is running ###
+> sudo systemctl status gpsd.socket
 
-* Test/debug GPS daemon:
-  > sudo systemctl stop gpsd.socket
-  > sudo gpsd /dev/ttyUSB1 -F /var/run/gpsd.sock
-  > cgps -s
-  > sudo killall gpsd
+### Test/debug GPS daemon ###
+> sudo systemctl stop gpsd.socket
+> sudo gpsd /dev/ttyUSB1 -F /var/run/gpsd.sock
+> cgps -s
+> sudo killall gpsd
 
-* Test video display:
-  list supported modes:
-  > tvservice –m CEA
-  > tvservice –m DMT
-  show current state:
-  > tvservice -s
+### Test video display ###
+(currently set as hdmi_group=1, hdmi_mode=16 in /boot/config.txt)
+list supported modes:
+> tvservice –m CEA
+> tvservice –m DMT
+show current state:
+> tvservice -s
 
 
 
