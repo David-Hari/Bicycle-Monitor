@@ -18,7 +18,7 @@ camera = None
 fontPath = '/usr/share/fonts/truetype/roboto/Roboto-Regular.ttf'
 statusFont = ImageFont.truetype(fontPath, 30)
 powerBarFont = ImageFont.truetype(fontPath, 30)
-statusOverlaySize = (960, 160)   # Size of image for overlay. Width must be a multiple of 32, height a multiple of 16.
+statusOverlayHeight = 160   # Max height of image for overlay. Must be a multiple of 16.
 statusBackgroundColour = (20,20,20,128)
 statusColours = {
 	'info': (255,255,255),
@@ -78,7 +78,6 @@ def showStatusText(text, timeout=10, level='info'):
 	print(text)  # For debugging/logging purposes
 
 	image = makeStatusTextImage(text, statusColours[level])
-	x = (config.videoDisplayResolution[0] - image.width) // 2
 	y = config.videoDisplayResolution[1] - image.height
 
 	# Push existing overlays up OR calculate y pos of this one
@@ -86,7 +85,7 @@ def showStatusText(text, timeout=10, level='info'):
 	thisId = statusIdCounter
 	statusIdCounter = statusIdCounter + 1
 	status = StatusOverlay(
-		overlay = addOverlay(image, (x, y, image.width, image.height)),
+		overlay = addOverlay(image, (0, y, image.width, image.height)),
 		timer = Timer(timeout, hideStatusText, args=[thisId]),
 		yPos = y
 	)
@@ -188,15 +187,15 @@ def makeStatusTextImage(text, colour):
 	Creates an image and draws the given text to it.
 	"""
 	global statusFont
-	global statusOverlaySize
+	global statusOverlayHeight
 	global statusBackgroundColour
 
-	image = Image.new('RGBA', statusOverlaySize)
+	image = Image.new('RGBA', (config.videoDisplayResolution[0], statusOverlayHeight))
 	draw = ImageDraw.Draw(image)
 	textWidth, textHeight = draw.textsize(text, font=statusFont)
 	textWidth += 60  # Add some padding
 	textHeight += 40
-	x = (statusOverlaySize[0] - textWidth) // 2
+	x = (config.videoDisplayResolution[0] - textWidth) // 2
 	draw.rectangle([x,0,x+textWidth,textHeight], fill=statusBackgroundColour)
 	drawShadowedText(draw, (x+30,20), text, font=statusFont, fill=colour)
 	return image
