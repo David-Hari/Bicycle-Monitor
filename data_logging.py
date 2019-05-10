@@ -45,4 +45,4 @@ def writeTorqueEvent(eventTime, leftTorque, rightTorque, leftPedalSmoothness, ri
 	torqueFile.write(f'{eventTime},{leftTorque},{rightTorque},{leftPedalSmoothness},{rightPedalSmoothness}\n')
 
 def writeCPUTemperature(temperature):
-	cpuTemperatureFile.write(f'{temperature}')
+	cpuTemperatureFile.write(f'{temperature}\n')
