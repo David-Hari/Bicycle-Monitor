@@ -31,7 +31,7 @@ or
 ### Test/debug GPS daemon ###
 > sudo systemctl stop gpsd.socket
 > sudo gpsd /dev/ttyUSB1 -F /var/run/gpsd.sock
-> cgps -s
+> cgps
 > sudo killall gpsd
 
 ### Test video display ###

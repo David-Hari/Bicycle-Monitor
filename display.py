@@ -12,13 +12,14 @@ import picamera
 import config
 
 
-StatusOverlay = recordclass('StatusOverlay', 'overlay timer yPos')
+StatusOverlay = recordclass('StatusOverlay', 'overlay timer yPos height')
 
 camera = None
 fontPath = '/usr/share/fonts/truetype/roboto/Roboto-Regular.ttf'
-statusFont = ImageFont.truetype(fontPath, 30)
-powerBarFont = ImageFont.truetype(fontPath, 30)
+statusFont = ImageFont.truetype(fontPath, 35)
+powerBarFont = ImageFont.truetype(fontPath, 35)
 statusOverlayHeight = 160   # Max height of image for overlay. Must be a multiple of 16.
+statusPadding = 10          # Size between each status message, in pixels.
 statusBackgroundColour = (20,20,20,128)
 statusColours = {
 	'info': (255,255,255),
@@ -46,9 +47,48 @@ def start():
 	powerBarOverlay = addOverlay(Image.new('RGBA', (320, 240)), (20, 20, 320, 240))
 
 
+def showStatusText(text, timeout=10, level='info'):
+	"""
+	Draws status text near the bottom of the screen.
+	Any existing status overlays still on screen will be pushed up.
+	:param text: The text to show
+	:param timeout: Text will be hidden after this many seconds
+	:param level: Status level. One of: 'info', 'warning' or 'error'.
+	:return: Id of the status that has been added to the screen
+	"""
+	global statusOverlays
+	global statusIdCounter
+	global statusColours
+	global statusPadding
+
+	print(text)  # For debugging/logging purposes
+
+	image, size = makeStatusTextImage(text, statusColours[level])
+	y = config.videoDisplayResolution[1] - size[1] - (statusPadding * 2)
+
+	# Push existing overlays up to make room for this one
+	for key, each in statusOverlays.items():
+		each.yPos = each.yPos - size[1] - statusPadding
+		w = each.overlay.window   # Tuple of x,y,w,h
+		each.overlay.window = (w[0], each.yPos, w[2], w[3])
+
+	thisId = statusIdCounter
+	statusIdCounter = statusIdCounter + 1
+	status = StatusOverlay(
+		overlay = addOverlay(image, (0, y, image.width, image.height)),
+		timer = Timer(timeout, hideStatusText, args=[thisId]),
+		yPos = y,
+		height = size[1]
+	)
+	statusOverlays[thisId] = status
+	status.timer.start()
+
+	return thisId
+
+
 ##########
 #
-# Sometimes the following error occurs when showing or updating text.
+# Sometimes the following error occurs when updating text.
 # Could be because there are too many overlays on screen.
 #
 #Traceback (most recent call last):
@@ -62,39 +102,6 @@ def start():
 #picamera.exc.PiCameraMMALError: no buffers available: Resource temporarily unavailable; try again later
 #
 ##########
-def showStatusText(text, timeout=10, level='info'):
-	"""
-	Draws status text near the bottom of the screen.
-	Any existing status overlays still on screen will be pushed up.
-	:param text: The text to show
-	:param timeout: Text will be hidden after this many seconds
-	:param level: Status level. One of: 'info', 'warning' or 'error'.
-	:return: Id of the status that has been added to the screen
-	"""
-	global statusOverlays
-	global statusIdCounter
-	global statusColours
-
-	print(text)  # For debugging/logging purposes
-
-	image = makeStatusTextImage(text, statusColours[level])
-	y = config.videoDisplayResolution[1] - image.height
-
-	# Push existing overlays up OR calculate y pos of this one
-
-	thisId = statusIdCounter
-	statusIdCounter = statusIdCounter + 1
-	status = StatusOverlay(
-		overlay = addOverlay(image, (0, y, image.width, image.height)),
-		timer = Timer(timeout, hideStatusText, args=[thisId]),
-		yPos = y
-	)
-	statusOverlays[thisId] = status
-	status.timer.start()
-
-	return thisId
-
-
 def updateStatusText(statusId, text, timeout=10, level='info'):
 	"""
 	Updates an existing status overlay with new text.
@@ -114,7 +121,7 @@ def updateStatusText(statusId, text, timeout=10, level='info'):
 
 	existingStatus = statusOverlays[statusId]
 	existingStatus.timer.cancel()
-	image = makeStatusTextImage(text, statusColours[level])
+	image, size = makeStatusTextImage(text, statusColours[level])
 	updateOverlay(existingStatus.overlay, image)
 	existingStatus.timer = Timer(timeout, hideStatusText, args=[statusId])
 	existingStatus.timer.start()
@@ -128,12 +135,20 @@ def hideStatusText(statusId):
 	:param statusId: Id of the status to hide
 	"""
 	global statusOverlays
+
 	if statusId in statusOverlays:
 		existingStatus = statusOverlays[statusId]
+		height = existingStatus.height
 		camera.remove_overlay(existingStatus.overlay)
 		if existingStatus.timer:
 			existingStatus.timer.cancel()  # Make sure timer is stopped
 		del statusOverlays[statusId]
+
+		# Move down any overlays above this one
+		for key, each in statusOverlays.items():
+			each.yPos = each.yPos + height + statusPadding
+			w = each.overlay.window   # Tuple of x,y,w,h
+			each.overlay.window = (w[0], each.yPos, w[2], w[3])
 
 
 def drawPowerBar(power, goalPower, powerRange, idealRange):
@@ -198,7 +213,7 @@ def makeStatusTextImage(text, colour):
 	x = (config.videoDisplayResolution[0] - textWidth) // 2
 	draw.rectangle([x,0,x+textWidth,textHeight], fill=statusBackgroundColour)
 	drawShadowedText(draw, (x+30,20), text, font=statusFont, fill=colour)
-	return image
+	return image, (textWidth, textHeight)
 
 
 def drawShadowedText(draw, position, text, font, fill=(255,255,255), shadow=(0,0,0)):

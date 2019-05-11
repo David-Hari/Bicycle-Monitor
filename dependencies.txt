@@ -2,3 +2,4 @@ picamera
 python-ant
 Pillow
 recordclass
+gpsd-py3
