@@ -12,6 +12,7 @@ from ant.core.constants import *
 from ant.core.exceptions import *
 from ant.plus.heartrate import *
 from ant.plus.power import *
+import gpsd
 
 import config
 import display
@@ -20,6 +21,9 @@ import data_logging
 
 cpuWarnTemperature = 80  # Degrees C
 cpuBadTemperature = 90
+#displayUpdateMutex = something
+tempWarning = None
+gspWarning = None
 
 
 def devicePaired(deviceProfile, channelId):
@@ -30,7 +34,7 @@ def powerMonitorPaired(deviceProfile, channelId):
 	deviceProfile.setCrankLength(config.crankLength)
 
 def searchTimedOut(deviceProfile):
-	display.showStatusText(f'Time-out trying to connect to {deviceProfile.name}')
+	display.showStatusText(f'Could not connect to {deviceProfile.name}')
 
 def channelClosed(deviceProfile):
 	display.showStatusText(f'Channel closed for {deviceProfile.name}')
@@ -57,10 +61,9 @@ def getCPUTemperature():
 
 
 
-#displayUpdateMutex = something
-
 data_logging.openFiles()
 display.start()
+
 
 print('Starting up...')
 antNode = Node(driver.USB2Driver())
@@ -87,7 +90,13 @@ try:
 except ANTException as err:
 	display.showStatusText(f'Could not start ANT.\n{err}')
 
-tempWarning = None
+
+print('Connecting to GPS service...')
+gpsd.connect()
+time.sleep(1)
+print('Done.')
+
+
 counter = 0
 while True:
 	try:
@@ -97,9 +106,18 @@ while True:
 		#    display.drawGPSStuff()
 
 		# Check GPS stuff once a second
-		#if counter % 32 == 0:
-		#    gsp get speed
-		#    update display
+		if counter % 4 == 0:
+			try:
+				info = gpsd.get_current()
+				if info.mode >= 2 and info.sats_valid:  # Check if it has a fix on position
+					speed = info.speed()
+				# update display
+				else:
+					if counter % 8 == 0:
+						gspWarning = display.updateStatusText(gspWarning, 'GPS cannot get a fix on location',
+					                                          level='warning', timeout=4)
+			except UserWarning as e:
+				print(e)
 
 		# Check CPU temperature once every 8 second
 		if counter % 32 == 0:
@@ -115,6 +133,8 @@ while True:
 				                                       level=statusLevel, timeout=10)
 
 		counter = counter + 1
+
+		# NOTE: If this time is changed, all the modulo operands will have to be changed too.
 		time.sleep(0.250)  # 250ms
 	except KeyboardInterrupt:
 		break
@@ -126,4 +146,5 @@ try:
 	antNode.stop()
 	print('Done.')
 except ANTException as err:
-	display.showStatusText(f'Could not stop ANT.\n{err}')
+	print(f'Could not stop ANT.\n{err}')
+display.stop()

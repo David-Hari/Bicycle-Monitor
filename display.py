@@ -43,8 +43,12 @@ def start():
 	## https://picamera.readthedocs.io/en/release-1.13/fov.html#sensor-modes
 	## Note that the mini ("spy") camera only comes in a V1 module.
 
-	camera.start_preview()
+	camera.start_preview(fullscreen=True)
 	powerBarOverlay = addOverlay(Image.new('RGBA', (320, 240)), (20, 20, 320, 240))
+
+
+def stop():
+	camera.stop_preview()
 
 
 def showStatusText(text, timeout=10, level='info'):
