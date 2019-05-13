@@ -138,7 +138,8 @@ def hideStatusText(statusId):
 
 	if statusId in statusOverlays:
 		existingStatus = statusOverlays[statusId]
-		height = existingStatus.height
+		thisY = existingStatus.yPos
+		thisHeight = existingStatus.height
 		camera.remove_overlay(existingStatus.overlay)
 		if existingStatus.timer:
 			existingStatus.timer.cancel()  # Make sure timer is stopped
@@ -146,9 +147,10 @@ def hideStatusText(statusId):
 
 		# Move down any overlays above this one
 		for key, each in statusOverlays.items():
-			each.yPos = each.yPos + height + statusPadding
-			w = each.overlay.window   # Tuple of x,y,w,h
-			each.overlay.window = (w[0], each.yPos, w[2], w[3])
+			if each.yPos < thisY:
+				each.yPos = each.yPos + thisHeight + statusPadding
+				w = each.overlay.window   # Tuple of x,y,w,h
+				each.overlay.window = (w[0], each.yPos, w[2], w[3])
 
 
 def drawPowerBar(power, goalPower, powerRange, idealRange):
