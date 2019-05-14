@@ -36,12 +36,12 @@ def start():
 	global camera
 	global powerBarOverlay
 
-	camera = picamera.PiCamera()
-	camera.exposure_mode = 'sports'  # To reduce motion blur
-	camera.framerate = 49  # Highest supported by mode 5
 	## For more information about camera modes, see
-	## https://picamera.readthedocs.io/en/release-1.13/fov.html#sensor-modes
+	## https://picamera.readthedocs.io/en/latest/fov.html#sensor-modes
 	## Note that the mini ("spy") camera only comes in a V1 module.
+	camera = picamera.PiCamera(sensor_mode=5)
+	#camera.exposure_mode = 'sports'  # To reduce motion blur. May not be needed.
+	camera.framerate = 49  # Highest supported by mode 5
 
 	camera.start_preview(fullscreen=True)
 	powerBarOverlay = addOverlay(Image.new('RGBA', (320, 240)), (20, 20, 320, 240))

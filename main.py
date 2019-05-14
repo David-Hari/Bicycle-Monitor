@@ -105,17 +105,17 @@ while True:
 		#    display.drawPowerBar(power, config.powerGoal, config.powerRange, config.powerIdealRange)
 		#    display.drawGPSStuff()
 
-		# Check GPS stuff once a second
-		if counter % 4 == 0:
+		# Check GPS stuff once a second. But give it some time to start up first.
+		if counter > 200 and counter % 4 == 0:
 			try:
 				info = gpsd.get_current()
 				if info.mode >= 2 and info.sats_valid:  # Check if it has a fix on position
 					speed = info.speed()
-				# update display
+					# update display
 				else:
-					if counter % 8 == 0:
+					if counter % 32 == 0:
 						gspWarning = display.updateStatusText(gspWarning, 'GPS cannot get a fix on location',
-					                                          level='warning', timeout=4)
+					                                          level='warning', timeout=10)
 			except UserWarning as e:
 				print(e)
 
