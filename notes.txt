@@ -42,6 +42,17 @@ list supported modes:
 show current state:
 > tvservice -s
 
+### Bluetooth stuff (run as root) ###
+> modprobe btusb
+> systemctl start bluetooth
+> service bluetooth status
+> bluetoothctl
+  # power on
+  # agent on
+  # default-agent
+
+
+
 
 To run camera & display from command line, use:
 > raspivid -t 0 -f --mode 5 -fps 49 -w 1296 -h 730 --flush
