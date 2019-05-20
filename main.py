@@ -103,7 +103,6 @@ while True:
 		#TODO
 		#lock displayUpdateMutex:
 		#    display.drawPowerBar(power, config.powerGoal, config.powerRange, config.powerIdealRange)
-		#    display.drawGPSStuff()
 
 		# Check GPS stuff once a second. But give it some time to start up first.
 		if counter > 200 and counter % 4 == 0:

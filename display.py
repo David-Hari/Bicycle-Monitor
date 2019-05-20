@@ -30,6 +30,8 @@ statusOverlays = {}
 statusIdCounter = 0
 maxStatusOverlays = 4   # Don't flood the screen with messages
 powerBarOverlay = None
+powerRed = (207,16,26)
+powerGreen = (31,160,70)
 
 
 def start():
@@ -37,7 +39,7 @@ def start():
 	global powerBarOverlay
 
 	monkeyPatchPiCamera()
-	
+
 	## For more information about camera modes, see
 	## https://picamera.readthedocs.io/en/latest/fov.html#sensor-modes
 	## Note that the mini ("spy") camera only comes in a V1 module.
@@ -153,6 +155,8 @@ def drawPowerBar(power, goalPower, powerRange, idealRange):
 	:return:
 	"""
 	global powerBarOverlay
+	global powerRed
+	global powerGreen
 
 	spacing = 20  # Leave room for text at the top and bottom
 	barHeight = powerBarOverlay.window[3] - (spacing * 2)
@@ -160,14 +164,14 @@ def drawPowerBar(power, goalPower, powerRange, idealRange):
 	draw = ImageDraw.Draw(image)
 	fullRange = powerRange * 2
 	clampedPower = clamp(power, goalPower - powerRange, goalPower + powerRange)
-	colour = (207,16,26)  # red
+	colour = powerRed
 	if inThreshold(power, goalPower, idealRange):
-		colour = (31,160,70)  # green
+		colour = powerGreen
 	mid = (barHeight // 2) + spacing
 	y = (((goalPower + powerRange) - clampedPower) / fullRange * barHeight) + spacing
-	draw.rectangle([60,mid,140,y], fill=colour)
-	drawShadowedText(draw, (5,mid-16), str(goalPower), font=powerBarFont, fill=(255,255,255))
-	drawShadowedText(draw, (145,y-16), str(power), font=powerBarFont, fill=(255,255,255))
+	draw.rectangle([70,mid,130,y], fill=colour)
+	drawShadowedText(draw, (0,mid-20), str(goalPower), font=powerBarFont, fill=(255,255,255))
+	drawShadowedText(draw, (140,y-20), str(power), font=powerBarFont, fill=(255,255,255))
 	updateOverlay(powerBarOverlay, image)
 
 
