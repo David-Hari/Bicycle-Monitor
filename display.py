@@ -36,6 +36,8 @@ def start():
 	global camera
 	global powerBarOverlay
 
+	monkeyPatchPiCamera()
+	
 	## For more information about camera modes, see
 	## https://picamera.readthedocs.io/en/latest/fov.html#sensor-modes
 	## Note that the mini ("spy") camera only comes in a V1 module.
@@ -90,22 +92,6 @@ def showStatusText(text, timeout=10, level='info'):
 	return thisId
 
 
-##########
-#
-# Sometimes the following error occurs when updating text.
-# Could be because there are too many overlays on screen.
-#
-#Traceback (most recent call last):
-#  File "_ctypes/callbacks.c", line 232, in 'calling callback function'
-#  File "/usr/local/lib/python3.7/site-packages/picamera/mmalobj.py", line 1227, in wrapper
-#    self._pool.send_buffer(block=False)
-#  File "/usr/local/lib/python3.7/site-packages/picamera/mmalobj.py", line 1931, in send_buffer
-#>>>     super(MMALPortPool, self).send_buffer(port, block, timeout)
-#  File "/usr/local/lib/python3.7/site-packages/picamera/mmalobj.py", line 1881, in send_buffer
-#    raise PiCameraMMALError(mmal.MMAL_EAGAIN, 'no buffers available')
-#picamera.exc.PiCameraMMALError: no buffers available: Resource temporarily unavailable; try again later
-#
-##########
 def updateStatusText(statusId, text, timeout=10, level='info'):
 	"""
 	Updates an existing status overlay with new text.
@@ -239,3 +225,30 @@ def clamp(value, minValue, maxValue):
 
 def inThreshold(value, goal, threshold):
 	return goal - threshold < value < goal + threshold
+
+
+# https://github.com/dtreskunov/rpi-sensorium/commit/40c6f3646931bf0735c5fe4579fa89947e96aed7
+#
+# MMALPort has a bug in enable.wrapper, where it always calls
+# self._pool.send_buffer(block=False) regardless of the port direction.
+# This is in contrast to setup time when it only calls
+# self._pool.send_all_buffers(block=False)
+# if self._port[0].type == mmal.MMAL_PORT_TYPE_OUTPUT.
+# Because of this bug updating an overlay once will log a MMAL_EAGAIN
+# error every update. This is safe to ignore as we the user is driving
+# the renderer input port with calls to update() that dequeue buffers
+# and sends them to the input port (so queue is empty on when
+# send_all_buffers(block=False) is called from wrapper).
+# As a workaround, monkey patch MMALPortPool.send_buffer and
+# silence the "error" if thrown by our overlay instance.
+def monkeyPatchPiCamera():
+	original_send_buffer = picamera.mmalobj.MMALPortPool.send_buffer
+
+	def silent_send_buffer(originalSelf, *args, **kwargs):
+		try:
+			original_send_buffer(originalSelf, *args, **kwargs)
+		except picamera.exc.PiCameraMMALError as error:
+			if error.status != 14:
+				raise error
+
+	picamera.mmalobj.MMALPortPool.send_buffer = silent_send_buffer
