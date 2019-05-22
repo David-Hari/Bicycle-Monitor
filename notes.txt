@@ -1,21 +1,14 @@
 
 Bicycle-Monitor TODO:
 
-* Show multiple statuses on screen.
-  Have a list of overlays.
-  Adding new status will push existing overlays up. If there are too many, top
-  ones will be removed.
-  Each one will have a time-out, after which it will be removed from the list.
-
-  showStatusText can return an id so that callers can call it again with that
-  id and it wil update the existing text.
-  If the overlay is still showing, it will reset the hide timer.
-  If the overlay has been removed then it will just add a new one.
+* Show distance until finish. Use GPS co-ordinates.
 
 * Use a mutex lock when updating all data and when drawing it to screen.
 
 * Ant sometimes fails to start back up again once it's been shut down.
   Perhaps the shutdown does not happen properly.
+
+
 
 
 Useful commands:

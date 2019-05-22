@@ -30,8 +30,9 @@ statusOverlays = {}
 statusIdCounter = 0
 maxStatusOverlays = 4   # Don't flood the screen with messages
 powerBarOverlay = None
-powerRed = (207,16,26)
-powerGreen = (31,160,70)
+powerUnderColour = (207,16,26)
+powerIdealColour = (31,160,70)
+powerOverColour = (239, 122, 0)
 
 
 def start():
@@ -152,11 +153,11 @@ def drawPowerBar(power, goalPower, powerRange, idealRange):
 	:param goalPower: Power to try to achieve, in Watts
 	:param powerRange: The high and low bounds of the bar chart, in Watts
 	:param idealRange: The high and low bounds of the green (good) area, in Watts
-	:return:
 	"""
 	global powerBarOverlay
-	global powerRed
-	global powerGreen
+	global powerUnderColour
+	global powerIdealColour
+	global powerOverColour
 
 	spacing = 20  # Leave room for text at the top and bottom
 	barHeight = powerBarOverlay.window[3] - (spacing * 2)
@@ -164,15 +165,28 @@ def drawPowerBar(power, goalPower, powerRange, idealRange):
 	draw = ImageDraw.Draw(image)
 	fullRange = powerRange * 2
 	clampedPower = clamp(power, goalPower - powerRange, goalPower + powerRange)
-	colour = powerRed
-	if inThreshold(power, goalPower, idealRange):
-		colour = powerGreen
 	mid = (barHeight // 2) + spacing
-	y = (((goalPower + powerRange) - clampedPower) / fullRange * barHeight) + spacing
-	draw.rectangle([70,mid,130,y], fill=colour)
+	y = ((goalPower + powerRange - clampedPower) / fullRange * barHeight) + spacing
+	idealHeight = idealRange / fullRange * barHeight
+	idealTop = mid - idealHeight
+	idealBottom = mid + idealHeight
+	draw.rectangle([75, idealTop, 125, idealBottom], fill=powerIdealColour)
+	if power < goalPower - idealRange:
+		draw.rectangle([75,idealBottom,125,y], fill=powerUnderColour)
+	elif power > goalPower + idealRange:
+		draw.rectangle([75,idealTop,125,y], fill=powerOverColour)
+	draw.line([70,y,130,y], fill=(0,0,0), width=3)
 	drawShadowedText(draw, (0,mid-20), str(goalPower), font=powerBarFont, fill=(255,255,255))
-	drawShadowedText(draw, (140,y-20), str(power), font=powerBarFont, fill=(255,255,255))
+	drawShadowedText(draw, (140,y-20), str(int(power)), font=powerBarFont, fill=(255,255,255))
 	updateOverlay(powerBarOverlay, image)
+
+
+def drawSpeed(speed):
+	"""
+	Draws the speed on screen
+	:param speed: Speed in meters per second
+	"""
+	pass
 
 
 
@@ -226,9 +240,6 @@ def drawShadowedText(draw, position, text, font, fill=(255,255,255), shadow=(0,0
 def clamp(value, minValue, maxValue):
 	return min(max(value, minValue), maxValue)
 
-
-def inThreshold(value, goal, threshold):
-	return goal - threshold < value < goal + threshold
 
 
 # https://github.com/dtreskunov/rpi-sensorium/commit/40c6f3646931bf0735c5fe4579fa89947e96aed7
