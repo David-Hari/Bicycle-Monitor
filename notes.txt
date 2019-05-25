@@ -1,9 +1,10 @@
 
 Bicycle-Monitor TODO:
 
-* Show distance until finish. Use GPS co-ordinates.
-
 * Use a mutex lock when updating all data and when drawing it to screen.
+
+* Show distance until finish. Use GPS co-ordinates.
+  Show heart rate.
 
 * Ant sometimes fails to start back up again once it's been shut down.
   Perhaps the shutdown does not happen properly.

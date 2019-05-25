@@ -26,7 +26,7 @@ def openFiles():
 	heartRateFile = open(heartRateFileName, 'w', encoding='utf-8')
 	heartRateFile.write('Time,Heart Rate (bpm)\n')
 	powerFile = open(powerFileName, 'w', encoding='utf-8')
-	powerFile.write('Time,Instantaneous Power (W),Accumulated Power (W),Pedal Power Ratio,Cadence (rpm)\n')
+	powerFile.write('Time,Instantaneous Power (W),Accumulated Power (W),Pedal Right/Left Power Ratio,Cadence (rpm)\n')
 	torqueFile = open(torqueFileName, 'w', encoding='utf-8')
 	torqueFile.write('Time,Torque Effectiveness,,Pedal Smoothness,\n')
 	torqueFile.write(',left,right,left,right\n')

@@ -43,7 +43,7 @@ def channelClosed(deviceProfile):
 def heartRateData(heartRate, eventTime, interval):
 	data_logging.writeHeartRateEvent(eventTime, heartRate)
 
-def powerData(eventCount, pedalDifferentiation, pedalPowerRatio, cadence, accumulatedPower, instantaneousPower):
+def powerData(eventCount, pedalPowerRatio, cadence, accumulatedPower, instantaneousPower):
 	ratio = '' if pedalPowerRatio is None else pedalPowerRatio
 	data_logging.writePowerEvent(0, instantaneousPower, accumulatedPower, ratio, cadence)
 
