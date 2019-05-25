@@ -57,7 +57,7 @@ def torqueAndPedalData(eventCount, leftTorque, rightTorque, leftPedalSmoothness,
 
 def getCPUTemperature():
 	tempString = os.popen('cat /sys/class/thermal/thermal_zone0/temp').readline()
-	return int(tempString) / 1000.0
+	return 0 if tempString == '' else int(tempString) / 1000.0
 
 
 
