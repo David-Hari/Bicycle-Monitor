@@ -181,11 +181,14 @@ def drawPowerBar(power, goalPower, powerRange, idealRange):
 	updateOverlay(powerBarOverlay, image)
 
 
-def drawSpeed(speed):
+def drawSpeedAndDistance(speed, distance):
 	"""
 	Draws the speed on screen
 	:param speed: Speed in meters per second
+	:param distance: Distance to end in meters
 	"""
+	# TODO: Show speed and dist in both km and miles
+	#  If None, draw '--'
 	pass
 
 

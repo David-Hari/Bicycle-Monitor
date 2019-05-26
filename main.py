@@ -110,8 +110,13 @@ while True:
 				info = gpsd.get_current()
 				if info.mode >= 2 and info.sats_valid:  # Check if it has a fix on position
 					data_logging.writeGPS(info)
-					display.drawSpeed(info.hspeed)
+					# TODO:
+					#   - Store end lat,lon in config
+					#   - Get (info.lat, info.lon)
+					#   - Calculate distance in meters
+					display.drawSpeedAndDistance(info.hspeed, 0)
 				else:
+					display.drawSpeedAndDistance(None, None)
 					if counter < 600 and counter % 32 == 0:
 						gspWarning = display.updateStatusText(gspWarning, 'GPS cannot get a fix on location',
 					                                          level='warning', timeout=10)
