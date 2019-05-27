@@ -16,8 +16,10 @@ StatusOverlay = recordclass('StatusOverlay', 'overlay timer yPos height')
 
 camera = None
 fontPath = '/usr/share/fonts/truetype/roboto/Roboto-Regular.ttf'
+boldFontPath = '/usr/share/fonts/truetype/roboto/Roboto-Regular.ttf' #TODO
 statusFont = ImageFont.truetype(fontPath, 35)
 powerBarFont = ImageFont.truetype(fontPath, 35)
+titleFont = ImageFont.truetype(boldFontPath, 35)
 statusOverlayHeight = 160   # Max height of image for overlay. Must be a multiple of 16.
 statusPadding = 10          # Size between each status message, in pixels.
 statusBackgroundColour = (20,20,20,128)
@@ -30,6 +32,8 @@ statusOverlays = {}
 statusIdCounter = 0
 maxStatusOverlays = 4   # Don't flood the screen with messages
 powerBarOverlay = None
+gpsOverlay = None
+heartRateOverlay = None
 powerUnderColour = (207,16,26)
 powerIdealColour = (31,160,70)
 powerOverColour = (239, 122, 0)
@@ -181,7 +185,7 @@ def drawPowerBar(power, goalPower, powerRange, idealRange):
 	updateOverlay(powerBarOverlay, image)
 
 
-def drawSpeedAndDistance(speed, distance):
+def updateSpeedAndDistance(speed, distance):
 	"""
 	Draws the speed on screen
 	:param speed: Speed in meters per second
@@ -189,6 +193,16 @@ def drawSpeedAndDistance(speed, distance):
 	"""
 	# TODO: Show speed and dist in both km and miles
 	#  If None, draw '--'
+	global gpsOverlay
+	pass
+
+
+def updateHeartRate(heartRate):
+	"""
+	Draws heart rate on screen
+	:param heartRate:
+	"""
+	global heartRateOverlay
 	pass
 
 

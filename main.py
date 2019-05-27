@@ -19,11 +19,13 @@ import display
 import data_logging
 
 
+power = 0
+heartRate = 0
 cpuWarnTemperature = 80  # Degrees C
 cpuBadTemperature = 90
-#displayUpdateMutex = something
 tempWarning = None
 gspWarning = None
+#TODO: powerUpdateMutex = something
 
 
 def devicePaired(deviceProfile, channelId):
@@ -40,16 +42,16 @@ def channelClosed(deviceProfile):
 	display.showStatusText(f'Channel closed for {deviceProfile.name}')
 
 
-def heartRateData(heartRate, eventTime, interval):
+def heartRateData(hr, eventTime, interval):
+	global heartRate
+	heartRate = hr
 	data_logging.writeHeartRateEvent(eventTime, heartRate)
 
 def powerData(eventCount, pedalPowerRatio, cadence, accumulatedPower, instantaneousPower):
+	global power
+	power = instantaneousPower
 	ratio = '' if pedalPowerRatio is None else pedalPowerRatio
 	data_logging.writePowerEvent(0, instantaneousPower, accumulatedPower, ratio, cadence)
-
-	#TODO
-	#lock displayUpdateMutex:
-	#   power = instantaneousPower   <-- calculate average since last displayed
 
 def torqueAndPedalData(eventCount, leftTorque, rightTorque, leftPedalSmoothness, rightPedalSmoothness):
 	data_logging.writeTorqueEvent(0, leftTorque, rightTorque, leftPedalSmoothness, rightPedalSmoothness)
@@ -85,7 +87,7 @@ try:
 	                      'onPowerData': powerData,
 	                      'onTorqueAndPedalData': torqueAndPedalData})
 
-	#heartRateMonitor.open(ChannelID(*config.heartRatePairing))
+	heartRateMonitor.open(ChannelID(*config.heartRatePairing))
 	powerMonitor.open(ChannelID(*config.powerPairing))
 except ANTException as err:
 	display.showStatusText(f'Could not start ANT.\n{err}')
@@ -100,9 +102,8 @@ print('Done.')
 counter = 0
 while True:
 	try:
-		#TODO
-		#lock displayUpdateMutex:
-		#    display.drawPowerBar(power, config.powerGoal, config.powerRange, config.powerIdealRange)
+		#TODO: lock powerUpdateMutex?
+		display.drawPowerBar(power, config.powerGoal, config.powerRange, config.powerIdealRange)
 
 		# Check GPS stuff once a second. But give it some time to start up first.
 		if counter > 200 and counter % 4 == 0:
@@ -114,14 +115,18 @@ while True:
 					#   - Store end lat,lon in config
 					#   - Get (info.lat, info.lon)
 					#   - Calculate distance in meters
-					display.drawSpeedAndDistance(info.hspeed, 0)
+					display.updateSpeedAndDistance(info.hspeed, 0)
 				else:
-					display.drawSpeedAndDistance(None, None)
+					display.updateSpeedAndDistance(None, None)
 					if counter < 600 and counter % 32 == 0:
 						gspWarning = display.updateStatusText(gspWarning, 'GPS cannot get a fix on location',
 					                                          level='warning', timeout=10)
 			except UserWarning as e:
 				print(e)
+
+		# Update heart rate once a second
+		if counter % 4 == 0:
+			display.updateHeartRate(heartRate)
 
 		# Check CPU temperature once every 8 second
 		if counter % 32 == 0:
