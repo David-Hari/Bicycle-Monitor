@@ -36,10 +36,11 @@ list supported modes:
 show current state:
 > tvservice -s
 
-### Bluetooth stuff (run as root) ###
-> modprobe btusb
-> systemctl start bluetooth
+### Bluetooth stuff ###
+> sudo modprobe btusb
+> sudo systemctl start bluetooth
 > service bluetooth status
+> service hciuart status
 > bluetoothctl
   # power on
   # agent on

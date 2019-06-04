@@ -16,9 +16,9 @@ StatusOverlay = recordclass('StatusOverlay', 'overlay timer yPos height')
 
 camera = None
 fontPath = '/usr/share/fonts/truetype/roboto/Roboto-Regular.ttf'
-boldFontPath = '/usr/share/fonts/truetype/roboto/Roboto-Regular.ttf' #TODO
+boldFontPath = '/usr/share/fonts/truetype/roboto/Roboto-Bold.ttf'
 statusFont = ImageFont.truetype(fontPath, 35)
-powerBarFont = ImageFont.truetype(fontPath, 35)
+infoFont = ImageFont.truetype(fontPath, 32)
 titleFont = ImageFont.truetype(boldFontPath, 35)
 statusOverlayHeight = 160   # Max height of image for overlay. Must be a multiple of 16.
 statusPadding = 10          # Size between each status message, in pixels.
@@ -42,6 +42,8 @@ powerOverColour = (239, 122, 0)
 def start():
 	global camera
 	global powerBarOverlay
+	global gpsOverlay
+	global heartRateOverlay
 
 	monkeyPatchPiCamera()
 
@@ -53,7 +55,9 @@ def start():
 	camera.framerate = 49  # Highest supported by mode 5
 
 	camera.start_preview(fullscreen=True)
-	powerBarOverlay = addOverlay(Image.new('RGBA', (320, 240)), (20, 20, 320, 240))
+	powerBarOverlay = addOverlay(Image.new('RGBA', (256, 240)), (20, 0, 256, 240))
+	gpsOverlay = addOverlay(Image.new('RGBA', (512, 128)), (320, 0, 512, 128))
+	heartRateOverlay = addOverlay(Image.new('RGBA', (256, 128)), (1740, 0, 256, 128))
 
 
 def stop():
@@ -71,8 +75,6 @@ def showStatusText(text, timeout=10, level='info'):
 	"""
 	global statusOverlays
 	global statusIdCounter
-	global statusColours
-	global statusPadding
 
 	print(text)  # For debugging/logging purposes
 
@@ -109,8 +111,6 @@ def updateStatusText(statusId, text, timeout=10, level='info'):
 	:param level: Status level if new overlay. One of: 'info', 'warning' or 'error'.
 	:return: The id of the new or existing status
 	"""
-	global statusColours
-
 	print(text)  # For debugging/logging purposes
 
 	if statusId is None or statusId not in statusOverlays:
@@ -159,29 +159,31 @@ def drawPowerBar(power, goalPower, powerRange, idealRange):
 	:param idealRange: The high and low bounds of the green (good) area, in Watts
 	"""
 	global powerBarOverlay
-	global powerUnderColour
-	global powerIdealColour
-	global powerOverColour
 
-	spacing = 20  # Leave room for text at the top and bottom
-	barHeight = powerBarOverlay.window[3] - (spacing * 2)
 	image = Image.new('RGBA', powerBarOverlay.window[2:4])
 	draw = ImageDraw.Draw(image)
+	titleHeight = 50  # Best guess. Quicker than draw.textsize.
+	barPadding = 20   # Leave room for text at the top and bottom
+	barHeight = powerBarOverlay.window[3] - (barPadding * 2) - titleHeight
+##
+	draw.rectangle([0,0,powerBarOverlay.window[2]-1,powerBarOverlay.window[3]-1], outline=(255,0,0))
+##
 	fullRange = powerRange * 2
 	clampedPower = clamp(power, goalPower - powerRange, goalPower + powerRange)
-	mid = (barHeight // 2) + spacing
-	y = ((goalPower + powerRange - clampedPower) / fullRange * barHeight) + spacing
+	mid = (barHeight // 2) + barPadding + titleHeight
+	y = ((goalPower + powerRange - clampedPower) / fullRange * barHeight) + barPadding + titleHeight
 	idealHeight = idealRange / fullRange * barHeight
 	idealTop = mid - idealHeight
 	idealBottom = mid + idealHeight
-	draw.rectangle([75, idealTop, 125, idealBottom], fill=powerIdealColour)
+	draw.rectangle([70,idealTop,120,idealBottom], fill=powerIdealColour)
 	if power < goalPower - idealRange:
-		draw.rectangle([75,idealBottom,125,y], fill=powerUnderColour)
+		draw.rectangle([72,idealBottom,118,y], fill=powerUnderColour)
 	elif power > goalPower + idealRange:
-		draw.rectangle([75,idealTop,125,y], fill=powerOverColour)
-	draw.line([70,y,130,y], fill=(0,0,0), width=3)
-	drawShadowedText(draw, (0,mid-20), str(goalPower), font=powerBarFont, fill=(255,255,255))
-	drawShadowedText(draw, (140,y-20), str(int(power)), font=powerBarFont, fill=(255,255,255))
+		draw.rectangle([72,idealTop,118,y], fill=powerOverColour)
+	draw.line([65,y,125,y], fill=(0,0,0), width=5)
+	draw.line([67,y,123,y], fill=(255,255,255), width=3)
+	drawShadowedText(draw, (0,mid-20), str(goalPower), font=infoFont, fill=(255,255,255))
+	drawShadowedText(draw, (135,y-20), str(int(power)), font=infoFont, fill=(255,255,255))
 	updateOverlay(powerBarOverlay, image)
 
 
@@ -194,7 +196,11 @@ def updateSpeedAndDistance(speed, distance):
 	# TODO: Show speed and dist in both km and miles
 	#  If None, draw '--'
 	global gpsOverlay
-	pass
+
+	image = Image.new('RGBA', gpsOverlay.window[2:4])
+	draw = ImageDraw.Draw(image)
+	draw.rectangle([0,0,gpsOverlay.window[2]-1,gpsOverlay.window[3]-1], outline=(255,0,0))
+	updateOverlay(gpsOverlay, image)
 
 
 def updateHeartRate(heartRate):
@@ -203,7 +209,11 @@ def updateHeartRate(heartRate):
 	:param heartRate:
 	"""
 	global heartRateOverlay
-	pass
+
+	image = Image.new('RGBA', heartRateOverlay.window[2:4])
+	draw = ImageDraw.Draw(image)
+	draw.rectangle([0,0,heartRateOverlay.window[2]-1,heartRateOverlay.window[3]-1], outline=(255,0,0))
+	updateOverlay(heartRateOverlay, image)
 
 
 
@@ -228,10 +238,6 @@ def makeStatusTextImage(text, colour):
 	"""
 	Creates an image and draws the given text to it.
 	"""
-	global statusFont
-	global statusOverlayHeight
-	global statusBackgroundColour
-
 	image = Image.new('RGBA', (config.videoDisplayResolution[0], statusOverlayHeight))
 	draw = ImageDraw.Draw(image)
 	textWidth, textHeight = draw.textsize(text, font=statusFont)

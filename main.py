@@ -99,6 +99,8 @@ time.sleep(1)
 print('Done.')
 
 
+display.updateSpeedAndDistance(None, None)
+
 counter = 0
 while True:
 	try:
