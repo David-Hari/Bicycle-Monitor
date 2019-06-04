@@ -162,12 +162,10 @@ def drawPowerBar(power, goalPower, powerRange, idealRange):
 
 	image = Image.new('RGBA', powerBarOverlay.window[2:4])
 	draw = ImageDraw.Draw(image)
-	titleHeight = 50  # Best guess. Quicker than draw.textsize.
+	titleHeight = 45  # Best guess. Quicker than draw.textsize.
 	barPadding = 20   # Leave room for text at the top and bottom
 	barHeight = powerBarOverlay.window[3] - (barPadding * 2) - titleHeight
-##
-	draw.rectangle([0,0,powerBarOverlay.window[2]-1,powerBarOverlay.window[3]-1], outline=(255,0,0))
-##
+	drawShadowedText(draw, (40,0), 'Power', font=titleFont)
 	fullRange = powerRange * 2
 	clampedPower = clamp(power, goalPower - powerRange, goalPower + powerRange)
 	mid = (barHeight // 2) + barPadding + titleHeight
@@ -182,8 +180,8 @@ def drawPowerBar(power, goalPower, powerRange, idealRange):
 		draw.rectangle([72,idealTop,118,y], fill=powerOverColour)
 	draw.line([65,y,125,y], fill=(0,0,0), width=5)
 	draw.line([67,y,123,y], fill=(255,255,255), width=3)
-	drawShadowedText(draw, (0,mid-20), str(goalPower), font=infoFont, fill=(255,255,255))
-	drawShadowedText(draw, (135,y-20), str(int(power)), font=infoFont, fill=(255,255,255))
+	drawShadowedText(draw, (0,mid-20), str(goalPower), font=infoFont)
+	drawShadowedText(draw, (135,y-20), str(int(power)), font=infoFont)
 	updateOverlay(powerBarOverlay, image)
 
 
