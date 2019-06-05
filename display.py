@@ -17,9 +17,11 @@ StatusOverlay = recordclass('StatusOverlay', 'overlay timer yPos height')
 camera = None
 fontPath = '/usr/share/fonts/truetype/roboto/Roboto-Regular.ttf'
 boldFontPath = '/usr/share/fonts/truetype/roboto/Roboto-Bold.ttf'
+heartImage = Image.open('./heart.png').convert('RGBA')
 statusFont = ImageFont.truetype(fontPath, 35)
 infoFont = ImageFont.truetype(fontPath, 32)
 titleFont = ImageFont.truetype(boldFontPath, 35)
+titleHeight = 45            # Best guess. Quicker than draw.textsize.
 statusOverlayHeight = 160   # Max height of image for overlay. Must be a multiple of 16.
 statusPadding = 10          # Size between each status message, in pixels.
 statusBackgroundColour = (20,20,20,128)
@@ -162,7 +164,6 @@ def drawPowerBar(power, goalPower, powerRange, idealRange):
 
 	image = Image.new('RGBA', powerBarOverlay.window[2:4])
 	draw = ImageDraw.Draw(image)
-	titleHeight = 45  # Best guess. Quicker than draw.textsize.
 	barPadding = 20   # Leave room for text at the top and bottom
 	barHeight = powerBarOverlay.window[3] - (barPadding * 2) - titleHeight
 	drawShadowedText(draw, (40,0), 'Power', font=titleFont)
@@ -198,6 +199,7 @@ def updateSpeedAndDistance(speed, distance):
 	image = Image.new('RGBA', gpsOverlay.window[2:4])
 	draw = ImageDraw.Draw(image)
 	draw.rectangle([0,0,gpsOverlay.window[2]-1,gpsOverlay.window[3]-1], outline=(255,0,0))
+	drawShadowedText(draw, (40, 0), 'Speed', font=titleFont)
 	updateOverlay(gpsOverlay, image)
 
 
@@ -209,8 +211,9 @@ def updateHeartRate(heartRate):
 	global heartRateOverlay
 
 	image = Image.new('RGBA', heartRateOverlay.window[2:4])
+	image.paste(heartImage, [0,5,40,45])
 	draw = ImageDraw.Draw(image)
-	draw.rectangle([0,0,heartRateOverlay.window[2]-1,heartRateOverlay.window[3]-1], outline=(255,0,0))
+	drawShadowedText(draw, (42,2), str(int(heartRate)), font=infoFont)
 	updateOverlay(heartRateOverlay, image)
 
 

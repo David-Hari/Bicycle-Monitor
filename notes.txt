@@ -64,6 +64,7 @@ Python-Ant TODO:
 
 * Only call callback on each new event, ignore identical messages
   in between. For example, a new power event should come on each crank rotation.
+  Same for heart rate monitor.
 
 * Log time of each bicycle power message.
 
