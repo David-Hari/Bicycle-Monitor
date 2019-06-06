@@ -198,8 +198,19 @@ def updateSpeedAndDistance(speed, distance):
 
 	image = Image.new('RGBA', gpsOverlay.window[2:4])
 	draw = ImageDraw.Draw(image)
-	draw.rectangle([0,0,gpsOverlay.window[2]-1,gpsOverlay.window[3]-1], outline=(255,0,0))
-	drawShadowedText(draw, (40, 0), 'Speed', font=titleFont)
+
+	drawShadowedText(draw, (0,0), 'Speed', font=titleFont)
+	kmhText = '--' if speed is None else str(int(speed*3.6))
+	mphText = '--' if speed is None else str(int(speed*2.237))
+	drawShadowedText(draw, (0,titleHeight+5), kmhText + ' km/h', font=infoFont)
+	drawShadowedText(draw, (0,titleHeight+45), mphText + ' mph', font=infoFont)
+
+	drawShadowedText(draw, (200, 0), 'Dist.', font=titleFont)
+	kmText = '--' if distance is None else '{0:.2f}'.format(distance/1000)
+	miText = '--' if distance is None else '{0:.2f}'.format(distance/1609.344)
+	drawShadowedText(draw, (200,titleHeight+5), kmText + ' km', font=infoFont)
+	drawShadowedText(draw, (200,titleHeight+45), miText + ' mi.', font=infoFont)
+
 	updateOverlay(gpsOverlay, image)
 
 

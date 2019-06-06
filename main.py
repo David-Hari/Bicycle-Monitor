@@ -24,7 +24,7 @@ heartRate = 0
 cpuWarnTemperature = 80  # Degrees C
 cpuBadTemperature = 90
 tempWarning = None
-gspWarning = None
+gspMessage = None
 #TODO: powerUpdateMutex = something
 
 
@@ -102,16 +102,28 @@ print('Done.')
 display.updateSpeedAndDistance(None, None)
 
 counter = 0
+isGpsActive = False
 while True:
 	try:
 		#TODO: lock powerUpdateMutex?
 		display.drawPowerBar(power, config.powerGoal, config.powerRange, config.powerIdealRange)
 
-		# Check GPS stuff once a second. But give it some time to start up first.
-		if counter > 200 and counter % 4 == 0:
+		# Check to see if GPS is active. Give it some time to start up first.
+		if not isGpsActive and counter > 40 and counter % 8 == 0:
 			try:
 				info = gpsd.get_current()
 				if info.mode >= 2 and info.sats_valid:  # Check if it has a fix on position
+					isGpsActive = True
+				else:
+					gspMessage = display.updateStatusText(gspMessage, 'GPS cannot get a fix on location')
+			except Exception as e:
+				gspMessage = display.updateStatusText(gspMessage, str(e), level='warning')
+
+		# Get GPS info once a second after we have a fix
+		if isGpsActive and counter % 4 == 0:
+			try:
+				info = gpsd.get_current()
+				if info.mode >= 2 and info.sats_valid:  # Make sure we still have a fix
 					data_logging.writeGPS(info)
 					# TODO:
 					#   - Store end lat,lon in config
@@ -120,11 +132,9 @@ while True:
 					display.updateSpeedAndDistance(info.hspeed, 0)
 				else:
 					display.updateSpeedAndDistance(None, None)
-					if counter < 600 and counter % 32 == 0:
-						gspWarning = display.updateStatusText(gspWarning, 'GPS cannot get a fix on location',
-					                                          level='warning', timeout=10)
-			except UserWarning as e:
-				print(e)
+					isGpsActive = False
+			except Exception as e:
+				gspMessage = display.updateStatusText(gspMessage, str(e), level='error')
 
 		# Update heart rate once a second
 		if counter % 4 == 0:
@@ -155,7 +165,7 @@ print('Shutting down...')
 data_logging.closeFiles()
 try:
 	antNode.stop()
-	print('Done.')
 except ANTException as err:
 	print(f'Could not stop ANT.\n{err}')
 display.stop()
+print('Done.')
