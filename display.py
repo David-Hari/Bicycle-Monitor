@@ -70,6 +70,7 @@ def showStatusText(text, timeout=10, level='info'):
 	"""
 	Draws status text near the bottom of the screen.
 	Any existing status overlays still on screen will be pushed up.
+
 	:param text: The text to show
 	:param timeout: Text will be hidden after this many seconds
 	:param level: Status level. One of: 'info', 'warning' or 'error'.
@@ -107,6 +108,7 @@ def updateStatusText(statusId, text, timeout=10, level='info'):
 	"""
 	Updates an existing status overlay with new text.
 	If the overlay does not exist, a new one will be created.
+
 	:param statusId: Id of the existing status
 	:param text: The new text to show
 	:param timeout: Text will be hidden after this many seconds
@@ -131,6 +133,7 @@ def updateStatusText(statusId, text, timeout=10, level='info'):
 def hideStatusText(statusId):
 	"""
 	Hides a status text overlay.
+
 	:param statusId: Id of the status to hide
 	"""
 	global statusOverlays
@@ -155,6 +158,7 @@ def hideStatusText(statusId):
 def drawPowerBar(power, goalPower, powerRange, idealRange):
 	"""
 	Draws a bar graph indicating current power production.
+
 	:param power: Current power in Watts
 	:param goalPower: Power to try to achieve, in Watts
 	:param powerRange: The high and low bounds of the bar chart, in Watts
@@ -189,6 +193,7 @@ def drawPowerBar(power, goalPower, powerRange, idealRange):
 def updateSpeedAndDistance(speed, distance):
 	"""
 	Draws the speed on screen
+
 	:param speed: Speed in meters per second
 	:param distance: Distance to end in meters
 	"""
@@ -216,7 +221,8 @@ def updateSpeedAndDistance(speed, distance):
 
 def updateHeartRate(heartRate):
 	"""
-	Draws heart rate on screen
+	Draws heart rate on screen.
+
 	:param heartRate:
 	"""
 	global heartRateOverlay
@@ -234,6 +240,7 @@ def updateHeartRate(heartRate):
 def addOverlay(image, position):
 	"""
 	Adds a region of the screen that can be drawn to.
+
 	:param image: Initial image to draw
 	:param position: x,y position of the top-left corner of the overlay
 	:return: The overlay object

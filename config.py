@@ -12,3 +12,7 @@ crankLength = 145.0 # mm
 powerGoal = 200       # Watts. Power output to try to achieve
 powerRange = 40       # Watts. Show this much more/less than the goal
 powerIdealRange = 10  # Watts. Actual power output should be within this range
+
+# Latitude and longitude of finish line. Used to calculate distance.
+finishPosition = (33.4027361, 151.33358)
+# Battle Mountain: (40.4676639, 117.06286)

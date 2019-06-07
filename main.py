@@ -6,6 +6,7 @@
 
 import os
 import time
+import math
 from ant.core import driver
 from ant.core.node import Node, Network, ChannelID
 from ant.core.constants import *
@@ -27,6 +28,8 @@ tempWarning = None
 gspMessage = None
 #TODO: powerUpdateMutex = something
 
+
+## ANT Callbacks ##
 
 def devicePaired(deviceProfile, channelId):
 	display.showStatusText(f'Connected to {deviceProfile.name} ({channelId.deviceNumber})')
@@ -57,9 +60,26 @@ def torqueAndPedalData(eventCount, leftTorque, rightTorque, leftPedalSmoothness,
 	data_logging.writeTorqueEvent(0, leftTorque, rightTorque, leftPedalSmoothness, rightPedalSmoothness)
 
 
+## Miscellaneous functions ##
+
 def getCPUTemperature():
 	tempString = os.popen('cat /sys/class/thermal/thermal_zone0/temp').readline()
 	return 0 if tempString == '' else int(tempString) / 1000.0
+
+def dist(a, b):
+	"""
+	Calculates distance between two positions.
+
+	:param a: First position as (latitude,longitude) tuple, in degrees
+	:param b: Second position as (latitude,longitude) tuple, in degrees
+	:return: Distance in meters
+	"""
+	φ1 = math.radians(a[0])
+	φ2 = math.radians(b[0])
+	Δλ = math.radians(b[1] - a[1])
+	x = Δλ * math.cos((φ1+φ2)/2)
+	y = φ2-φ1
+	return math.hypot(x, y) * 6371000 # Mean earth radius
 
 
 
@@ -125,11 +145,8 @@ while True:
 				info = gpsd.get_current()
 				if info.mode >= 2 and info.sats_valid:  # Make sure we still have a fix
 					data_logging.writeGPS(info)
-					# TODO:
-					#   - Store end lat,lon in config
-					#   - Get (info.lat, info.lon)
-					#   - Calculate distance in meters
-					display.updateSpeedAndDistance(info.hspeed, 0)
+					distanceToFinish = dist((info.lat, info.lon), config.finishPosition)
+					display.updateSpeedAndDistance(info.hspeed, distanceToFinish)
 				else:
 					display.updateSpeedAndDistance(None, None)
 					isGpsActive = False

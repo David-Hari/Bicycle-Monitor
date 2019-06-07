@@ -31,7 +31,7 @@ def openFiles():
 	torqueFile.write('Time,Torque Effectiveness,,Pedal Smoothness,\n')
 	torqueFile.write(',left,right,left,right\n')
 	gpsFile = open(gpsFileName, 'w', encoding='utf-8')
-	gpsFile.write('Time (UTC),Longitude,Latitude,Longitude Precision (m),Latitude Precision (m),Speed (m/s),Speed Precision\n')
+	gpsFile.write('Time (UTC),Latitude,Longitude,Latitude Precision (m),Longitude Precision (m),Speed (m/s),Speed Precision\n')
 
 	## For diagnostics
 	cpuTemperatureFile = open(cpuTemperatureFileName, 'w', encoding='utf-8')
@@ -80,13 +80,13 @@ def writeTorqueEvent(eventTime, leftTorque, rightTorque, leftPedalSmoothness, ri
 def writeGPS(info):
 	gpsFile.write(str(info.get_time()))
 	gpsFile.write(',')
-	gpsFile.write(str(info.lon))
-	gpsFile.write(',')
 	gpsFile.write(str(info.lat))
 	gpsFile.write(',')
-	gpsFile.write(str(info.error['x']))
+	gpsFile.write(str(info.lon))
 	gpsFile.write(',')
 	gpsFile.write(str(info.error['y']))
+	gpsFile.write(',')
+	gpsFile.write(str(info.error['x']))
 	gpsFile.write(',')
 	gpsFile.write(str(info.hspeed))
 	gpsFile.write(',')
