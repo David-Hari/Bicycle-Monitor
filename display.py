@@ -230,7 +230,7 @@ def updateHeartRate(heartRate):
 	image = Image.new('RGBA', heartRateOverlay.window[2:4])
 	image.paste(heartImage, [0,5,40,45])
 	draw = ImageDraw.Draw(image)
-	drawShadowedText(draw, (42,2), str(int(heartRate)), font=infoFont)
+	drawShadowedText(draw, (45,2), str(int(heartRate)), font=infoFont)
 	updateOverlay(heartRateOverlay, image)
 
 
