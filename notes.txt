@@ -1,7 +1,7 @@
 
 Bicycle-Monitor TODO:
 
-* Use a mutex lock when updating all data and when drawing it to screen.
+* (Maybe) Use a mutex lock when updating all data and when drawing it to screen.
 
 * Ant sometimes fails to start back up again once it's been shut down.
   Perhaps the shutdown does not happen properly.
