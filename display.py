@@ -32,7 +32,7 @@ statusColours = {
 }
 statusOverlays = {}
 statusIdCounter = 0
-maxStatusOverlays = 4   # Don't flood the screen with messages
+maxStatusOverlays = 4   # So we don't flood the screen with messages
 powerBarOverlay = None
 gpsOverlay = None
 heartRateOverlay = None
@@ -55,6 +55,7 @@ def start():
 	camera = picamera.PiCamera(sensor_mode=5)
 	#camera.exposure_mode = 'sports'  # To reduce motion blur. May not be needed.
 	camera.framerate = 49  # Highest supported by mode 5
+	camera.vflip = True    # Top camera is mounted upside down
 
 	camera.start_preview(fullscreen=True)
 	powerBarOverlay = addOverlay(Image.new('RGBA', (256, 240)), (20, 0, 256, 240))
