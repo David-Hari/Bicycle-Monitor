@@ -56,6 +56,7 @@ def start():
 	#camera.exposure_mode = 'sports'  # To reduce motion blur. May not be needed.
 	camera.framerate = 49  # Highest supported by mode 5
 	camera.vflip = True    # Top camera is mounted upside down
+	camera.hflip = True
 
 	camera.start_preview(fullscreen=True)
 	powerBarOverlay = addOverlay(Image.new('RGBA', (256, 240)), (20, 0, 256, 240))
