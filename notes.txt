@@ -43,6 +43,8 @@ show current state:
   # agent on
   # default-agent
 
+### GPIO and other info (from gpiozero library) ###
+> pinout
 
 
 
