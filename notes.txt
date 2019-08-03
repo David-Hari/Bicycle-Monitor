@@ -9,9 +9,6 @@ Bicycle-Monitor TODO:
 
 
 
-Small bits either side of divider to fit against Pi
-
-
 
 Useful commands:
 
