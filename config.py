@@ -3,7 +3,7 @@
 videoDisplayResolution = (1920, 1080)
 
 # Channel IDs for each paired device. Set to None to enable searching.
-heartRatePairing = (21741, 120, 1)
+heartRatePairing = (18029, 120, 1)
 powerPairing = (2920, 11, 5)
 
 # Bike parameters
