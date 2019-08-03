@@ -1,0 +1,28 @@
+#!/bin/sh
+# /etc/init.d/backupcam
+
+### BEGIN INIT INFO
+# Provides:          backupcam
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start/stop camera preview
+### END INIT INFO
+
+case "$1" in
+    start)
+        echo "Starting camera preview"
+        raspivid -t 0 -f --mode 5 -fps 49 -w 1296 -h 730 --flush &
+        ;;
+    stop)
+        echo "Stopping camera preview"
+        killall raspivid
+        ;;
+    *)
+        echo "Usage: /etc/init.d/backupcam start|stop"
+        exit 1
+        ;;
+esac
+
+exit 0
