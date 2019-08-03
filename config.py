@@ -7,7 +7,7 @@ heartRatePairing = (18029, 120, 1)
 powerPairing = (2920, 11, 5)
 
 # Bike parameters
-crankLength = 145.0 # mm
+crankLength = 140.0 # mm
 
 powerGoal = 200       # Watts. Power output to try to achieve
 powerRange = 40       # Watts. Show this much more/less than the goal
