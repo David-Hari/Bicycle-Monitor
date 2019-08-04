@@ -50,7 +50,7 @@ show current state:
 
 
 To run camera & display from command line, use:
-> raspivid -t 0 -f --mode 5 -fps 49 -w 1296 -h 730 --flush
+> raspivid -t 0 -f --mode 5 -ex sports -fps 49 -w 1296 -h 730 --flush
 
 
 

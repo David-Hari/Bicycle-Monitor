@@ -53,7 +53,7 @@ def start():
 	## https://picamera.readthedocs.io/en/latest/fov.html#sensor-modes
 	## Note that the mini ("spy") camera only comes in a V1 module.
 	camera = picamera.PiCamera(sensor_mode=5)
-	#camera.exposure_mode = 'sports'  # To reduce motion blur. May not be needed.
+	camera.exposure_mode = 'sports'  # To reduce motion blur. May not be needed.
 	camera.framerate = 49  # Highest supported by mode 5
 	camera.vflip = True    # Top camera is mounted upside down
 	camera.hflip = True
@@ -61,7 +61,7 @@ def start():
 	camera.start_preview(fullscreen=True)
 	powerBarOverlay = addOverlay(Image.new('RGBA', (256, 240)), (20, 0, 256, 240))
 	gpsOverlay = addOverlay(Image.new('RGBA', (512, 128)), (320, 0, 512, 128))
-	heartRateOverlay = addOverlay(Image.new('RGBA', (256, 128)), (1740, 0, 256, 128))
+	heartRateOverlay = addOverlay(Image.new('RGBA', (256, 128)), (1780, 20, 256, 128))
 
 
 def stop():
