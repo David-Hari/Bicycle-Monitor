@@ -6,8 +6,9 @@ Conflicts=getty@tty1.service
 [Service]
 Type=simple
 WorkingDirectory=/home/pi/Bicycle-Monitor/
-ExecStart=python3 /home/pi/Bicycle-Monitor/main.py
+ExecStart=/usr/local/bin/python3.7 /home/pi/Bicycle-Monitor/main.py
 StandardInput=tty-force
+KillSignal=SIGINT
 
 [Install]
 WantedBy=multi-user.target

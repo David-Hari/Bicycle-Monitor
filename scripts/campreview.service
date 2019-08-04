@@ -5,7 +5,7 @@ Conflicts=getty@tty1.service
 
 [Service]
 Type=simple
-ExecStart=raspivid -t 0 -f --mode 5 -ex sports -fps 49 -w 1296 -h 730 --flush
+ExecStart=/usr/bin/raspivid -t 0 -f --mode 5 -ex sports -fps 49 -w 1296 -h 730 --flush
 StandardInput=tty-force
 
 [Install]
