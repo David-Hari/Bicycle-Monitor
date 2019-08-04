@@ -1,0 +1,13 @@
+[Unit]
+Description=Bicycle Monitor
+After=multi-user.target
+Conflicts=getty@tty1.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/pi/Bicycle-Monitor/
+ExecStart=python3 /home/pi/Bicycle-Monitor/main.py
+StandardInput=tty-force
+
+[Install]
+WantedBy=multi-user.target
