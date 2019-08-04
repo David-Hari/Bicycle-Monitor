@@ -81,8 +81,6 @@ def showStatusText(text, timeout=10, level='info'):
 	global statusOverlays
 	global statusIdCounter
 
-	print(text)  # For debugging/logging purposes
-
 	image, size = makeStatusTextImage(text, statusColours[level])
 	y = config.videoDisplayResolution[1] - size[1] - (statusPadding * 2)
 
@@ -117,8 +115,6 @@ def updateStatusText(statusId, text, timeout=10, level='info'):
 	:param level: Status level if new overlay. One of: 'info', 'warning' or 'error'.
 	:return: The id of the new or existing status
 	"""
-	print(text)  # For debugging/logging purposes
-
 	if statusId is None or statusId not in statusOverlays:
 		return showStatusText(text, timeout, level)
 
