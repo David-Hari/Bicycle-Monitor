@@ -4,11 +4,16 @@
 
 """
 
-heartRateFileName = './data/heart-rate.csv'
-powerFileName = './data/power.csv'
-torqueFileName = './data/torque.csv'
-gpsFileName = './data/location.csv'
-cpuTemperatureFileName = './data/cpu_temperature.csv'
+import os
+import datetime
+
+
+baseDir = './data/'
+heartRateFileName = 'heart-rate.csv'
+powerFileName = 'power.csv'
+torqueFileName = 'torque.csv'
+gpsFileName = 'location.csv'
+cpuTemperatureFileName = 'cpu_temperature.csv'
 heartRateFile = None
 powerFile = None
 torqueFile = None
@@ -23,18 +28,20 @@ def openFiles():
 	global gpsFile
 	global cpuTemperatureFile
 
-	heartRateFile = open(heartRateFileName, 'w', encoding='utf-8')
+	currentDir = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S') + '/'
+	os.makedirs(baseDir + currentDir)
+	heartRateFile = open(baseDir + currentDir + heartRateFileName, 'w', encoding='utf-8')
 	heartRateFile.write('Time,Heart Rate (bpm)\n')
-	powerFile = open(powerFileName, 'w', encoding='utf-8')
+	powerFile = open(baseDir + currentDir + powerFileName, 'w', encoding='utf-8')
 	powerFile.write('Time,Instantaneous Power (W),Accumulated Power (W),Pedal Right/Left Power Ratio,Cadence (rpm)\n')
-	torqueFile = open(torqueFileName, 'w', encoding='utf-8')
+	torqueFile = open(baseDir + currentDir + torqueFileName, 'w', encoding='utf-8')
 	torqueFile.write('Time,Torque Effectiveness,,Pedal Smoothness,\n')
 	torqueFile.write(',left,right,left,right\n')
-	gpsFile = open(gpsFileName, 'w', encoding='utf-8')
+	gpsFile = open(baseDir + currentDir + gpsFileName, 'w', encoding='utf-8')
 	gpsFile.write('Time (UTC),Latitude,Longitude,Latitude Precision (m),Longitude Precision (m),Speed (m/s),Speed Precision\n')
 
 	## For diagnostics
-	cpuTemperatureFile = open(cpuTemperatureFileName, 'w', encoding='utf-8')
+	cpuTemperatureFile = open(baseDir + currentDir + cpuTemperatureFileName, 'w', encoding='utf-8')
 	################
 
 def closeFiles():
