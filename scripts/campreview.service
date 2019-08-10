@@ -1,12 +1,11 @@
 [Unit]
 Description=Camera Preview
 After=multi-user.target
-Conflicts=getty@tty1.service
 
 [Service]
 Type=simple
 ExecStart=/usr/bin/raspivid -t 0 -f --mode 5 -ex sports -fps 49 -w 1296 -h 730 --flush
-StandardInput=tty-force
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target

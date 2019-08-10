@@ -1,14 +1,17 @@
 [Unit]
 Description=Bicycle Monitor
 After=multi-user.target
-Conflicts=getty@tty1.service
 
 [Service]
 Type=simple
 WorkingDirectory=/home/pi/Bicycle-Monitor/
 ExecStart=/usr/local/bin/python3.7 /home/pi/Bicycle-Monitor/main.py
-StandardInput=tty-force
+Restart=on-failure
 KillSignal=SIGINT
+
+# Disable Python's buffering of STDOUT and STDERR, so that output from the
+# service shows up immediately in systemd's logs
+Environment=PYTHONUNBUFFERED=1
 
 [Install]
 WantedBy=multi-user.target
