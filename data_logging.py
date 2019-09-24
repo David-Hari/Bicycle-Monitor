@@ -5,7 +5,6 @@
 """
 
 import os
-import datetime
 
 
 baseDir = './data/'
@@ -28,20 +27,21 @@ def openFiles():
 	global gpsFile
 	global cpuTemperatureFile
 
-	currentDir = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S') + '/'
-	os.makedirs(baseDir + currentDir)
-	heartRateFile = open(baseDir + currentDir + heartRateFileName, 'w', encoding='utf-8')
+	os.makedirs(baseDir)
+	currentDir = makeUniqueDir(baseDir)
+	
+	heartRateFile = open(currentDir + heartRateFileName, 'w', encoding='utf-8')
 	heartRateFile.write('Time,Heart Rate (bpm)\n')
-	powerFile = open(baseDir + currentDir + powerFileName, 'w', encoding='utf-8')
+	powerFile = open(currentDir + powerFileName, 'w', encoding='utf-8')
 	powerFile.write('Time,Instantaneous Power (W),Accumulated Power (W),Pedal Right/Left Power Ratio,Cadence (rpm)\n')
-	torqueFile = open(baseDir + currentDir + torqueFileName, 'w', encoding='utf-8')
+	torqueFile = open(currentDir + torqueFileName, 'w', encoding='utf-8')
 	torqueFile.write('Time,Torque Effectiveness,,Pedal Smoothness,\n')
 	torqueFile.write(',left,right,left,right\n')
-	gpsFile = open(baseDir + currentDir + gpsFileName, 'w', encoding='utf-8')
+	gpsFile = open(currentDir + gpsFileName, 'w', encoding='utf-8')
 	gpsFile.write('Time (UTC),Latitude,Longitude,Latitude Precision (m),Longitude Precision (m),Speed (m/s),Speed Precision\n')
 
 	## For diagnostics
-	cpuTemperatureFile = open(baseDir + currentDir + cpuTemperatureFileName, 'w', encoding='utf-8')
+	cpuTemperatureFile = open(currentDir + cpuTemperatureFileName, 'w', encoding='utf-8')
 	################
 
 def closeFiles():
@@ -52,6 +52,20 @@ def closeFiles():
 
 	if cpuTemperatureFile:
 		cpuTemperatureFile.close()
+
+def makeUniqueDir(base):
+    """
+    Creates a new directory with a unique number as it's name.
+    :param base: The base directory to create it in
+    :return: The full path to the new directory
+    """
+    num = 1
+    while True:
+        try:
+            os.mkdir(base + str(num))
+            return base + str(num) + '/'
+        except FileExistsError:
+            num = num + 1
 
 
 def writeHeartRateEvent(eventTime, heartRate):
