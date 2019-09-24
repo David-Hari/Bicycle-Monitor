@@ -1,8 +1,6 @@
 
 Bicycle-Monitor TODO:
 
-* Use sequential numbered folders instead of dates.
-
 * Try 'antishake' camera setting.
 
 * If connecting to power or heart rate meter fails, try again after a few seconds.
