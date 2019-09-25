@@ -29,7 +29,7 @@ def openFiles():
 
 	os.makedirs(baseDir)
 	currentDir = makeUniqueDir(baseDir)
-	
+
 	heartRateFile = open(currentDir + heartRateFileName, 'w', encoding='utf-8')
 	heartRateFile.write('Time,Heart Rate (bpm)\n')
 	powerFile = open(currentDir + powerFileName, 'w', encoding='utf-8')
@@ -41,7 +41,7 @@ def openFiles():
 	gpsFile.write('Time (UTC),Latitude,Longitude,Latitude Precision (m),Longitude Precision (m),Speed (m/s),Speed Precision\n')
 
 	## For diagnostics
-	cpuTemperatureFile = open(currentDir + cpuTemperatureFileName, 'w', encoding='utf-8')
+	#cpuTemperatureFile = open(currentDir + cpuTemperatureFileName, 'w', encoding='utf-8')
 	################
 
 def closeFiles():
@@ -54,18 +54,18 @@ def closeFiles():
 		cpuTemperatureFile.close()
 
 def makeUniqueDir(base):
-    """
-    Creates a new directory with a unique number as it's name.
-    :param base: The base directory to create it in
-    :return: The full path to the new directory
-    """
-    num = 1
-    while True:
-        try:
-            os.mkdir(base + str(num))
-            return base + str(num) + '/'
-        except FileExistsError:
-            num = num + 1
+	"""
+	Creates a new directory with a unique number as it's name.
+	:param base: The base directory to create it in
+	:return: The full path to the new directory
+	"""
+	num = 1
+	while True:
+		try:
+			os.mkdir(base + str(num))
+			return base + str(num) + '/'
+		except FileExistsError:
+			num = num + 1
 
 
 def writeHeartRateEvent(eventTime, heartRate):

@@ -162,7 +162,7 @@ while True:
 			temperature = getCPUTemperature()
 
 			## For diagnostics
-			data_logging.writeCPUTemperature(temperature)
+			#data_logging.writeCPUTemperature(temperature)
 			################
 
 			if temperature > cpuWarnTemperature:
