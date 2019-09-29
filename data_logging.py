@@ -27,7 +27,7 @@ def openFiles():
 	global gpsFile
 	global cpuTemperatureFile
 
-	os.makedirs(baseDir)
+	os.makedirs(baseDir, exist_ok=True)
 	currentDir = makeUniqueDir(baseDir)
 
 	heartRateFile = open(currentDir + heartRateFileName, 'w', encoding='utf-8')
