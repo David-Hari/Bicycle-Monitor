@@ -53,9 +53,11 @@ def start():
 	## https://picamera.readthedocs.io/en/latest/fov.html#sensor-modes
 	## Note that the mini ("spy") camera only comes in a V1 module.
 	camera = picamera.PiCamera(sensor_mode=5)
-	camera.exposure_mode = 'sports'  # To reduce motion blur. May not be needed.
+	camera.exposure_mode = 'sports'  # To reduce motion blur.
 	camera.framerate = 49  # Highest supported by mode 5
-	camera.vflip = True    # Top camera is mounted upside down
+
+	# Top camera is mounted upside down
+	camera.vflip = True
 	camera.hflip = True
 
 	camera.start_preview(fullscreen=True)
