@@ -1,11 +1,6 @@
 
 Bicycle-Monitor TODO:
 
-* Try 'antishake' camera setting.
-
-* If connecting to power or heart rate meter fails, try again after a few seconds.
-  Use device.state to check.
-
 * Record video.
 
 * Ant sometimes fails to start back up again once it's been shut down.

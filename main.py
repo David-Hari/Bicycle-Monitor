@@ -26,23 +26,24 @@ cpuWarnTemperature = 80  # Degrees C
 cpuBadTemperature = 90
 tempWarning = None
 gspMessage = None
-#TODO: powerUpdateMutex = something
 
 
-## ANT Callbacks ##
+#-------------------------------------------------#
+#  ANT Callbacks                                  #
+#-------------------------------------------------#
 
 def devicePaired(deviceProfile, channelId):
-	display.showStatusText(f'Connected to {deviceProfile.name} ({channelId.deviceNumber})')
+	showMessage(f'Connected to {deviceProfile.name} ({channelId.deviceNumber})')
 
 def powerMonitorPaired(deviceProfile, channelId):
 	devicePaired(deviceProfile, channelId)
 	deviceProfile.setCrankLength(config.crankLength)
 
 def searchTimedOut(deviceProfile):
-	display.showStatusText(f'Could not connect to {deviceProfile.name}')
+	showMessage(f'Could not connect to {deviceProfile.name}')
 
 def channelClosed(deviceProfile):
-	display.showStatusText(f'Channel closed for {deviceProfile.name}')
+	showMessage(f'Channel closed for {deviceProfile.name}')
 
 
 def heartRateData(hr, eventTime, interval):
@@ -60,7 +61,14 @@ def torqueAndPedalData(eventCount, leftTorque, rightTorque, leftPedalSmoothness,
 	data_logging.writeTorqueEvent(0, leftTorque, rightTorque, leftPedalSmoothness, rightPedalSmoothness)
 
 
-## Miscellaneous functions ##
+
+#-------------------------------------------------#
+#  Miscellaneous functions                        #
+#-------------------------------------------------#
+
+def showMessage(string):
+	print(string)
+	display.showStatusText(string)
 
 def getCPUTemperature():
 	tempString = os.popen('cat /sys/class/thermal/thermal_zone0/temp').readline()
@@ -83,17 +91,20 @@ def dist(a, b):
 
 
 
+#-------------------------------------------------#
+#  Initialization                                 #
+#-------------------------------------------------#
+
 data_logging.openFiles()
 display.start()
 
-
-print('Starting up...')
+showMessage('Starting up...')
 antNode = Node(driver.USB2Driver())
 try:
 	antNode.start()
 	network = Network(key=NETWORK_KEY_ANT_PLUS, name='N:ANT+')
 	antNode.setNetworkKey(NETWORK_NUMBER_PUBLIC, network)
-	print('Done.')
+	showMessage('Done.')
 
 	heartRateMonitor = HeartRate(antNode, network,
 	                     {'onDevicePaired': devicePaired,
@@ -107,25 +118,28 @@ try:
 	                      'onPowerData': powerData,
 	                      'onTorqueAndPedalData': torqueAndPedalData})
 
-	heartRateMonitor.open(ChannelID(*config.heartRatePairing))
-	powerMonitor.open(ChannelID(*config.powerPairing))
+	heartRateMonitor.open(ChannelID(*config.heartRatePairing), searchTimeout=300)
+	powerMonitor.open(ChannelID(*config.powerPairing), searchTimeout=300)
 except ANTException as err:
-	display.showStatusText(f'Could not start ANT.\n{err}')
+	showMessage(f'Could not start ANT.\n{err}')
 
-
-print('Connecting to GPS service...')
+showMessage('Connecting to GPS service...')
 gpsd.connect()
 time.sleep(1)
-print('Done.')
-
+showMessage('Done.')
 
 display.updateSpeedAndDistance(None, None)
+
+
+
+#-------------------------------------------------#
+#  Main loop                                      #
+#-------------------------------------------------#
 
 counter = 0
 isGpsActive = False
 while True:
 	try:
-		#TODO: lock powerUpdateMutex?
 		display.drawPowerBar(power, config.powerGoal, config.powerRange, config.powerIdealRange)
 
 		# Check to see if GPS is active. Give it some time to start up first.
@@ -178,11 +192,10 @@ while True:
 		break
 
 
-print('Shutting down...')
+showMessage('Shutting down...')
 data_logging.closeFiles()
 try:
 	antNode.stop()
 except ANTException as err:
-	print(f'Could not stop ANT.\n{err}')
+	showMessage(f'Could not stop ANT.\n{err}')
 display.stop()
-print('Done.')
