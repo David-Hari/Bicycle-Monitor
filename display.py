@@ -7,7 +7,6 @@
 from threading import Timer
 from recordclass import recordclass
 from PIL import Image, ImageDraw, ImageFont
-import picamera
 
 import config
 
@@ -41,25 +40,13 @@ powerIdealColour = (31,160,70)
 powerOverColour = (239, 122, 0)
 
 
-def start():
+def start(piCamera):
 	global camera
 	global powerBarOverlay
 	global gpsOverlay
 	global heartRateOverlay
 
-	monkeyPatchPiCamera()
-
-	## For more information about camera modes, see
-	## https://picamera.readthedocs.io/en/latest/fov.html#sensor-modes
-	## Note that the mini ("spy") camera only comes in a V1 module.
-	camera = picamera.PiCamera(sensor_mode=5)
-	camera.exposure_mode = 'sports'  # To reduce motion blur.
-	camera.framerate = 49  # Highest supported by mode 5
-
-	# Top camera is mounted upside down
-	camera.vflip = True
-	camera.hflip = True
-
+	camera = piCamera
 	camera.start_preview(fullscreen=True)
 	powerBarOverlay = addOverlay(Image.new('RGBA', (256, 240)), (20, 0, 256, 240))
 	gpsOverlay = addOverlay(Image.new('RGBA', (512, 128)), (320, 0, 512, 128))
@@ -281,31 +268,3 @@ def drawShadowedText(draw, position, text, font, fill=(255,255,255), shadow=(0,0
 
 def clamp(value, minValue, maxValue):
 	return min(max(value, minValue), maxValue)
-
-
-
-# https://github.com/dtreskunov/rpi-sensorium/commit/40c6f3646931bf0735c5fe4579fa89947e96aed7
-#
-# MMALPort has a bug in enable.wrapper, where it always calls
-# self._pool.send_buffer(block=False) regardless of the port direction.
-# This is in contrast to setup time when it only calls
-# self._pool.send_all_buffers(block=False)
-# if self._port[0].type == mmal.MMAL_PORT_TYPE_OUTPUT.
-# Because of this bug updating an overlay once will log a MMAL_EAGAIN
-# error every update. This is safe to ignore as we the user is driving
-# the renderer input port with calls to update() that dequeue buffers
-# and sends them to the input port (so queue is empty on when
-# send_all_buffers(block=False) is called from wrapper).
-# As a workaround, monkey patch MMALPortPool.send_buffer and
-# silence the "error" if thrown by our overlay instance.
-def monkeyPatchPiCamera():
-	original_send_buffer = picamera.mmalobj.MMALPortPool.send_buffer
-
-	def silent_send_buffer(originalSelf, *args, **kwargs):
-		try:
-			original_send_buffer(originalSelf, *args, **kwargs)
-		except picamera.exc.PiCameraMMALError as error:
-			if error.status != 14:
-				raise error
-
-	picamera.mmalobj.MMALPortPool.send_buffer = silent_send_buffer

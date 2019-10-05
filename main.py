@@ -13,11 +13,12 @@ from ant.core.constants import *
 from ant.core.exceptions import *
 from ant.plus.heartrate import *
 from ant.plus.power import *
+import picamera
 import gpsd
 
 import config
 import display
-import data_logging
+import recording
 
 
 power = 0
@@ -47,16 +48,16 @@ def channelClosed(deviceProfile):
 def heartRateData(hr, eventTime, interval):
 	global heartRate
 	heartRate = hr
-	data_logging.writeHeartRateEvent(eventTime, heartRate)
+	recording.writeHeartRateEvent(eventTime, heartRate)
 
 def powerData(eventCount, pedalPowerRatio, cadence, accumulatedPower, instantaneousPower):
 	global power
 	power = instantaneousPower
 	ratio = '' if pedalPowerRatio is None else pedalPowerRatio
-	data_logging.writePowerEvent(0, instantaneousPower, accumulatedPower, ratio, cadence)
+	recording.writePowerEvent(0, instantaneousPower, accumulatedPower, ratio, cadence)
 
 def torqueAndPedalData(eventCount, leftTorque, rightTorque, leftPedalSmoothness, rightPedalSmoothness):
-	data_logging.writeTorqueEvent(0, leftTorque, rightTorque, leftPedalSmoothness, rightPedalSmoothness)
+	recording.writeTorqueEvent(0, leftTorque, rightTorque, leftPedalSmoothness, rightPedalSmoothness)
 
 
 
@@ -93,8 +94,43 @@ def dist(a, b):
 #  Initialization                                 #
 #-------------------------------------------------#
 
-data_logging.openFiles()
-display.start()
+recording.openFiles()
+
+# https://github.com/dtreskunov/rpi-sensorium/commit/40c6f3646931bf0735c5fe4579fa89947e96aed7
+#
+# MMALPort has a bug in enable.wrapper, where it always calls
+# self._pool.send_buffer(block=False) regardless of the port direction.
+# This is in contrast to setup time when it only calls
+# self._pool.send_all_buffers(block=False)
+# if self._port[0].type == mmal.MMAL_PORT_TYPE_OUTPUT.
+# Because of this bug updating an overlay once will log a MMAL_EAGAIN
+# error every update. This is safe to ignore as we the user is driving
+# the renderer input port with calls to update() that dequeue buffers
+# and sends them to the input port (so queue is empty on when
+# send_all_buffers(block=False) is called from wrapper).
+# As a workaround, monkey patch MMALPortPool.send_buffer and
+# silence the "error" if thrown by our overlay instance.
+original_send_buffer = picamera.mmalobj.MMALPortPool.send_buffer
+def silent_send_buffer(originalSelf, *args, **kwargs):
+	try:
+		original_send_buffer(originalSelf, *args, **kwargs)
+	except picamera.exc.PiCameraMMALError as error:
+		if error.status != 14:
+			raise error
+picamera.mmalobj.MMALPortPool.send_buffer = silent_send_buffer
+
+## For more information about camera modes, see
+## https://picamera.readthedocs.io/en/latest/fov.html#sensor-modes
+## Note that the mini ("spy") camera only comes in a V1 module.
+camera = picamera.PiCamera(sensor_mode=5)
+camera.exposure_mode = 'sports'  # To reduce motion blur.
+camera.framerate = 49  # Highest supported by mode 5
+
+# Top camera is mounted upside down
+camera.vflip = True
+camera.hflip = True
+
+display.start(camera)
 
 showMessage('Starting up...')
 antNode = Node(driver.USB2Driver())
@@ -126,6 +162,7 @@ gpsd.connect()
 time.sleep(1)
 
 display.drawSpeedAndDistance(None, None)
+recording.startRecordingVideo(camera)
 
 
 
@@ -155,7 +192,7 @@ while True:
 			try:
 				info = gpsd.get_current()
 				if info.mode >= 2 and info.sats_valid:  # Make sure we still have a fix
-					data_logging.writeGPS(info)
+					recording.writeGPS(info)
 					distanceToFinish = dist((info.lat, info.lon), config.finishPosition)
 					display.drawSpeedAndDistance(info.hspeed, distanceToFinish)
 				else:
@@ -190,7 +227,8 @@ while True:
 
 
 showMessage('Shutting down...')
-data_logging.closeFiles()
+recording.stopRecordingVideo(camera)
+recording.closeFiles()
 try:
 	antNode.stop()
 except ANTException as err:

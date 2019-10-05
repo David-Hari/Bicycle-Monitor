@@ -1,18 +1,22 @@
 """
 
-  Handles logging data to file
+  Handles logging data to file and recording video
 
 """
 
 import os
+
+import config
 
 
 baseDir = './data/'
 heartRateFileName = 'heart-rate.csv'
 powerFileName = 'power.csv'
 torqueFileName = 'torque.csv'
-gpsFileName = 'location.csv'
+gpsFileName = 'gps.csv'
+videoFileName = 'video.h264'
 cpuTemperatureFileName = 'cpu_temperature.csv'
+currentDir = None
 heartRateFile = None
 powerFile = None
 torqueFile = None
@@ -21,6 +25,7 @@ cpuTemperatureFile = None
 
 
 def openFiles():
+	global currentDir
 	global heartRateFile
 	global powerFile
 	global torqueFile
@@ -66,6 +71,13 @@ def makeUniqueDir(base):
 			return base + str(num) + '/'
 		except FileExistsError:
 			num = num + 1
+
+
+def startRecordingVideo(camera):
+	camera.start_recording(currentDir + videoFileName, format='h264', resize=config.recordResolution)
+
+def stopRecordingVideo(camera):
+	camera.stop_recording()
 
 
 def writeHeartRateEvent(eventTime, heartRate):
