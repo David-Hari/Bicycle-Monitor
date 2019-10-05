@@ -24,8 +24,6 @@ power = 0
 heartRate = 0
 cpuWarnTemperature = 80  # Degrees C
 cpuBadTemperature = 90
-tempWarning = None
-gspMessage = None
 
 
 #-------------------------------------------------#
@@ -43,7 +41,7 @@ def searchTimedOut(deviceProfile):
 	showMessage(f'Could not connect to {deviceProfile.name}')
 
 def channelClosed(deviceProfile):
-	showMessage(f'Channel closed for {deviceProfile.name}')
+	print(f'Channel closed for {deviceProfile.name}')
 
 
 def heartRateData(hr, eventTime, interval):
@@ -104,7 +102,6 @@ try:
 	antNode.start()
 	network = Network(key=NETWORK_KEY_ANT_PLUS, name='N:ANT+')
 	antNode.setNetworkKey(NETWORK_NUMBER_PUBLIC, network)
-	showMessage('Done.')
 
 	heartRateMonitor = HeartRate(antNode, network,
 	                     {'onDevicePaired': devicePaired,
@@ -120,15 +117,15 @@ try:
 
 	heartRateMonitor.open(ChannelID(*config.heartRatePairing), searchTimeout=300)
 	powerMonitor.open(ChannelID(*config.powerPairing), searchTimeout=300)
+	showMessage('ANT started. Connecting to devices...')
 except ANTException as err:
 	showMessage(f'Could not start ANT.\n{err}')
 
 showMessage('Connecting to GPS service...')
 gpsd.connect()
 time.sleep(1)
-showMessage('Done.')
 
-display.updateSpeedAndDistance(None, None)
+display.drawSpeedAndDistance(None, None)
 
 
 
@@ -138,6 +135,8 @@ display.updateSpeedAndDistance(None, None)
 
 counter = 0
 isGpsActive = False
+tempWarning = None
+gspMessage = None
 while True:
 	try:
 		display.drawPowerBar(power, config.powerGoal, config.powerRange, config.powerIdealRange)
@@ -148,8 +147,6 @@ while True:
 				info = gpsd.get_current()
 				if info.mode >= 2 and info.sats_valid:  # Check if it has a fix on position
 					isGpsActive = True
-				else:
-					gspMessage = display.updateStatusText(gspMessage, 'GPS cannot get a fix on location')
 			except Exception as e:
 				gspMessage = display.updateStatusText(gspMessage, str(e), level='warning')
 
@@ -160,16 +157,16 @@ while True:
 				if info.mode >= 2 and info.sats_valid:  # Make sure we still have a fix
 					data_logging.writeGPS(info)
 					distanceToFinish = dist((info.lat, info.lon), config.finishPosition)
-					display.updateSpeedAndDistance(info.hspeed, distanceToFinish)
+					display.drawSpeedAndDistance(info.hspeed, distanceToFinish)
 				else:
-					display.updateSpeedAndDistance(None, None)
+					display.drawSpeedAndDistance(None, None)
 					isGpsActive = False
 			except Exception as e:
 				gspMessage = display.updateStatusText(gspMessage, str(e), level='error')
 
 		# Update heart rate once a second
 		if counter % 4 == 0:
-			display.updateHeartRate(heartRate)
+			display.drawHeartRate(heartRate)
 
 		# Check CPU temperature once every 8 second
 		if counter % 32 == 0:

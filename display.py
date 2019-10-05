@@ -190,7 +190,7 @@ def drawPowerBar(power, goalPower, powerRange, idealRange):
 	updateOverlay(powerBarOverlay, image)
 
 
-def updateSpeedAndDistance(speed, distance):
+def drawSpeedAndDistance(speed, distance):
 	"""
 	Draws the speed on screen
 
@@ -207,19 +207,19 @@ def updateSpeedAndDistance(speed, distance):
 	drawShadowedText(draw, (0,0), 'Speed', font=titleFont)
 	kmhText = '--' if speed is None else str(int(speed*3.6))
 	mphText = '--' if speed is None else str(int(speed*2.237))
-	drawShadowedText(draw, (0,titleHeight+5), kmhText + ' km/h', font=infoFont)
-	drawShadowedText(draw, (0,titleHeight+45), mphText + ' mph', font=infoFont)
+	drawShadowedText(draw, (2,titleHeight+5), kmhText + ' km/h', font=infoFont)
+	drawShadowedText(draw, (2,titleHeight+45), mphText + ' mph', font=infoFont)
 
 	drawShadowedText(draw, (200, 0), 'Dist.', font=titleFont)
 	kmText = '--' if distance is None else '{0:.2f}'.format(distance/1000)
 	miText = '--' if distance is None else '{0:.2f}'.format(distance/1609.344)
-	drawShadowedText(draw, (200,titleHeight+5), kmText + ' km', font=infoFont)
-	drawShadowedText(draw, (200,titleHeight+45), miText + ' mi.', font=infoFont)
+	drawShadowedText(draw, (202,titleHeight+5), kmText + ' km', font=infoFont)
+	drawShadowedText(draw, (202,titleHeight+45), miText + ' mi.', font=infoFont)
 
 	updateOverlay(gpsOverlay, image)
 
 
-def updateHeartRate(heartRate):
+def drawHeartRate(heartRate):
 	"""
 	Draws heart rate on screen.
 
