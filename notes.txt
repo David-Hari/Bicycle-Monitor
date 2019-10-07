@@ -1,12 +1,6 @@
 
 Bicycle-Monitor TODO:
 
-* Record video.
-
-* Ant sometimes fails to start back up again once it's been shut down.
-  Perhaps the shutdown does not happen properly.
-
-
 
 
 
