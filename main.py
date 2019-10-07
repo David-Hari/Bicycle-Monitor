@@ -227,7 +227,10 @@ while True:
 
 
 showMessage('Shutting down...')
-recording.stopRecordingVideo(camera)
+try:
+	recording.stopRecordingVideo(camera)
+except Exception as err:
+	showMessage(f'Error during video recording.\n{err}')
 recording.closeFiles()
 try:
 	antNode.stop()

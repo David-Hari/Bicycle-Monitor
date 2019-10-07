@@ -74,7 +74,10 @@ def makeUniqueDir(base):
 
 
 def startRecordingVideo(camera):
-	camera.start_recording(currentDir + videoFileName, format='h264', resize=config.recordResolution)
+	# Resolution is half width and height of the mode 5 resolution
+	# intra_period=0 causes the encoder to produce a single initial I-frame, and then only P-frames subsequently.
+	camera.start_recording(currentDir + videoFileName, format='h264', resize=(648, 365),
+	                       intra_period=0)
 
 def stopRecordingVideo(camera):
 	camera.stop_recording()
