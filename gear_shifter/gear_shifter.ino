@@ -1,20 +1,39 @@
 #include <Servo.h>
 
+
+const int GEAR_UP_PIN = 2;
+const int GEAR_DOWN_PIN = 3;
+
 Servo servo;
+unsigned long lastDebounceTime = 0;  // Last time a button was pushed (input went LOW)
+unsigned long debounceDelay = 100;   // Milliseconds delay before detecting another push
+//boolean wasGearUpButtonPressed = false;   // To remember the event from an interrupt
+//boolean wasGearDownButtonPressed = false; // ditto
+volatile int currentGear = 0;
 
 // The setup function runs once when you press reset or power the board
 void setup() {
-  servo.attach(3);
+  Serial.begin(9600);
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(GEAR_UP_PIN, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(GEAR_UP_PIN), gearUpButtonPressed, FALLING);
+  //servo.attach(4);
 }
 
-// the loop function runs over and over again forever
 void loop() {
-  servo.write(0);
-  delay(1000);
-  servo.write(90);
-  delay(1000);
-  servo.write(180);
-  delay(1000);
-  servo.write(90);
-  delay(1000);
+  Serial.println(currentGear);
+  delay(10);
+}
+
+void gearUpButtonPressed() {
+  // NOTE: This works for button down, but button up also bounces and can generate press events
+  unsigned long currentTime = millis();
+  if ((currentTime - lastDebounceTime) > debounceDelay) {
+    currentGear++;
+    lastDebounceTime = currentTime;
+  }
+}
+
+void gearDownButtonPressed() {
+  currentGear--;
 }
