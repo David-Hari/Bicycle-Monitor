@@ -1,6 +1,7 @@
 
 Bicycle-Monitor TODO:
 
+* Power Arduino using Raspberry Pi's USB connection. Can do serial communication this way too.
 
 
 
