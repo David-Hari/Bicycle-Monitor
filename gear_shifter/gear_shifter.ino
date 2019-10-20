@@ -21,17 +21,24 @@ void setup() {
 /* The main loop runs continuously.                                      */
 /*************************************************************************/
 void loop() {
-	waitForInput();
-	sendUpdate();
+	int change = waitForInput();
+	currentGear += change;   // + or -, up or down
+	if (currentGear > MAX_GEARS) {  // Bounds checking
+		currentGear = MAX_GEARS;
+	}
+	else if (currentGear < 1) {
+		currentGear = 1;
+	}
+	sendUpdate(currentGear);
 	moveServo(currentGear);
 }
 
 
 /*************************************************************************/
-/* Send the current gear number over serial communication.               */
+/* Send the given gear number over serial communication.                 */
 /*************************************************************************/
-void sendUpdate() {
-	Serial.println(currentGear);
+void sendUpdate(int gear) {
+	Serial.println(gear);
 }
 
 

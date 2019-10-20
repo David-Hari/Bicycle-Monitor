@@ -8,6 +8,7 @@ const int gearPositions[] = {
 	120, // 6th gear
 	142  // 7th gear
 };
+static_assert((sizeof(gearPositions)/sizeof((gearPositions)[0])) == MAX_GEARS, "Number of elements in gearPositions[] does not match MAX_GEARS");
 
 Servo servo;
 

@@ -7,22 +7,16 @@ int previousDownButtonState = HIGH;
 
 
 /*************************************************************************/
-/* Continuously check button state waiting for a press. Once pressed,    */
-/* increment/decrement gear number and return.                           */
+/* Continuously check button state, waiting for a press.                 */
+/* Return +1 if up button is pressed, -1 if down button.                 */
 /*************************************************************************/
-void waitForInput() {
+int waitForInput() {
 	while(true) {
 		if (checkUpButton()) {
-			if (currentGear < 7) {
-				currentGear++;
-			}
-			return;
+			return 1;
 		}
 		else if (checkDownButton()) {
-			if (currentGear > 1) {
-				currentGear--;
-			}
-			return;
+			return -1;
 		}
 		// NOTE: Delay is just a busy loop, so we might as well read the input
 		// continuously without delay. But then we'd have to de-bounce it.
