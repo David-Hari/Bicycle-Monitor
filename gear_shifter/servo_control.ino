@@ -17,8 +17,22 @@ void setupServo() {
 }
 
 /*************************************************************************/
-/* Move the servo motor to the given gear position.                      */
+/* Move the servo motor to the <toGear> position, assuming it is         */
+/* currently in the <fromGear> position.                                 */
 /*************************************************************************/
-void moveServo(int gear) {
-	servo.write(gearPositions[gear-1]);
+void moveServo(int fromGear, int toGear) {
+	int currentAngle = gearPositions[fromGear-1];  // TODO: Read actual angle and verify
+	int newAngle = gearPositions[toGear-1];
+	if (newAngle >= currentAngle) {
+		for (int angle = currentAngle; angle <= newAngle; angle++) {
+			servo.write(angle);
+			delay(10);
+		}
+	}
+	else {
+		for (int angle = currentAngle; angle >= newAngle; angle--) {
+			servo.write(angle);
+			delay(10);
+		}
+	}
 }
