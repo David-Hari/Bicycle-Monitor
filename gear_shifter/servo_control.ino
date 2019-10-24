@@ -10,9 +10,13 @@ const int gearPositions[] = {
 };
 static_assert((sizeof(gearPositions)/sizeof((gearPositions)[0])) == MAX_GEARS, "Number of elements in gearPositions[] does not match MAX_GEARS");
 
+
 Servo servo;
 
-void setupServo() {
+/*************************************************************************/
+/* Start sending pulses to the servo to control it.                      */
+/*************************************************************************/
+void initializeServo() {
 	servo.attach(SERVO_PIN);
 }
 

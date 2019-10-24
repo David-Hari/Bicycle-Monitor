@@ -1,52 +1,60 @@
 
-const unsigned long lastDebounceTime = 0;  // Last time a button was pushed (input went LOW)
 const unsigned long debounceDelay = 100;   // Milliseconds delay before detecting another push
+unsigned long lastButtonTime = 0;          // Last time button was pressed or released
 
-int previousUpButtonState = HIGH;
-int previousDownButtonState = HIGH;
+Button upButton;
+Button downButton;
 
+/*************************************************************************/
+/* Initialize the button structures to hold state information.           */
+/*************************************************************************/
+void initializeButtons() {
+	upButton.pin = UP_BUTTON_PIN;
+	upButton.state = HIGH;
+	downButton.pin = DOWN_BUTTON_PIN;
+	downButton.state = HIGH;
+}
 
 /*************************************************************************/
 /* Continuously check button state, waiting for a press.                 */
 /* Return +1 if up button is pressed, -1 if down button.                 */
 /*************************************************************************/
 int waitForInput() {
+	lastButtonTime = millis();
 	while(true) {
-		if (checkUpButton()) {
+		if (checkButton(upButton)) {
 			return 1;
 		}
-		else if (checkDownButton()) {
+		else if (checkButton(downButton)) {
 			return -1;
 		}
-		// NOTE: Delay is just a busy loop, so we might as well read the input
-		// continuously without delay. But then we'd have to de-bounce it.
-		delay(100);
+		// If time since last button press or release is less than the
+		// debounce delay then wait for the remainder of the time.
+		long remainingTime = long(debounceDelay - (millis() - lastButtonTime));
+		if (remainingTime > 0) {
+			delay(remainingTime);
+		}
 	}
 }
 
 /*************************************************************************/
 /* Return true if the button has been pressed.                           */
 /*************************************************************************/
-boolean checkButton(const int pin, int &previousState) {
-	int currentState = digitalRead(pin);
+boolean checkButton(Button &button) {
+	int previousState = button.state;
+	int currentState = digitalRead(button.pin);
 
 	// Check if button was pressed
 	if (previousState == HIGH && currentState == LOW) {
-		previousState = currentState;
+		button.state = currentState;
+		lastButtonTime = millis();
 		return true;
 	}
 	// Detect release as well (to maintain the correct state)
 	if (previousState == LOW && currentState == HIGH) {
-		previousState = currentState;
+		button.state = currentState;
+		lastButtonTime = millis();
 	}
 
 	return false;
-}
-
-boolean checkUpButton() {
-	return checkButton(UP_BUTTON_PIN, previousUpButtonState);
-}
-
-boolean checkDownButton() {
-	return checkButton(DOWN_BUTTON_PIN, previousDownButtonState);
 }

@@ -12,9 +12,11 @@ void setup() {
 	pinMode(LED_BUILTIN, OUTPUT);
 	pinMode(UP_BUTTON_PIN, INPUT_PULLUP);
 	pinMode(DOWN_BUTTON_PIN, INPUT_PULLUP);
+	initializeButtons();
+	initializeServo();
 	Serial.begin(9600);
-	setupServo();
-	currentGear = 1;
+	currentGear = 1;     // TODO: Read current angle to determine gear
+	sendGearChanged(currentGear);
 }
 
 /*************************************************************************/
