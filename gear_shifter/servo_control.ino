@@ -21,6 +21,17 @@ void initializeServo() {
 }
 
 /*************************************************************************/
+/* Reads the current position of the servo and returns the gear it       */
+/* corresponds to.                                                       */
+/* Approximate pot voltages and digital values:                          */
+/*   Min:    0.112V       21  (18-24)                                    */
+/*   Max:    3.130V       649 (646-652)                                  */
+/*************************************************************************/
+int readGear() {
+	return 1;  // TODO: Read current angle to determine gear
+}
+
+/*************************************************************************/
 /* Move the servo motor to the <toGear> position, assuming it is         */
 /* currently in the <fromGear> position.                                 */
 /*************************************************************************/

@@ -1,9 +1,13 @@
 
 Bicycle-Monitor TODO:
 
-* Power Arduino using Raspberry Pi's USB connection. Can do serial communication this way too.
+* Blink LED when servo position does not correspond to a gear.
 
-* May need to check if serial is available before trying to write.
+* Power Arduino using Raspberry Pi's USB connection. Can do serial communication this way too.
+  s = serial.Serial('/dev/ttyACM0', 9600)
+  s.readline()
+
+* Show gear number at right of screen. Make the number go grey or something when gear is changing.
 
 
 

@@ -15,7 +15,7 @@ void setup() {
 	initializeButtons();
 	initializeServo();
 	Serial.begin(9600);
-	currentGear = 1;     // TODO: Read current angle to determine gear
+	currentGear = readGear();
 	sendGearChanged(currentGear);
 }
 
