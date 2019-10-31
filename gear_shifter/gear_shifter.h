@@ -2,6 +2,7 @@
 const int UP_BUTTON_PIN = 2;
 const int DOWN_BUTTON_PIN = 3;
 const int SERVO_PIN = 4;
+const int FEEDBACK_PIN = 5;   // Analog pin
 const int MAX_GEARS = 7;
 
 
@@ -18,4 +19,6 @@ void initializeButtons();
 int waitForInput();
 
 void initializeServo(int gear);
+int readAnalogAverage();
+int readGear();
 void moveServo(int fromGear, int toGear);

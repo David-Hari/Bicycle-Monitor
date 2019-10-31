@@ -10,6 +10,10 @@ const int gearPositions[] = {
 };
 static_assert((sizeof(gearPositions)/sizeof((gearPositions)[0])) == MAX_GEARS, "Number of elements in gearPositions[] does not match MAX_GEARS");
 
+// Range of analog input from potentiometer (Full range of analog read is 0-1023).
+const int ANALOG_MIN = 21;   // 0.112V
+const int ANALOG_MAX = 649;  // 3.130V
+
 
 Servo servo;
 
@@ -17,15 +21,25 @@ Servo servo;
 /* Start sending pulses to the servo to control it.                      */
 /*************************************************************************/
 void initializeServo() {
-	servo.attach(SERVO_PIN);
+	servo.attach(SERVO_PIN, 500, 2500);
 }
 
 /*************************************************************************/
-/* Reads the current position of the servo and returns the gear it       */
-/* corresponds to.                                                       */
-/* Approximate pot voltages and digital values:                          */
-/*   Min:    0.112V       21  (18-24)                                    */
-/*   Max:    3.130V       649 (646-652)                                  */
+/* Reads the current position of the servo, averaging it over a number   */
+/* of reads to avoid noise.                                              */
+/*************************************************************************/
+int readAnalogAverage() {
+	int value = 0;
+	for (int i = 0; i < 3; i++) {
+		delay(10);
+		value += analogRead(FEEDBACK_PIN);
+	}
+	return value / 3;
+}
+
+/*************************************************************************/
+/* Returns the currently selected gear, or -1 if the servo position does */
+/* not correspond to any gear.                                           */
 /*************************************************************************/
 int readGear() {
 	return 1;  // TODO: Read current angle to determine gear
@@ -36,7 +50,7 @@ int readGear() {
 /* currently in the <fromGear> position.                                 */
 /*************************************************************************/
 void moveServo(int fromGear, int toGear) {
-	int currentAngle = gearPositions[fromGear-1];  // TODO: Read actual angle and verify
+	int currentAngle = gearPositions[fromGear-1];  // TODO: Read actual angle and fail if it doesn't match
 	int newAngle = gearPositions[toGear-1];
 	if (newAngle >= currentAngle) {
 		for (int angle = currentAngle; angle <= newAngle; angle++) {

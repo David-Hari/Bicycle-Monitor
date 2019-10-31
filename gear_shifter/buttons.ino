@@ -9,6 +9,8 @@ Button downButton;
 /* Initialize the button structures to hold state information.           */
 /*************************************************************************/
 void initializeButtons() {
+	pinMode(UP_BUTTON_PIN, INPUT_PULLUP);
+	pinMode(DOWN_BUTTON_PIN, INPUT_PULLUP);
 	upButton.pin = UP_BUTTON_PIN;
 	upButton.state = HIGH;
 	downButton.pin = DOWN_BUTTON_PIN;
@@ -21,7 +23,7 @@ void initializeButtons() {
 /*************************************************************************/
 int waitForInput() {
 	lastButtonTime = millis();
-	while(true) {
+	while (true) {
 		if (checkButton(upButton)) {
 			return 1;
 		}
