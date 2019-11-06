@@ -19,6 +19,7 @@ void initializeButtons();
 int waitForInput();
 
 void initializeServo(int gear);
-int readAnalogAverage();
+int readAngle();
 int readGear();
-void moveServo(int fromGear, int toGear);
+void changeGear(int fromGear, int toGear);
+void moveServo(int angle);
