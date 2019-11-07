@@ -18,6 +18,13 @@ void initializeButtons() {
 }
 
 /*************************************************************************/
+/* Check if both buttons are held down. Used for debugging.              */
+/*************************************************************************/
+boolean areBothButtonsDown() {
+	return digitalRead(UP_BUTTON_PIN) == LOW && digitalRead(DOWN_BUTTON_PIN) == LOW;
+}
+
+/*************************************************************************/
 /* Continuously check button state, waiting for a press.                 */
 /* Return +1 if up button is pressed, -1 if down button.                 */
 /*************************************************************************/

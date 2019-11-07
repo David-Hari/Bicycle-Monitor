@@ -1,12 +1,11 @@
 
 const int gearPositions[] = {
-	10,  // 1st gear
-	32,  // 2nd gear
-	54,  // 3rd gear
-	76,  // 4th gear
-	98,  // 5th gear
-	120, // 6th gear
-	142  // 7th gear
+	  0, // 1st gear
+	 32, // 2nd gear
+	 54, // 3rd gear
+	 76, // 4th gear
+	 98, // 5th gear
+	120 // 6th gear
 };
 static_assert((sizeof(gearPositions)/sizeof((gearPositions)[0])) == MAX_GEARS, "Number of elements in gearPositions[] does not match MAX_GEARS");
 
@@ -30,12 +29,18 @@ Servo servo;
 /* Start sending pulses to the servo to control it.                      */
 /*************************************************************************/
 void initializeServo() {
-	// TODO: Read current angle and verify
 	servo.attach(SERVO_PIN, SERVO_MIN_PULSE, SERVO_MAX_PULSE);
 }
 
 /*************************************************************************/
-/* Reads the current position of the servo, averaging it over a number   */
+/* Stop sending pulses to the servo. This will make it "limp".           */
+/*************************************************************************/
+void stopServo() {
+	servo.detach();
+}
+
+/*************************************************************************/
+/* Read the current position of the servo, averaging it over a number    */
 /* of reads to avoid noise.                                              */
 /*************************************************************************/
 int readAngle() {
@@ -50,19 +55,31 @@ int readAngle() {
 }
 
 /*************************************************************************/
-/* Returns the currently selected gear, or -1 if the servo position does */
+/* Return the currently selected gear, or -1 if the servo position does  */
 /* not correspond to any gear.                                           */
 /*************************************************************************/
 int readGear() {
-	return 1;  // TODO: Read current angle to determine gear
+	int currentAngle = readAngle();
+	int gearAngle = 0;
+	for (int i = 0; i < MAX_GEARS; i++) {
+		gearAngle = gearPositions[i];
+		if (currentAngle >= gearAngle - GEAR_POSITION_THRESHOLD && currentAngle <= gearAngle + GEAR_POSITION_THRESHOLD) {
+			return i + 1;
+		}
+	}
+	return -1;
 }
 
 /*************************************************************************/
-/* Move the servo motor to the <toGear> position, assuming it is         */
-/* currently in the <fromGear> position.                                 */
+/* Move the servo motor to the <toGear> position.                        */
+/* Return the new gear number or -1 on error.                            */
 /*************************************************************************/
-void changeGear(int fromGear, int toGear) {
-	int currentAngle = gearPositions[fromGear-1];  // TODO: Read actual angle and fail if it doesn't match
+int changeGear(int toGear) {
+	int currentGear = readGear();
+	if (currentGear == -1) {
+		return -1;
+	}
+	int currentAngle = gearPositions[currentGear-1];
 	int newAngle = gearPositions[toGear-1];
 	if (newAngle >= currentAngle) {
 		for (int angle = currentAngle; angle <= newAngle; angle++) {
@@ -76,6 +93,8 @@ void changeGear(int fromGear, int toGear) {
 			delay(10);
 		}
 	}
+	delay(100);
+	return readGear();
 }
 
 /*************************************************************************/

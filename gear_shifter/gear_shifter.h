@@ -3,7 +3,8 @@ const int UP_BUTTON_PIN = 2;
 const int DOWN_BUTTON_PIN = 3;
 const int SERVO_PIN = 4;
 const int FEEDBACK_PIN = 5;   // Analog pin
-const int MAX_GEARS = 7;
+const int MAX_GEARS = 6;
+const int GEAR_POSITION_THRESHOLD = 2;  // Degrees +/- actual position
 
 
 struct Button {
@@ -14,12 +15,17 @@ struct Button {
 
 void sendGearChanging();
 void sendGearChanged(int gear);
+void sendError(String message);
+void error(String message);
+void gearPositionError();
 
 void initializeButtons();
+boolean areBothButtonsDown();
 int waitForInput();
 
-void initializeServo(int gear);
+void initializeServo();
+void stopServo();
 int readAngle();
 int readGear();
-void changeGear(int fromGear, int toGear);
+int changeGear(int toGear);
 void moveServo(int angle);
