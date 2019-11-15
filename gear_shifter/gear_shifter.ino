@@ -14,24 +14,23 @@ void setup() {
 	initializeButtons();
 	Serial.begin(9600);
 	debug = areBothButtonsDown();
+	/****/delay(3000);
 	currentGear = readGear();
+	if (currentGear == -1 && !debug) {  // Skip gear check in debug
+		gearPositionError();
+	}
+	initializeServo();
 	if (debug) {
 		currentGear = 1;
 		moveServo(0);
 	}
-	else {
-		if (currentGear == -1) {  // Skip gear check in debug
-			gearPositionError();
-		}
-	}
-	initializeServo();
-	sendGearChanged(currentGear);
 }
 
 /*************************************************************************/
 /* The main loop runs continuously.                                      */
 /*************************************************************************/
 void loop() {
+	Serial.println("loop");
 	int change = waitForInput();
 	currentGear += change;   // + is up, - is down
 	if (currentGear > MAX_GEARS) {
@@ -52,14 +51,18 @@ void loop() {
 /* Send an indication that the gear is currently changing.               */
 /*************************************************************************/
 void sendGearChanging() {
-	Serial.println("#");
+	if (Serial.availableForWrite() > 0) {
+		Serial.println("#");
+	}
 }
 
 /*************************************************************************/
 /* Send the given gear number over serial.                               */
 /*************************************************************************/
 void sendGearChanged(int gear) {
-	Serial.println(gear);
+	if (Serial.availableForWrite() > 0) {
+		Serial.println(gear);
+	}
 }
 
 /*************************************************************************/
@@ -74,12 +77,11 @@ void sendError(String message) {
 /*************************************************************************/
 /* Blink the LED to indicate an error.                                   */
 /*************************************************************************/
-void error(String message) {
+void error() {
 	unsigned int state = HIGH;
 	while (true) {
 		digitalWrite(LED_BUILTIN, state);
 		state = !state;
-		sendError(message);
 		delay(400);
 	}
 }
@@ -89,5 +91,6 @@ void error(String message) {
 /*************************************************************************/
 void gearPositionError() {
 	stopServo();
-	error("Gear not in correct position");
+	sendError("Gear not in correct position");
+	error();
 }

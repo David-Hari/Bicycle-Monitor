@@ -5,7 +5,7 @@ const int gearPositions[] = {
 	 54, // 3rd gear
 	 76, // 4th gear
 	 98, // 5th gear
-	120 // 6th gear
+	120  // 6th gear
 };
 static_assert((sizeof(gearPositions)/sizeof((gearPositions)[0])) == MAX_GEARS, "Number of elements in gearPositions[] does not match MAX_GEARS");
 
@@ -64,9 +64,11 @@ int readGear() {
 	for (int i = 0; i < MAX_GEARS; i++) {
 		gearAngle = gearPositions[i];
 		if (currentAngle >= gearAngle - GEAR_POSITION_THRESHOLD && currentAngle <= gearAngle + GEAR_POSITION_THRESHOLD) {
+	Serial.println("Read "+String(currentAngle)+",  "+String(i));
 			return i + 1;
 		}
 	}
+	Serial.println("Read "+String(currentAngle)+",  "+String(-1));
 	return -1;
 }
 
@@ -101,6 +103,7 @@ int changeGear(int toGear) {
 /* Move the servo motor to the given angle.                              */
 /*************************************************************************/
 void moveServo(int angle) {
+	Serial.println("Move "+String(angle));
 	if (angle < 0) { angle = 0; } else if (angle > SERVO_MAX_ANGLE) { angle = SERVO_MAX_ANGLE; }
 	servo.writeMicroseconds(map(angle, SERVO_MIN_ANGLE, SERVO_MAX_ANGLE, SERVO_MIN_PULSE, SERVO_MAX_PULSE));
 }

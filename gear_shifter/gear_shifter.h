@@ -4,7 +4,7 @@ const int DOWN_BUTTON_PIN = 3;
 const int SERVO_PIN = 4;
 const int FEEDBACK_PIN = 5;   // Analog pin
 const int MAX_GEARS = 6;
-const int GEAR_POSITION_THRESHOLD = 2;  // Degrees +/- actual position
+const int GEAR_POSITION_THRESHOLD = 4;  // Degrees +/- actual position
 
 
 struct Button {
@@ -16,7 +16,7 @@ struct Button {
 void sendGearChanging();
 void sendGearChanged(int gear);
 void sendError(String message);
-void error(String message);
+void error();
 void gearPositionError();
 
 void initializeButtons();
