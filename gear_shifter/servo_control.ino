@@ -64,11 +64,9 @@ int readGear() {
 	for (int i = 0; i < MAX_GEARS; i++) {
 		gearAngle = gearPositions[i];
 		if (currentAngle >= gearAngle - GEAR_POSITION_THRESHOLD && currentAngle <= gearAngle + GEAR_POSITION_THRESHOLD) {
-	Serial.println("Read "+String(currentAngle)+",  "+String(i));
 			return i + 1;
 		}
 	}
-	Serial.println("Read "+String(currentAngle)+",  "+String(-1));
 	return -1;
 }
 
@@ -95,7 +93,7 @@ int changeGear(int toGear) {
 			delay(10);
 		}
 	}
-	delay(100);
+	for (int i = 0; readGear() != toGear && i < 100; i++) {}  // Wait for gear to move
 	return readGear();
 }
 
@@ -103,7 +101,6 @@ int changeGear(int toGear) {
 /* Move the servo motor to the given angle.                              */
 /*************************************************************************/
 void moveServo(int angle) {
-	Serial.println("Move "+String(angle));
 	if (angle < 0) { angle = 0; } else if (angle > SERVO_MAX_ANGLE) { angle = SERVO_MAX_ANGLE; }
 	servo.writeMicroseconds(map(angle, SERVO_MIN_ANGLE, SERVO_MAX_ANGLE, SERVO_MIN_PULSE, SERVO_MAX_PULSE));
 }

@@ -14,23 +14,29 @@ void setup() {
 	initializeButtons();
 	Serial.begin(9600);
 	debug = areBothButtonsDown();
-	/****/delay(3000);
-	currentGear = readGear();
-	if (currentGear == -1 && !debug) {  // Skip gear check in debug
-		gearPositionError();
-	}
-	initializeServo();
+	// Note: Servo position needs to be set *before* attaching, otherwise it
+	// will move to a default position.
 	if (debug) {
 		currentGear = 1;
 		moveServo(0);
 	}
+	else {
+		currentGear = changeGear(readGear());
+		if (currentGear == -1) {
+			gearPositionError();
+		}
+	}
+	initializeServo();
 }
+
+// TODO:
+//  Find out why gearPositionError happens sometimes when changing gears (perhaps quickly).
+//  Stop servo from jumping all over the place when power is cut.
 
 /*************************************************************************/
 /* The main loop runs continuously.                                      */
 /*************************************************************************/
 void loop() {
-	Serial.println("loop");
 	int change = waitForInput();
 	currentGear += change;   // + is up, - is down
 	if (currentGear > MAX_GEARS) {
