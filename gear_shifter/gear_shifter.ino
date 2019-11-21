@@ -32,6 +32,7 @@ void setup() {
 // TODO:
 //  Find out why gearPositionError happens sometimes when changing gears (perhaps quickly).
 //  Stop servo from jumping all over the place when power is cut.
+//  Make sure servo.detach cuts power to the servo (I'm not sure it does). 
 
 /*************************************************************************/
 /* The main loop runs continuously.                                      */
