@@ -21,6 +21,8 @@ import display
 import recording
 
 
+heartRateMonitor = None
+powerMonitor = None
 power = 0
 heartRate = 0
 cpuWarnTemperature = 80  # Degrees C
@@ -233,6 +235,10 @@ except Exception as err:
 	showMessage(f'Error during video recording.\n{err}')
 recording.closeFiles()
 try:
+	if heartRateMonitor is not None:
+		heartRateMonitor.close()
+	if powerMonitor is not None:
+		powerMonitor.close()
 	antNode.stop()
 except ANTException as err:
 	showMessage(f'Could not stop ANT.\n{err}')
