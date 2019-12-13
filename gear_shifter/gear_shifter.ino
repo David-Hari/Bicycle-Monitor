@@ -13,6 +13,7 @@ void setup() {
 	pinMode(LED_BUILTIN, OUTPUT);
 	initializeButtons();
 	Serial.begin(9600);
+	delay(3000);
 	debug = areBothButtonsDown();
 	// Note: Servo position needs to be set *before* attaching, otherwise it
 	// will move to a default position.
