@@ -7,6 +7,8 @@
 import os
 import time
 import math
+from serial import Serial
+
 from ant.core import driver
 from ant.core.node import Node, Network, ChannelID
 from ant.core.constants import *
@@ -21,6 +23,8 @@ import display
 import recording
 
 
+original_send_buffer = None
+gearChangerComms = None
 heartRateMonitor = None
 powerMonitor = None
 power = 0
@@ -90,14 +94,6 @@ def dist(a, b):
 	y = φ2-φ1
 	return math.hypot(x, y) * 6371000 # Mean earth radius
 
-
-
-#-------------------------------------------------#
-#  Initialization                                 #
-#-------------------------------------------------#
-
-recording.openFiles()
-
 # https://github.com/dtreskunov/rpi-sensorium/commit/40c6f3646931bf0735c5fe4579fa89947e96aed7
 #
 # MMALPort has a bug in enable.wrapper, where it always calls
@@ -112,14 +108,26 @@ recording.openFiles()
 # send_all_buffers(block=False) is called from wrapper).
 # As a workaround, monkey patch MMALPortPool.send_buffer and
 # silence the "error" if thrown by our overlay instance.
-original_send_buffer = picamera.mmalobj.MMALPortPool.send_buffer
-def silent_send_buffer(originalSelf, *args, **kwargs):
-	try:
-		original_send_buffer(originalSelf, *args, **kwargs)
-	except picamera.exc.PiCameraMMALError as error:
-		if error.status != 14:
-			raise error
-picamera.mmalobj.MMALPortPool.send_buffer = silent_send_buffer
+def patchPiCamera():
+	global original_send_buffer
+	original_send_buffer = picamera.mmalobj.MMALPortPool.send_buffer
+	def silent_send_buffer(originalSelf, *args, **kwargs):
+		try:
+			original_send_buffer(originalSelf, *args, **kwargs)
+		except picamera.exc.PiCameraMMALError as error:
+			if error.status != 14:
+				raise error
+	picamera.mmalobj.MMALPortPool.send_buffer = silent_send_buffer
+
+
+
+#-------------------------------------------------#
+#  Initialization                                 #
+#-------------------------------------------------#
+
+recording.openFiles()
+
+patchPiCamera()
 
 ## For more information about camera modes, see
 ## https://picamera.readthedocs.io/en/latest/fov.html#sensor-modes
@@ -134,7 +142,13 @@ camera.hflip = True
 
 display.start(camera)
 
-showMessage('Starting up...')
+try:
+	# A timeout of 0 means non-blocking mode, read() returns immediately with whatever is in the buffer.
+	gearChangerComms = Serial('/dev/serial/by-id/usb-Arduino_LLC_Arduino_Micro-if00', 9600, timeout=0)
+except Exception as err:
+	showMessage(f'Could not connect to gear changer.\n{err}')
+
+showMessage('Starting up ANT...')
 antNode = Node(driver.USB2Driver())
 try:
 	antNode.start()
@@ -206,6 +220,17 @@ while True:
 		# Update heart rate once a second
 		if counter % 4 == 0:
 			display.drawHeartRate(heartRate)
+
+		# Read serial communication from gear changer, and update display if necessary
+		if gearChangerComms is not None:
+			numBytes = gearChangerComms.in_waiting
+			if numBytes > 0:
+				# TODO: May be multiple lines in buffer. Split on \n and loop.
+				commsType = gearChangerComms.read(1)  # 'G' for gear number, 'E' for error message
+				if commsType == 'E':
+					showMessage(gearChangerComms.read(numBytes - 1).decode('ascii'))
+				else:
+					showMessage(gearChangerComms.read(numBytes - 1).decode('ascii'))
 
 		# Check CPU temperature once every 8 second
 		if counter % 32 == 0:

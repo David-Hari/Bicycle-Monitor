@@ -1,11 +1,11 @@
 
 Bicycle-Monitor TODO:
 
-* Power Arduino using Raspberry Pi's USB connection. Can do serial communication this way too.
-  s = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
-  if (s.in_waiting() > 0): s.read()
-
 * Show gear number at right of screen. Make the number go grey or something when gear is changing.
+
+* Lock statusOverlays dictionary (in display.py) so we don't get a "dictionary changed size during iteration"
+  error when showing status and another one hides because of timeout
+
 
 
 
@@ -46,13 +46,15 @@ show current state:
 ### GPIO and other info (from gpiozero library) ###
 > pinout
 
-
-
 To run camera & display from command line, use:
 > raspivid -t 0 -f --mode 5 -ex sports -fps 49 -w 1296 -h 730 --flush
 
 
 
+Linux setup:
+
+For ANT USB device, create file /etc/udev/rules.d/garmin-ant2.rules containing the following:
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0fcf", ATTRS{idProduct}=="1008", RUN+="/sbin/modprobe usbserial vendor=0x0fcf product=0x1008", MODE="0666", OWNER="pi", GROUP="root"
 
 
 
