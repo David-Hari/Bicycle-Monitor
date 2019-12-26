@@ -31,9 +31,7 @@ void setup() {
 }
 
 // TODO:
-//  Find out why gearPositionError happens sometimes when changing gears (perhaps quickly).
 //  Stop servo from jumping all over the place when power is cut.
-//  Make sure servo.detach cuts power to the servo (I'm not sure it does). 
 
 /*************************************************************************/
 /* The main loop runs continuously.                                      */
@@ -47,21 +45,11 @@ void loop() {
 	else if (currentGear < 1) {
 		currentGear = 1;
 	}
-	sendGearChanging();
 	currentGear = changeGear(currentGear);
-	if (currentGear == -1 && !debug) {  // Skip gear check in debug
+	if (currentGear == E_NO_POSITION) {
 		gearPositionError();
 	}
 	sendGearChanged(currentGear);
-}
-
-/*************************************************************************/
-/* Send an indication that the gear is currently changing.               */
-/*************************************************************************/
-void sendGearChanging() {
-	if (Serial.availableForWrite() > 0) {
-		Serial.println("#");
-	}
 }
 
 /*************************************************************************/
@@ -69,7 +57,9 @@ void sendGearChanging() {
 /*************************************************************************/
 void sendGearChanged(int gear) {
 	if (Serial.availableForWrite() > 0) {
-		Serial.println(gear);
+		Serial.print("G");
+		Serial.print(gear);
+		Serial.print("\n");
 	}
 }
 
@@ -78,7 +68,9 @@ void sendGearChanged(int gear) {
 /*************************************************************************/
 void sendError(String message) {
 	if (Serial.availableForWrite() > 0) {
-		Serial.println("E" + message);
+		Serial.print("E");
+		Serial.print(message);
+		Serial.print("\n");
 	}
 }
 
@@ -100,5 +92,7 @@ void error() {
 void gearPositionError() {
 	stopServo();
 	sendError("Gear not in correct position");
-	error();
+	if (!debug) {
+		error();
+	}
 }

@@ -6,6 +6,8 @@ const int FEEDBACK_PIN = 5;   // Analog pin
 const int MAX_GEARS = 6;
 const int GEAR_POSITION_THRESHOLD = 4;  // Degrees +/- actual position
 
+const int E_NO_POSITION = -1;
+
 
 struct Button {
 	int pin;
@@ -13,7 +15,6 @@ struct Button {
 };
 
 
-void sendGearChanging();
 void sendGearChanged(int gear);
 void sendError(String message);
 void error();

@@ -33,7 +33,9 @@ void initializeServo() {
 }
 
 /*************************************************************************/
-/* Stop sending pulses to the servo. This will make it "limp".           */
+/* Stop sending pulses to the servo. This SHOULD turn off the servo and  */
+/* make it "limp", but it does not. Perhaps this brand holds even when   */
+/* PWM signal stops.                                                     */
 /*************************************************************************/
 void stopServo() {
 	servo.detach();
@@ -55,8 +57,8 @@ int readAngle() {
 }
 
 /*************************************************************************/
-/* Return the currently selected gear, or -1 if the servo position does  */
-/* not correspond to any gear.                                           */
+/* Return the currently selected gear, or an error code if the servo     */
+/* position does not correspond to any gear.                             */
 /*************************************************************************/
 int readGear() {
 	int currentAngle = readAngle();
@@ -67,7 +69,7 @@ int readGear() {
 			return i + 1;
 		}
 	}
-	return -1;
+	return E_NO_POSITION;
 }
 
 /*************************************************************************/
@@ -76,8 +78,8 @@ int readGear() {
 /*************************************************************************/
 int changeGear(int toGear) {
 	int currentGear = readGear();
-	if (currentGear == -1) {
-		return -1;
+	if (currentGear < 0) {
+		return currentGear;  // As error code
 	}
 	int currentAngle = gearPositions[currentGear-1];
 	int newAngle = gearPositions[toGear-1];
@@ -93,7 +95,7 @@ int changeGear(int toGear) {
 			delay(10);
 		}
 	}
-	for (int i = 0; readGear() != toGear && i < 100; i++) {}  // Wait for gear to move
+	for (int i = 0; readGear() != toGear && i < 200; i++) {}  // Wait for gear to move
 	return readGear();
 }
 
