@@ -3,8 +3,6 @@ Bicycle-Monitor TODO:
 
 * Show gear number at right of screen. Make the number go grey or something when gear is changing.
 
-* Lock statusOverlays dictionary (in display.py) so we don't get a "dictionary changed size during iteration"
-  error when showing status and another one hides because of timeout
 
 
 

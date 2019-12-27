@@ -4,7 +4,7 @@
 
 """
 
-from threading import Timer
+from threading import Timer, Lock
 from recordclass import recordclass
 from PIL import Image, ImageDraw, ImageFont
 
@@ -31,7 +31,8 @@ statusColours = {
 }
 statusOverlays = {}
 statusIdCounter = 0
-maxStatusOverlays = 4   # So we don't flood the screen with messages
+#maxStatusOverlays = 4   # So we don't flood the screen with messages
+overlaysMutex = Lock()
 powerBarOverlay = None
 gpsOverlay = None
 heartRateOverlay = None
@@ -73,22 +74,23 @@ def showStatusText(text, timeout=10, level='info'):
 	image, size = makeStatusTextImage(text, statusColours[level])
 	y = config.videoDisplayResolution[1] - size[1] - (statusPadding * 2)
 
-	# Push existing overlays up to make room for this one
-	for key, each in statusOverlays.items():
-		each.yPos = each.yPos - size[1] - statusPadding
-		w = each.overlay.window   # Tuple of x,y,w,h
-		each.overlay.window = (w[0], each.yPos, w[2], w[3])
+	with overlaysMutex:
+		# Push existing overlays up to make room for this one
+		for key, each in statusOverlays.items():
+			each.yPos = each.yPos - size[1] - statusPadding
+			w = each.overlay.window   # Tuple of x,y,w,h
+			each.overlay.window = (w[0], each.yPos, w[2], w[3])
 
-	thisId = statusIdCounter
-	statusIdCounter = statusIdCounter + 1
-	status = StatusOverlay(
-		overlay = addOverlay(image, (0, y, image.width, image.height)),
-		timer = Timer(timeout, hideStatusText, args=[thisId]),
-		yPos = y,
-		height = size[1]
-	)
-	statusOverlays[thisId] = status
-	status.timer.start()
+		thisId = statusIdCounter
+		statusIdCounter = statusIdCounter + 1
+		status = StatusOverlay(
+			overlay = addOverlay(image, (0, y, image.width, image.height)),
+			timer = Timer(timeout, hideStatusText, args=[thisId]),
+			yPos = y,
+			height = size[1]
+		)
+		statusOverlays[thisId] = status
+		status.timer.start()
 
 	return thisId
 
@@ -104,17 +106,18 @@ def updateStatusText(statusId, text, timeout=10, level='info'):
 	:param level: Status level if new overlay. One of: 'info', 'warning' or 'error'.
 	:return: The id of the new or existing status
 	"""
-	if statusId is None or statusId not in statusOverlays:
-		return showStatusText(text, timeout, level)
+	if statusId is not None:
+		with overlaysMutex:
+			existingStatus = statusOverlays.get(statusId)
+		if existingStatus is not None:
+			existingStatus.timer.cancel()
+			image, size = makeStatusTextImage(text, statusColours[level])
+			updateOverlay(existingStatus.overlay, image)
+			existingStatus.timer = Timer(timeout, hideStatusText, args=[statusId])
+			existingStatus.timer.start()
+			return statusId
 
-	existingStatus = statusOverlays[statusId]
-	existingStatus.timer.cancel()
-	image, size = makeStatusTextImage(text, statusColours[level])
-	updateOverlay(existingStatus.overlay, image)
-	existingStatus.timer = Timer(timeout, hideStatusText, args=[statusId])
-	existingStatus.timer.start()
-
-	return statusId
+	return showStatusText(text, timeout, level)
 
 
 def hideStatusText(statusId):
@@ -125,21 +128,22 @@ def hideStatusText(statusId):
 	"""
 	global statusOverlays
 
-	if statusId in statusOverlays:
-		existingStatus = statusOverlays[statusId]
-		thisY = existingStatus.yPos
-		thisHeight = existingStatus.height
-		camera.remove_overlay(existingStatus.overlay)
-		if existingStatus.timer:
-			existingStatus.timer.cancel()  # Make sure timer is stopped
-		del statusOverlays[statusId]
+	with overlaysMutex:
+		if statusId in statusOverlays:
+			existingStatus = statusOverlays[statusId]
+			thisY = existingStatus.yPos
+			thisHeight = existingStatus.height
+			camera.remove_overlay(existingStatus.overlay)
+			if existingStatus.timer:
+				existingStatus.timer.cancel()  # Make sure timer is stopped
+			del statusOverlays[statusId]
 
-		# Move down any overlays above this one
-		for key, each in statusOverlays.items():
-			if each.yPos < thisY:
-				each.yPos = each.yPos + thisHeight + statusPadding
-				w = each.overlay.window   # Tuple of x,y,w,h
-				each.overlay.window = (w[0], each.yPos, w[2], w[3])
+			# Move down any overlays above this one
+			for key, each in statusOverlays.items():
+				if each.yPos < thisY:
+					each.yPos = each.yPos + thisHeight + statusPadding
+					w = each.overlay.window   # Tuple of x,y,w,h
+					each.overlay.window = (w[0], each.yPos, w[2], w[3])
 
 
 def drawPowerBar(power, goalPower, powerRange, idealRange):
