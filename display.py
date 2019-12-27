@@ -188,8 +188,6 @@ def drawSpeedAndDistance(speed, distance):
 	:param speed: Speed in meters per second
 	:param distance: Distance to end in meters
 	"""
-	# TODO: Show speed and dist in both km and miles
-	#  If None, draw '--'
 	global gpsOverlay
 
 	image = Image.new('RGBA', gpsOverlay.window[2:4])
