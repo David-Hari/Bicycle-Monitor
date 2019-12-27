@@ -19,6 +19,7 @@ boldFontPath = '/usr/share/fonts/truetype/roboto/Roboto-Bold.ttf'
 heartImage = Image.open('./heart.png').convert('RGBA')
 statusFont = ImageFont.truetype(fontPath, 35)
 infoFont = ImageFont.truetype(fontPath, 32)
+gearFont = ImageFont.truetype(fontPath, 50)
 titleFont = ImageFont.truetype(boldFontPath, 35)
 titleHeight = 45            # Best guess. Quicker than draw.textsize.
 statusOverlayHeight = 160   # Max height of image for overlay. Must be a multiple of 16.
@@ -36,6 +37,7 @@ overlaysMutex = Lock()
 powerBarOverlay = None
 gpsOverlay = None
 heartRateOverlay = None
+gearOverlay = None
 powerUnderColour = (207,16,26)
 powerIdealColour = (31,160,70)
 powerOverColour = (239, 122, 0)
@@ -46,12 +48,14 @@ def start(piCamera):
 	global powerBarOverlay
 	global gpsOverlay
 	global heartRateOverlay
+	global gearOverlay
 
 	camera = piCamera
 	camera.start_preview(fullscreen=True)
 	powerBarOverlay = addOverlay(Image.new('RGBA', (256, 240)), (20, 0, 256, 240))
 	gpsOverlay = addOverlay(Image.new('RGBA', (512, 128)), (320, 0, 512, 128))
 	heartRateOverlay = addOverlay(Image.new('RGBA', (256, 128)), (1780, 20, 256, 128))
+	gearOverlay = addOverlay(Image.new('RGBA', (128, 128)), (1780, 600, 128, 128))
 
 
 def stop():
@@ -222,6 +226,16 @@ def drawHeartRate(heartRate):
 	drawShadowedText(draw, (45,2), str(int(heartRate)), font=infoFont)
 	updateOverlay(heartRateOverlay, image)
 
+def drawGearNumber(gear):
+	"""
+	:param gear: The number of gear the bike is currently in
+	"""
+	global gearOverlay
+
+	image = Image.new('RGBA', gearOverlay.window[2:4])
+	draw = ImageDraw.Draw(image)
+	drawShadowedText(draw, (0,0), str(gear), font=gearFont)
+	updateOverlay(gearOverlay, image)
 
 
 ### Private methods ###

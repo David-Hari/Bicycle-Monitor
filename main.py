@@ -230,7 +230,7 @@ while True:
 				if commsType == 'E':
 					showMessage(gearChangerComms.read(numBytes - 1).decode('ascii'))
 				else:
-					showMessage(gearChangerComms.read(numBytes - 1).decode('ascii'))
+					display.drawGearNumber(int(gearChangerComms.read(numBytes - 1).decode('ascii')))
 
 		# Check CPU temperature once every 8 second
 		if counter % 32 == 0:
