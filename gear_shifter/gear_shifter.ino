@@ -13,7 +13,6 @@ void setup() {
 	pinMode(LED_BUILTIN, OUTPUT);
 	initializeButtons();
 	Serial.begin(9600);
-	delay(3000);
 	debug = areBothButtonsDown();
 	// Note: Servo position needs to be set *before* attaching, otherwise it
 	// will move to a default position.
@@ -23,9 +22,7 @@ void setup() {
 	}
 	else {
 		currentGear = changeGear(readGear());
-		if (currentGear == -1) {
-			gearPositionError();
-		}
+		checkError(currentGear);
 	}
 	initializeServo();
 }
@@ -46,9 +43,7 @@ void loop() {
 		currentGear = 1;
 	}
 	currentGear = changeGear(currentGear);
-	if (currentGear == E_NO_POSITION) {
-		gearPositionError();
-	}
+	checkError(currentGear);
 	sendGearChanged(currentGear);
 }
 
@@ -64,6 +59,36 @@ void sendGearChanged(int gear) {
 }
 
 /*************************************************************************/
+/* Checks the given number to see if it is an error code.                */
+/* If so, send an appropriate error message and loop.                    */
+/*************************************************************************/
+void checkError(int num) {
+	if (num == E_NO_POSITION) {
+		error("Gear not in correct position");
+	}
+}
+
+/*************************************************************************/
+/* The system has entered an error state.                                */
+/* Perform any necessary shut-down, then loop indefinitely.              */
+/* Blink the LED and periodically send the error message over serial.    */
+/*************************************************************************/
+void error(String message) {
+	unsigned int state = HIGH;
+	unsigned int count = 0;
+	stopServo();
+	while (true) {
+		if (count % 4 == 0) {
+			sendError(message);
+		}
+		digitalWrite(LED_BUILTIN, state);
+		state = !state;
+		count++;
+		delay(400);
+	}
+}
+
+/*************************************************************************/
 /* Send an error message over serial.                                    */
 /*************************************************************************/
 void sendError(String message) {
@@ -71,28 +96,5 @@ void sendError(String message) {
 		Serial.print("E");
 		Serial.print(message);
 		Serial.print("\n");
-	}
-}
-
-/*************************************************************************/
-/* Blink the LED to indicate an error.                                   */
-/*************************************************************************/
-void error() {
-	unsigned int state = HIGH;
-	while (true) {
-		digitalWrite(LED_BUILTIN, state);
-		state = !state;
-		delay(400);
-	}
-}
-
-/*************************************************************************/
-/* Indicate that there is an error with the gear position.               */
-/*************************************************************************/
-void gearPositionError() {
-	stopServo();
-	sendError("Gear not in correct position");
-	if (!debug) {
-		error();
 	}
 }

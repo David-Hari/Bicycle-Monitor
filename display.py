@@ -234,7 +234,10 @@ def drawGearNumber(gear):
 
 	image = Image.new('RGBA', gearOverlay.window[2:4])
 	draw = ImageDraw.Draw(image)
-	drawShadowedText(draw, (0,0), str(gear), font=gearFont)
+	text = str(gear)
+	textWidth, textHeight = draw.textsize(text, font=gearFont)
+	draw.rectangle([0,0,textWidth+60,textHeight+40], fill=statusBackgroundColour)
+	drawShadowedText(draw, (30,10), text, font=gearFont)
 	updateOverlay(gearOverlay, image)
 
 

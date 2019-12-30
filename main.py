@@ -24,7 +24,10 @@ import recording
 
 
 original_send_buffer = None
-gearChangerComms = None
+tempMessage = None
+gpsMessage = None
+gearMessage = None
+gearComms = None
 heartRateMonitor = None
 powerMonitor = None
 power = 0
@@ -68,12 +71,91 @@ def torqueAndPedalData(eventCount, leftTorque, rightTorque, leftPedalSmoothness,
 
 
 #-------------------------------------------------#
-#  Miscellaneous functions                        #
+#  Message functions                              #
 #-------------------------------------------------#
 
-def showMessage(string):
+def showMessage(string, err=None):
+	if err: print(string + '\n' + str(err))
+	else: print(string)
+	display.showStatusText(string, level=('error' if err is not None else 'info'))
+
+def showHighTemperatureMessage(value):
+	global tempMessage
+	statusLevel = 'error' if temperature > cpuBadTemperature else 'warning'
+	string = f'CPU temperature at {value}°C'
 	print(string)
-	display.showStatusText(string)
+	tempMessage = display.updateStatusText(tempMessage, string, level=statusLevel)
+
+def showGpsMessage(string, level):
+	global gpsMessage
+	print(string)
+	gpsMessage = display.updateStatusText(gpsMessage, string, level=level)
+
+def showGearMessage(string, err=None):
+	global gearMessage
+	if err: print(string + '\n' + str(err))
+	else: print(string)
+	gearMessage = display.updateStatusText(gearMessage, string, level='error', timeout=5)
+
+
+
+#-------------------------------------------------#
+#  Gear shifter functions                         #
+#-------------------------------------------------#
+
+def connectToGearShifter():
+	"""
+	Attempts to connect to the gear shifter, if not already connected.
+
+	:return: true if connected, false if not
+	"""
+	global gearComms
+
+	if gearComms is None:
+		try:
+			# A timeout of 0 means non-blocking mode, read() returns immediately with whatever is in the buffer.
+			gearComms = Serial('/dev/serial/by-id/usb-Arduino_LLC_Arduino_Micro-if00', 9600, timeout=0)
+		except Exception as err:
+			showGearMessage(f'Could not connect to gear shifter.', err)
+			return False
+	try:
+		gearComms.in_waiting  # This throws if not connected
+	except Exception as err:
+		showGearMessage(f'Could not connect to gear shifter.', err)
+		try:
+			gearComms.close()
+			gearComms.open()
+		except Exception:
+			showGearMessage(f'Could not connect to gear shifter.', err)
+		return False
+
+	return True
+
+def handleGearShifterComms(data):
+	"""
+	Read serial communication from gear shifter.
+	Update the gear number if necessary, and display any errors.
+
+	:param data: Bytes from the serial port
+	"""
+	global gearComms
+	global gearMessage
+
+	buffer = data.decode('ascii')
+	for line in filter(None, buffer.split('\n')):
+		commsType, value = line[:1], line[1:]
+		if commsType == 'G':    # 'G' for gear number, 'E' for error message
+			display.drawGearNumber(int(value))
+		elif commsType == 'E':
+			showGearMessage(value)
+		else:
+			showGearMessage(f'Unknown communication from gear shifter: \'{line}')
+
+
+
+#-------------------------------------------------#
+#  Miscellaneous functions                        #
+#-------------------------------------------------#
 
 def getCPUTemperature():
 	tempString = os.popen('cat /sys/class/thermal/thermal_zone0/temp').readline()
@@ -142,11 +224,7 @@ camera.hflip = True
 
 display.start(camera)
 
-try:
-	# A timeout of 0 means non-blocking mode, read() returns immediately with whatever is in the buffer.
-	gearChangerComms = Serial('/dev/serial/by-id/usb-Arduino_LLC_Arduino_Micro-if00', 9600, timeout=0)
-except Exception as err:
-	showMessage(f'Could not connect to gear changer.\n{err}')
+connectToGearShifter()
 
 showMessage('Starting up ANT...')
 antNode = Node(driver.USB2Driver())
@@ -170,8 +248,8 @@ try:
 	heartRateMonitor.open(ChannelID(*config.heartRatePairing), searchTimeout=300)
 	powerMonitor.open(ChannelID(*config.powerPairing), searchTimeout=300)
 	showMessage('ANT started. Connecting to devices...')
-except ANTException as err:
-	showMessage(f'Could not start ANT.\n{err}')
+except ANTException as error:
+	showMessage(f'Could not start ANT.', error)
 
 showMessage('Connecting to GPS service...')
 gpsd.connect()
@@ -188,10 +266,9 @@ recording.startRecordingVideo(camera)
 
 counter = 0
 isGpsActive = False
-tempWarning = None
-gspMessage = None
 while True:
 	try:
+		# Update the power info on display
 		display.drawPowerBar(power, config.powerGoal, config.powerRange, config.powerIdealRange)
 
 		# Check to see if GPS is active. Give it some time to start up first.
@@ -201,7 +278,7 @@ while True:
 				if info.mode >= 2 and info.sats_valid:  # Check if it has a fix on position
 					isGpsActive = True
 			except Exception as e:
-				gspMessage = display.updateStatusText(gspMessage, str(e), level='warning')
+				showGpsMessage(str(e), level='warning')
 
 		# Get GPS info once a second after we have a fix
 		if isGpsActive and counter % 4 == 0:
@@ -215,35 +292,28 @@ while True:
 					display.drawSpeedAndDistance(None, None)
 					isGpsActive = False
 			except Exception as e:
-				gspMessage = display.updateStatusText(gspMessage, str(e), level='error')
+				showGpsMessage(str(e), level='error')
 
 		# Update heart rate once a second
 		if counter % 4 == 0:
 			display.drawHeartRate(heartRate)
 
-		# Read serial communication from gear changer, and update display if necessary
-		if gearChangerComms is not None:
-			numBytes = gearChangerComms.in_waiting
-			if numBytes > 0:
-				# TODO: May be multiple lines in buffer. Split on \n and loop.
-				commsType = gearChangerComms.read(1)  # 'G' for gear number, 'E' for error message
-				if commsType == 'E':
-					showMessage(gearChangerComms.read(numBytes - 1).decode('ascii'))
-				else:
-					display.drawGearNumber(int(gearChangerComms.read(numBytes - 1).decode('ascii')))
+		# Read serial communication from gear shifter, and update display if necessary
+		if connectToGearShifter():
+			numBytes = gearComms.in_waiting
+			if numBytes > 1:
+				handleGearShifterComms(gearComms.read(numBytes))
 
 		# Check CPU temperature once every 8 second
 		if counter % 32 == 0:
 			temperature = getCPUTemperature()
 
 			## For diagnostics
-			#data_logging.writeCPUTemperature(temperature)
+			#recording.writeCPUTemperature(temperature)
 			################
 
 			if temperature > cpuWarnTemperature:
-				statusLevel = 'error' if temperature > cpuBadTemperature else 'warning'
-				tempWarning = display.updateStatusText(tempWarning, f'CPU temperature at {temperature}°C',
-				                                       level=statusLevel, timeout=10)
+				showHighTemperatureMessage(temperature)
 
 		counter = counter + 1
 
@@ -256,8 +326,8 @@ while True:
 showMessage('Shutting down...')
 try:
 	recording.stopRecordingVideo(camera)
-except Exception as err:
-	showMessage(f'Error during video recording.\n{err}')
+except Exception as error:
+	showMessage(f'Error during video recording.', error)
 recording.closeFiles()
 try:
 	if heartRateMonitor is not None:
@@ -265,6 +335,6 @@ try:
 	if powerMonitor is not None:
 		powerMonitor.close()
 	antNode.stop()
-except ANTException as err:
-	showMessage(f'Could not stop ANT.\n{err}')
+except ANTException as error:
+	showMessage(f'Could not stop ANT.', error)
 display.stop()
