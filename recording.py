@@ -6,8 +6,6 @@
 
 import os
 
-import config
-
 
 baseDir = './data/'
 heartRateFileName = 'heart-rate.csv'
