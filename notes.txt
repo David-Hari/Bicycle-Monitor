@@ -1,8 +1,16 @@
 
 Bicycle-Monitor TODO:
 
-* Show gear number at right of screen. Make the number go grey or something when gear is changing.
+* Perhaps make the gear number go grey when gear is changing.
+  Send 'C<num>' from Arduino, where <num> is the current gear.
+  drawGearNumber could accept an isChanging parameter.
 
+* Gear shifter could constantly check for errors in main loop.
+  Change waitForInput() to checkInput(), which will return immediately with either
+  1, -1, or 0 if time is less than debounce delay.
+
+* Gear shifter could somehow detect if motor is not powered (or at least if
+  there is no feedback signal).
 
 
 
