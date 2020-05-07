@@ -4,7 +4,6 @@
 
 """
 
-import os
 import time
 import math
 from serial import Serial
@@ -158,8 +157,10 @@ def handleGearShifterComms(data):
 #-------------------------------------------------#
 
 def getCPUTemperature():
-	tempString = os.popen('cat /sys/class/thermal/thermal_zone0/temp').readline()
-	return 0 if tempString == '' else int(tempString) / 1000.0
+    with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
+        tempString = f.read()
+        temp = 0 if tempString == '' else int(tempString) / 1000.0
+    return temp
 
 def dist(a, b):
 	"""
