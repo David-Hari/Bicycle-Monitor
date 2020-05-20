@@ -42,12 +42,15 @@ cpuBadTemperature = 90
 def devicePaired(deviceProfile, channelId):
 	showMessage(f'Connected to {deviceProfile.name} ({channelId.deviceNumber})')
 
+
 def powerMonitorPaired(deviceProfile, channelId):
 	devicePaired(deviceProfile, channelId)
 	deviceProfile.setCrankLength(config.crankLength)
 
+
 def searchTimedOut(deviceProfile):
 	showMessage(f'Could not connect to {deviceProfile.name}')
+
 
 def channelClosed(deviceProfile):
 	print(f'Channel closed for {deviceProfile.name}')
@@ -58,11 +61,13 @@ def heartRateData(hr, eventTime, interval):
 	heartRate = hr
 	recording.writeHeartRateEvent(eventTime, heartRate)
 
+
 def powerData(eventCount, pedalPowerRatio, cadence, accumulatedPower, instantaneousPower):
 	global power
 	power = instantaneousPower
 	ratio = '' if pedalPowerRatio is None else pedalPowerRatio
 	recording.writePowerEvent(0, instantaneousPower, accumulatedPower, ratio, cadence)
+
 
 def torqueAndPedalData(eventCount, leftTorque, rightTorque, leftPedalSmoothness, rightPedalSmoothness):
 	recording.writeTorqueEvent(0, leftTorque, rightTorque, leftPedalSmoothness, rightPedalSmoothness)
@@ -78,6 +83,7 @@ def showMessage(string, err=None):
 	else: print(string)
 	display.showStatusText(string, level=('error' if err is not None else 'info'))
 
+
 def showHighTemperatureMessage(value):
 	global tempMessage
 	statusLevel = 'error' if temperature > cpuBadTemperature else 'warning'
@@ -85,10 +91,12 @@ def showHighTemperatureMessage(value):
 	print(string)
 	tempMessage = display.updateStatusText(tempMessage, string, level=statusLevel)
 
+
 def showGpsMessage(string, level):
 	global gpsMessage
 	print(string)
 	gpsMessage = display.updateStatusText(gpsMessage, string, level=level)
+
 
 def showGearMessage(string, err=None):
 	global gearMessage
@@ -130,6 +138,7 @@ def connectToGearShifter():
 
 	return True
 
+
 def handleGearShifterComms(data):
 	"""
 	Read serial communication from gear shifter.
@@ -137,9 +146,6 @@ def handleGearShifterComms(data):
 
 	:param data: Bytes from the serial port
 	"""
-	global gearComms
-	global gearMessage
-
 	buffer = data.decode('ascii')
 	for line in filter(None, buffer.split('\n')):
 		commsType, value = line[:1], line[1:]
@@ -157,10 +163,11 @@ def handleGearShifterComms(data):
 #-------------------------------------------------#
 
 def getCPUTemperature():
-    with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
-        tempString = f.read()
-        temp = 0 if tempString == '' else int(tempString) / 1000.0
-    return temp
+	with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
+		tempString = f.read()
+		temp = 0 if tempString == '' else int(tempString) / 1000.0
+	return temp
+
 
 def dist(a, b):
 	"""
@@ -176,6 +183,7 @@ def dist(a, b):
 	x = Δλ * math.cos((φ1+φ2)/2)
 	y = φ2-φ1
 	return math.hypot(x, y) * 6371000 # Mean earth radius
+
 
 # https://github.com/dtreskunov/rpi-sensorium/commit/40c6f3646931bf0735c5fe4579fa89947e96aed7
 #
