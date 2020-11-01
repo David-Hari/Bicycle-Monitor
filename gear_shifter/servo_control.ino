@@ -92,14 +92,14 @@ int changeGear(int toGear) {
 	if (newAngle >= currentAngle) {
 		for (int angle = currentAngle; angle <= newAngle; angle++) {
 			moveServo(angle);
-			delay(10);
+			delay(GEAR_CHANGE_DELAY);
 			// TODO: Perhaps check both angles here too.
 		}
 	}
 	else {
 		for (int angle = currentAngle; angle >= newAngle; angle--) {
 			moveServo(angle);
-			delay(10);
+			delay(GEAR_CHANGE_DELAY);
 		}
 	}
 	for (int i = 0; readGear() != toGear && i < 200; i++) {}  // Wait for gear to move

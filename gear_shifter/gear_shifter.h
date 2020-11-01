@@ -12,6 +12,7 @@ const int FEEDBACK_PIN_2 = 5;
 const int MAX_GEARS = 6;
 const int GEAR_POSITION_THRESHOLD = 4;     // Degrees +/- actual position
 const int SERVO_ANGLE_DIFF_THRESHOLD = 1;  // Degrees +/- difference between both servos
+const int GEAR_CHANGE_DELAY = 10;          // Milliseconds to delay for each degree moved
 
 const int E_NO_POSITION = -1;
 const int E_NOT_ALIGNED = -2;
