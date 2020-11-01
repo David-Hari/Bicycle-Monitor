@@ -154,7 +154,7 @@ def handleGearShifterComms(data):
 		elif commsType == 'E':
 			showGearMessage(value)
 		else:
-			showGearMessage(f'Unknown communication from gear shifter: \'{line}')
+			showGearMessage(f'Unknown communication from gear shifter:\n{line}')
 
 
 
