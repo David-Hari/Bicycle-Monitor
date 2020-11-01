@@ -62,12 +62,11 @@ int readAngle(int servoPin) {
 /*************************************************************************/
 int readGear() {
 	int currentAngle1 = readAngle(FEEDBACK_PIN_1);
-	int currentAngle2 = readAngle(FEEDBACK_PIN_1);
+	int currentAngle2 = readAngle(FEEDBACK_PIN_2);
 	int angleDiff = currentAngle1 - currentAngle2;
-	/* Only one motor working for now
 	if (angleDiff > SERVO_ANGLE_DIFF_THRESHOLD || angleDiff < -SERVO_ANGLE_DIFF_THRESHOLD) {
 		return E_NOT_ALIGNED;
-	}*/
+	}
 	int gearAngle = 0;
 	for (int i = 0; i < MAX_GEARS; i++) {
 		gearAngle = gearPositions[i];
