@@ -60,11 +60,21 @@ void sendGearChanged(int gear) {
 
 /*************************************************************************/
 /* Checks the given number to see if it is an error code.                */
-/* If so, send an appropriate error message and loop.                    */
+/* If so, send an appropriate error message.                             */
 /*************************************************************************/
 void checkError(int num) {
-	if (num == E_NO_POSITION) {
-		error("Gear not in correct position");
+	if (num >= 0) {
+		return;   // Non-negative number is not an error
+	}
+	switch (num) {
+		case E_NO_POSITION: {
+			error(E_MSG_NO_POSITION);
+			break;
+		}
+		case E_NOT_ALIGNED: {
+			error(E_MSG_NOT_ALIGNED);
+			break;
+		}
 	}
 }
 

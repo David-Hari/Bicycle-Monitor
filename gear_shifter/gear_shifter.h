@@ -1,12 +1,22 @@
 
+/* Digital pins */
 const int UP_BUTTON_PIN = 2;
 const int DOWN_BUTTON_PIN = 3;
 const int SERVO_PIN = 4;
-const int FEEDBACK_PIN = 5;   // Analog pin
+
+/* Analog pins */
+const int FEEDBACK_PIN_1 = 4;
+const int FEEDBACK_PIN_2 = 5;
+
+/* Config */
 const int MAX_GEARS = 6;
-const int GEAR_POSITION_THRESHOLD = 4;  // Degrees +/- actual position
+const int GEAR_POSITION_THRESHOLD = 4;     // Degrees +/- actual position
+const int SERVO_ANGLE_DIFF_THRESHOLD = 1;  // Degrees +/- difference between both servos
 
 const int E_NO_POSITION = -1;
+const int E_NOT_ALIGNED = -2;
+const String E_MSG_NO_POSITION = "Gear not in correct position";
+const String E_MSG_NOT_ALIGNED = "Servo motors not aligned (different positions)";
 
 
 struct Button {
@@ -26,7 +36,7 @@ int waitForInput();
 
 void initializeServo();
 void stopServo();
-int readAngle();
+int readAngle(int servoPin);
 int readGear();
 int changeGear(int toGear);
 void moveServo(int angle);

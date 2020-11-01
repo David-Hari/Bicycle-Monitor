@@ -42,15 +42,15 @@ void stopServo() {
 }
 
 /*************************************************************************/
-/* Read the current position of the servo, averaging it over a number    */
-/* of reads to avoid noise.                                              */
+/* Read the current position of the servo at the given pin, averaging it */
+/* over a number of reads to avoid noise.                                */
 /*************************************************************************/
-int readAngle() {
+int readAngle(int servoPin) {
 	int value = 0;
 	const int NUM_READS = 5;
 	for (int i = 0; i < NUM_READS; i++) {
 		delay(10);
-		value += analogRead(FEEDBACK_PIN);
+		value += analogRead(servoPin);
 	}
 	int average = value / NUM_READS;
 	return map(average, ANALOG_MIN, ANALOG_MAX, SERVO_MIN_ANGLE, SERVO_MAX_ANGLE);
@@ -61,11 +61,17 @@ int readAngle() {
 /* position does not correspond to any gear.                             */
 /*************************************************************************/
 int readGear() {
-	int currentAngle = readAngle();
+	int currentAngle1 = readAngle(FEEDBACK_PIN_1);
+	int currentAngle2 = readAngle(FEEDBACK_PIN_1);
+	int angleDiff = currentAngle1 - currentAngle2;
+	/* Only one motor working for now
+	if (angleDiff > SERVO_ANGLE_DIFF_THRESHOLD || angleDiff < -SERVO_ANGLE_DIFF_THRESHOLD) {
+		return E_NOT_ALIGNED;
+	}*/
 	int gearAngle = 0;
 	for (int i = 0; i < MAX_GEARS; i++) {
 		gearAngle = gearPositions[i];
-		if (currentAngle >= gearAngle - GEAR_POSITION_THRESHOLD && currentAngle <= gearAngle + GEAR_POSITION_THRESHOLD) {
+		if (currentAngle1 >= gearAngle - GEAR_POSITION_THRESHOLD && currentAngle1 <= gearAngle + GEAR_POSITION_THRESHOLD) {
 			return i + 1;
 		}
 	}
@@ -79,7 +85,7 @@ int readGear() {
 int changeGear(int toGear) {
 	int currentGear = readGear();
 	if (currentGear < 0) {
-		return currentGear;  // As error code
+		return currentGear;  // Variable is error code
 	}
 	int currentAngle = gearPositions[currentGear-1];
 	int newAngle = gearPositions[toGear-1];
@@ -87,6 +93,7 @@ int changeGear(int toGear) {
 		for (int angle = currentAngle; angle <= newAngle; angle++) {
 			moveServo(angle);
 			delay(10);
+			// TODO: Perhaps check both angles here too.
 		}
 	}
 	else {
@@ -103,6 +110,11 @@ int changeGear(int toGear) {
 /* Move the servo motor to the given angle.                              */
 /*************************************************************************/
 void moveServo(int angle) {
-	if (angle < 0) { angle = 0; } else if (angle > SERVO_MAX_ANGLE) { angle = SERVO_MAX_ANGLE; }
+	if (angle < 0) {
+		angle = 0;
+	}
+	else if (angle > SERVO_MAX_ANGLE) {
+		angle = SERVO_MAX_ANGLE;
+	}
 	servo.writeMicroseconds(map(angle, SERVO_MIN_ANGLE, SERVO_MAX_ANGLE, SERVO_MIN_PULSE, SERVO_MAX_PULSE));
 }
