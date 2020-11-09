@@ -22,6 +22,9 @@ const int SERVO_MAX_PULSE = 2500;
 const int ANALOG_MIN = 620;   // 0 degrees.
 const int ANALOG_MAX = 60;    // 172 degrees.
 
+const int GEAR_POSITION_THRESHOLD = 4;     // Degrees +/- actual position
+const int SERVO_ANGLE_DIFF_THRESHOLD = 1;  // Degrees +/- difference between both servos
+
 
 Servo servo;
 
