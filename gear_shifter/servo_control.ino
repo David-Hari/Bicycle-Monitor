@@ -45,12 +45,12 @@ void stopServo() {
 /* Read the current position of the servo at the given pin, averaging it */
 /* over a number of reads to avoid noise.                                */
 /*************************************************************************/
-int readAngle(int servoPin) {
+int readAngle(int pin) {
 	int value = 0;
 	const int NUM_READS = 5;
 	for (int i = 0; i < NUM_READS; i++) {
 		delay(10);
-		value += analogRead(servoPin);
+		value += analogRead(pin);
 	}
 	int average = value / NUM_READS;
 	return map(average, ANALOG_MIN, ANALOG_MAX, SERVO_MIN_ANGLE, SERVO_MAX_ANGLE);
