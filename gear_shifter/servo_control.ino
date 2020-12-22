@@ -1,4 +1,10 @@
 
+// Servo wires colours
+//---------------------
+// Brown  =  Ground
+// Red    =  Power Supply
+// Orange =  Control Signal
+
 const int gearPositions[] = {
 	  0, // 1st gear
 	 32, // 2nd gear
