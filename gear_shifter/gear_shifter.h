@@ -9,7 +9,7 @@ const int FEEDBACK_PIN_1 = 4;
 const int FEEDBACK_PIN_2 = 5;
 
 /* Config */
-const int MAX_GEARS = 6;
+const int MAX_GEARS = 5;
 const int GEAR_CHANGE_DELAY = 5;   // Milliseconds to delay for each degree moved
 
 const int E_NO_POSITION = -1;
