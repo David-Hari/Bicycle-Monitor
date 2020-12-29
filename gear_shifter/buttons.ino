@@ -1,5 +1,5 @@
 
-const unsigned long debounceDelay = 200;   // Milliseconds delay before detecting another push
+const unsigned long debounceDelay = 100;   // Milliseconds delay before detecting another push
 unsigned long lastButtonTime = 0;          // Last time button was pressed or released
 
 Button upButton;
