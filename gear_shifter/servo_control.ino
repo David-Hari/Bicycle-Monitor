@@ -5,14 +5,6 @@
 // Red    =  Power Supply
 // Orange =  Control Signal
 
-const int gearPositions[] = {
-	  0, // 1st gear
-	 42, // 2nd gear
-	 84, // 3rd gear
-	126, // 4th gear
-	168  // 5th gear
-};
-static_assert((sizeof(gearPositions)/sizeof((gearPositions)[0])) == MAX_GEARS, "Number of elements in gearPositions[] does not match MAX_GEARS");
 
 const int SERVO_MIN_ANGLE = 0;    // Degrees
 const int SERVO_MAX_ANGLE = 172;

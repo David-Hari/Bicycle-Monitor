@@ -9,9 +9,17 @@ const int FEEDBACK_PIN_1 = 4;
 const int FEEDBACK_PIN_2 = 5;
 
 /* Config */
-const int MAX_GEARS = 5;
+const int gearPositions[] = {
+	  0, // 1st gear
+	 42, // 2nd gear
+	 84, // 3rd gear
+	126, // 4th gear
+	168  // 5th gear
+};
+const int MAX_GEARS = (sizeof(gearPositions)/sizeof((gearPositions)[0]));
 const int GEAR_CHANGE_DELAY = 5;   // Milliseconds to delay for each degree moved
 
+/* Errors */
 const int E_NO_POSITION = -1;
 const int E_NOT_ALIGNED = -2;
 const String E_MSG_NO_POSITION = "Gear not in correct position";
