@@ -98,11 +98,11 @@ def showGpsMessage(string, level):
 	gpsMessage = display.updateStatusText(gpsMessage, string, level=level)
 
 
-def showGearMessage(string, err=None):
+def showGearMessage(string, err=None, level):
 	global gearMessage
 	if err: print(string + '\n' + str(err))
 	else: print(string)
-	gearMessage = display.updateStatusText(gearMessage, string, level='error', timeout=5)
+	gearMessage = display.updateStatusText(gearMessage, string, level, timeout=5)
 
 
 
@@ -123,17 +123,17 @@ def connectToGearShifter():
 			# A timeout of 0 means non-blocking mode, read() returns immediately with whatever is in the buffer.
 			gearComms = Serial('/dev/serial/by-id/usb-Arduino_LLC_Arduino_Micro-if00', 9600, timeout=0)
 		except Exception as err:
-			showGearMessage(f'Could not connect to gear shifter.', err)
+			showGearMessage(f'Could not connect to gear shifter.', err, level='error')
 			return False
 	try:
 		gearComms.in_waiting  # This throws if not connected
 	except Exception as err:
-		showGearMessage(f'Could not connect to gear shifter.', err)
+		showGearMessage(f'Could not connect to gear shifter.', err, level='error')
 		try:
 			gearComms.close()
 			gearComms.open()
 		except Exception:
-			showGearMessage(f'Could not connect to gear shifter.', err)
+			showGearMessage(f'Could not connect to gear shifter.', err, level='error')
 		return False
 
 	return True
@@ -152,9 +152,9 @@ def handleGearShifterComms(data):
 		if commsType == 'G':    # 'G' for gear number, 'E' for error message
 			display.drawGearNumber(int(value))
 		elif commsType == 'E':
-			showGearMessage(value)
+			showGearMessage(value, level='error')
 		else:
-			showGearMessage(f'Unknown communication from gear shifter:\n{line}')
+			showGearMessage(f'Gear shifter:\n{line}', level='info')
 
 
 

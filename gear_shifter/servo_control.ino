@@ -19,9 +19,6 @@ const int SERVO_MAX_PULSE = 2500;
 const int ANALOG_MIN = 620;   // 0 degrees.
 const int ANALOG_MAX = 60;    // 172 degrees.
 
-const int GEAR_POSITION_THRESHOLD = 4;     // Degrees +/- actual position
-const int SERVO_ANGLE_DIFF_THRESHOLD = 1;  // Degrees +/- difference between both servos
-
 
 Servo servo;
 
@@ -57,42 +54,40 @@ int readAngle(int pin) {
 }
 
 /*************************************************************************/
-/* Return the currently selected gear, or an error code if the servo     */
-/* position does not correspond to any gear.                             */
+/* Return the currently selected gear.                                   */
+/* Error if the servo position does not correspond to any gear.          */
 /*************************************************************************/
 int readGear() {
-	int currentAngle1 = readAngle(FEEDBACK_PIN_1);
-	int currentAngle2 = readAngle(FEEDBACK_PIN_2);
-	int angleDiff = currentAngle1 - currentAngle2;
-	if (angleDiff > SERVO_ANGLE_DIFF_THRESHOLD || angleDiff < -SERVO_ANGLE_DIFF_THRESHOLD) {
-		return E_NOT_ALIGNED;
-	}
 	int gearAngle = 0;
+	int currentAngle1 = readAngle(FEEDBACK_PIN_1);
 	for (int i = 0; i < MAX_GEARS; i++) {
 		gearAngle = gearPositions[i];
 		if (currentAngle1 >= gearAngle - GEAR_POSITION_THRESHOLD && currentAngle1 <= gearAngle + GEAR_POSITION_THRESHOLD) {
 			return i + 1;
 		}
 	}
-	return E_NO_POSITION;
+	error("Gear not in correct position. Angle: " + String(currentAngle1));
+	return -1;  // Should not normally reach here
 }
 
 /*************************************************************************/
 /* Move the servo motor to the <toGear> position.                        */
-/* Return the new gear number or -1 on error.                            */
+/* Return the new gear number.                                           */
+/* Error if the two motors are not in the same position at the end.      */
 /*************************************************************************/
 int changeGear(int toGear) {
 	int currentGear = readGear();
 	if (currentGear < 0) {
-		return currentGear;  // Variable is error code
+		return -1;
 	}
+	
+	// Incrementally move the servo motors with delays in between to control their speed
 	int currentAngle = gearPositions[currentGear-1];
 	int newAngle = gearPositions[toGear-1];
 	if (newAngle >= currentAngle) {
 		for (int angle = currentAngle; angle <= newAngle; angle++) {
 			moveServo(angle);
 			delay(GEAR_CHANGE_DELAY);
-			// TODO: Perhaps check both angles here too.
 		}
 	}
 	else {
@@ -101,7 +96,19 @@ int changeGear(int toGear) {
 			delay(GEAR_CHANGE_DELAY);
 		}
 	}
-	for (int i = 0; readGear() != toGear && i < 200; i++) {}  // Wait for gear to move
+	
+	// Wait for servos to finish moving
+	// TODO: Angles can still be different even after this wait. Use a loop instead and constantly check.
+	delay(100);
+	
+	// Make sure both servos are still the same angle
+	int currentAngle1 = readAngle(FEEDBACK_PIN_1);
+	int currentAngle2 = readAngle(FEEDBACK_PIN_2);
+	int angleDiff = currentAngle1 - currentAngle2;
+	if (angleDiff > SERVO_ANGLE_DIFF_THRESHOLD || angleDiff < -SERVO_ANGLE_DIFF_THRESHOLD) {
+		error("Servo motors not aligned. Motor 1: " + String(currentAngle1) + "°  Motor 2: " + String(currentAngle2) + "°");
+	}
+	
 	return readGear();
 }
 

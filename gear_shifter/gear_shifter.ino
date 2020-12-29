@@ -6,6 +6,9 @@ int currentGear = 0;
 boolean debug = false;
 
 
+// TODO:
+//  Stop servo from jumping all over the place when power is cut.
+
 /*************************************************************************/
 /* The setup function runs once when you press reset or power the board. */
 /*************************************************************************/
@@ -17,18 +20,17 @@ void setup() {
 	// Note: Servo position needs to be set *before* attaching, otherwise it
 	// will move to a default position.
 	if (debug) {
+		Serial.println("Entering gear shifter debug mode");
+		delay(5000);
+		Serial.println("Gear shifter debug mode");
 		currentGear = 1;
 		moveServo(0);
 	}
 	else {
 		currentGear = changeGear(readGear());
-		checkError(currentGear);
 	}
 	initializeServo();
 }
-
-// TODO:
-//  Stop servo from jumping all over the place when power is cut.
 
 /*************************************************************************/
 /* The main loop runs continuously.                                      */
@@ -43,7 +45,6 @@ void loop() {
 		currentGear = 1;
 	}
 	currentGear = changeGear(currentGear);
-	checkError(currentGear);
 	sendGearChanged(currentGear);
 }
 
@@ -55,26 +56,6 @@ void sendGearChanged(int gear) {
 		Serial.print("G");
 		Serial.print(gear);
 		Serial.print("\n");
-	}
-}
-
-/*************************************************************************/
-/* Checks the given number to see if it is an error code.                */
-/* If so, send an appropriate error message.                             */
-/*************************************************************************/
-void checkError(int num) {
-	if (num >= 0) {
-		return;   // Non-negative number is not an error
-	}
-	switch (num) {
-		case E_NO_POSITION: {
-			error(E_MSG_NO_POSITION);
-			break;
-		}
-		case E_NOT_ALIGNED: {
-			error(E_MSG_NOT_ALIGNED);
-			break;
-		}
 	}
 }
 
