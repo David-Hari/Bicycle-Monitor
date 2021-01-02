@@ -98,11 +98,11 @@ def showGpsMessage(string, level):
 	gpsMessage = display.updateStatusText(gpsMessage, string, level=level)
 
 
-def showGearMessage(string, err=None, level):
+def showGearMessage(string, err=None, level='info'):
 	global gearMessage
 	if err: print(string + '\n' + str(err))
 	else: print(string)
-	gearMessage = display.updateStatusText(gearMessage, string, level, timeout=5)
+	gearMessage = display.updateStatusText(gearMessage, string, level)
 
 
 
@@ -127,11 +127,13 @@ def connectToGearShifter():
 			return False
 	try:
 		gearComms.in_waiting  # This throws if not connected
+		gearComms.write('S')  # 'S' for Start
 	except Exception as err:
 		showGearMessage(f'Could not connect to gear shifter.', err, level='error')
 		try:
 			gearComms.close()
 			gearComms.open()
+			gearComms.write('S')
 		except Exception:
 			showGearMessage(f'Could not connect to gear shifter.', err, level='error')
 		return False

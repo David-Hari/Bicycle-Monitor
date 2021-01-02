@@ -16,12 +16,21 @@ void setup() {
 	pinMode(LED_BUILTIN, OUTPUT);
 	initializeButtons();
 	Serial.begin(9600);
-	debug = areBothButtonsDown();
+	
+	// Listen for startup message from Pi, or buttons are pressed.
+	digitalWrite(LED_BUILTIN, HIGH);
+	while (Serial.available() <= 0 && !(debug = areBothButtonsDown())) {}
+	if (Serial.available() >= 1) {
+		char incomingByte = (char)Serial.read();
+		if (incomingByte == 'D') {
+			debug = true;
+		}
+	}
+	digitalWrite(LED_BUILTIN, LOW);
+	
 	// Note: Servo position needs to be set *before* attaching, otherwise it
 	// will move to a default position.
 	if (debug) {
-		Serial.println("Entering gear shifter debug mode");
-		delay(5000);
 		Serial.println("Gear shifter debug mode");
 		currentGear = 1;
 		moveServo(0);
@@ -65,17 +74,21 @@ void sendGearChanged(int gear) {
 /* Blink the LED and periodically send the error message over serial.    */
 /*************************************************************************/
 void error(String message) {
-	unsigned int state = HIGH;
 	unsigned int count = 0;
 	stopServo();
 	while (true) {
 		if (count % 4 == 0) {
 			sendError(message);
 		}
-		digitalWrite(LED_BUILTIN, state);
-		state = !state;
+		// 3 short on/off pulses every second
+		for (int i = 0; i < 3; i++) {
+			digitalWrite(LED_BUILTIN, HIGH);
+			delay(100);
+			digitalWrite(LED_BUILTIN, LOW);
+			delay(100);
+		}
+		delay(900);
 		count++;
-		delay(400);
 	}
 }
 

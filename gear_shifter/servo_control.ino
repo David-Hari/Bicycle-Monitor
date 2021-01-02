@@ -66,7 +66,7 @@ int readGear() {
 			return i + 1;
 		}
 	}
-	error("Gear not in correct position. Angle: " + String(currentAngle1));
+	error("Gear not in correct position. Motor 1: " + String(currentAngle1) + "°  Motor 2: " + String(readAngle(FEEDBACK_PIN_2)) + "°");
 	return -1;  // Should not normally reach here
 }
 
@@ -98,15 +98,17 @@ int changeGear(int toGear) {
 	}
 	
 	// Wait for servos to finish moving
-	// TODO: Angles can still be different even after this wait. Use a loop instead and constantly check.
-	delay(100);
+	for (int i = 0, currentAngle = readAngle(FEEDBACK_PIN_1);
+	     (currentAngle < newAngle - GEAR_POSITION_THRESHOLD || currentAngle > newAngle + GEAR_POSITION_THRESHOLD) && i < 200;
+	     i++, currentAngle = readAngle(FEEDBACK_PIN_1)) {
+	}
 	
 	// Make sure both servos are still the same angle
-	int currentAngle1 = readAngle(FEEDBACK_PIN_1);
+	currentAngle = readAngle(FEEDBACK_PIN_1);
 	int currentAngle2 = readAngle(FEEDBACK_PIN_2);
-	int angleDiff = currentAngle1 - currentAngle2;
+	int angleDiff = currentAngle - currentAngle2;
 	if (angleDiff > SERVO_ANGLE_DIFF_THRESHOLD || angleDiff < -SERVO_ANGLE_DIFF_THRESHOLD) {
-		error("Servo motors not aligned. Motor 1: " + String(currentAngle1) + "°  Motor 2: " + String(currentAngle2) + "°");
+		error("Servo motors not aligned. Motor 1: " + String(currentAngle) + "°  Motor 2: " + String(currentAngle2) + "°");
 	}
 	
 	return readGear();
