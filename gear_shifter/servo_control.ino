@@ -97,9 +97,9 @@ int changeGear(int toGear) {
 		}
 	}
 	
-	// Wait for servos to finish moving
+	// Wait for servos to finish moving. Wait no longer than 2 seconds (50ms per read x 40)
 	for (int i = 0, currentAngle = readAngle(FEEDBACK_PIN_1);
-	     (currentAngle < newAngle - GEAR_POSITION_THRESHOLD || currentAngle > newAngle + GEAR_POSITION_THRESHOLD) && i < 200;
+	     (currentAngle < newAngle - GEAR_POSITION_THRESHOLD || currentAngle > newAngle + GEAR_POSITION_THRESHOLD) && i < 40;
 	     i++, currentAngle = readAngle(FEEDBACK_PIN_1)) {
 	}
 	

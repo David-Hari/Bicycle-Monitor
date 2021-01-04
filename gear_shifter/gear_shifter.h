@@ -18,7 +18,7 @@ const int gearPositions[] = {
 };
 const int MAX_GEARS = (sizeof(gearPositions)/sizeof((gearPositions)[0]));
 const int GEAR_CHANGE_DELAY = 5;           // Milliseconds to delay for each degree moved
-const int GEAR_POSITION_THRESHOLD = 4;     // Degrees +/- actual position
+const int GEAR_POSITION_THRESHOLD = 8;     // Degrees +/- actual position
 const int SERVO_ANGLE_DIFF_THRESHOLD = 4;  // Degrees difference between both servos
 
 
