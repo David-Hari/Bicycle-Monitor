@@ -66,7 +66,7 @@ int readGear() {
 			return i + 1;
 		}
 	}
-	error("Gear not in correct position. Motor 1: " + String(currentAngle1) + "°  Motor 2: " + String(readAngle(FEEDBACK_PIN_2)) + "°");
+	error("Gear not in correct position. Motor 1: " + String(currentAngle1) + "°, Motor 2: " + String(readAngle(FEEDBACK_PIN_2)) + "°");
 	return -1;  // Should not normally reach here
 }
 
@@ -76,41 +76,44 @@ int readGear() {
 /* Error if the two motors are not in the same position at the end.      */
 /*************************************************************************/
 int changeGear(int toGear) {
+	int currentAngle1, currentAngle2, newAngle;
 	int currentGear = readGear();
 	if (currentGear < 0) {
 		return -1;
 	}
 	
 	// Incrementally move the servo motors with delays in between to control their speed
-	int currentAngle = gearPositions[currentGear-1];
-	int newAngle = gearPositions[toGear-1];
-	if (newAngle >= currentAngle) {
-		for (int angle = currentAngle; angle <= newAngle; angle++) {
+	currentAngle1 = gearPositions[currentGear-1];
+	newAngle = gearPositions[toGear-1];
+	if (newAngle >= currentAngle1) {
+		for (int angle = currentAngle1; angle <= newAngle; angle++) {
 			moveServo(angle);
 			delay(GEAR_CHANGE_DELAY);
 		}
 	}
 	else {
-		for (int angle = currentAngle; angle >= newAngle; angle--) {
+		for (int angle = currentAngle1; angle >= newAngle; angle--) {
 			moveServo(angle);
 			delay(GEAR_CHANGE_DELAY);
 		}
 	}
 	
-	// Wait for servos to finish moving. Wait no longer than 2 seconds (50ms per read x 40)
-	for (int i = 0, currentAngle = readAngle(FEEDBACK_PIN_1);
-	     (currentAngle < newAngle - GEAR_POSITION_THRESHOLD || currentAngle > newAngle + GEAR_POSITION_THRESHOLD) && i < 40;
-	     i++, currentAngle = readAngle(FEEDBACK_PIN_1)) {
+	// Wait for servos to finish moving.
+	long startWaitTime = millis();
+	boolean isFinished1 = false;
+	boolean isFinished2 = false;
+	do {
+		currentAngle1 = readAngle(FEEDBACK_PIN_1);
+		currentAngle2 = readAngle(FEEDBACK_PIN_2);
+		isFinished1 = currentAngle1 >= newAngle - GEAR_POSITION_THRESHOLD && currentAngle1 <= newAngle + GEAR_POSITION_THRESHOLD;
+		isFinished2 = currentAngle2 >= newAngle - GEAR_POSITION_THRESHOLD && currentAngle2 <= newAngle + GEAR_POSITION_THRESHOLD;
+	} while ((!isFinished1 || !isFinished2) && millis() - startWaitTime < GEAR_CHANGE_WAIT_TIME);
+
+	// Error if one or both servos are still not at the correct angle after waiting.
+	if (!isFinished1 || !isFinished2) {
+		error("Servo motors not aligned. Gear: " + String(toGear) + ", Motor 1: " + String(currentAngle1) + "°, Motor 2: " + String(currentAngle2) + "°");
 	}
-	
-	// Make sure both servos are still the same angle
-	currentAngle = readAngle(FEEDBACK_PIN_1);
-	int currentAngle2 = readAngle(FEEDBACK_PIN_2);
-	int angleDiff = currentAngle - currentAngle2;
-	if (angleDiff > SERVO_ANGLE_DIFF_THRESHOLD || angleDiff < -SERVO_ANGLE_DIFF_THRESHOLD) {
-		error("Servo motors not aligned. Motor 1: " + String(currentAngle) + "°  Motor 2: " + String(currentAngle2) + "°");
-	}
-	
+
 	return readGear();
 }
 
