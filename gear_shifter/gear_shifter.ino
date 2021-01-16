@@ -75,8 +75,10 @@ void sendGearChanged(int gear) {
 /*************************************************************************/
 void error(String message) {
 	unsigned int count = 0;
-	stopServo();
-	while (true) {
+	if (!debug) {
+		stopServo();
+	}
+	do {
 		if (count % 4 == 0) {
 			sendError(message);
 		}
@@ -89,7 +91,7 @@ void error(String message) {
 		}
 		delay(900);
 		count++;
-	}
+	} while (!debug);
 }
 
 /*************************************************************************/
