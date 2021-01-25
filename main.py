@@ -123,19 +123,19 @@ def connectToGearShifter():
 			# A timeout of 0 means non-blocking mode, read() returns immediately with whatever is in the buffer.
 			gearComms = Serial('/dev/serial/by-id/usb-Arduino_LLC_Arduino_Micro-if00', 9600, timeout=0)
 		except Exception as err:
-			showGearMessage(f'Could not connect to gear shifter.', err, level='error')
+			showGearMessage('Could not connect to gear shifter.', err, level='error')
 			return False
 	try:
 		gearComms.in_waiting  # This throws if not connected
 		gearComms.write('S')  # 'S' for Start
 	except Exception as err:
-		showGearMessage(f'Could not connect to gear shifter.', err, level='error')
+		showGearMessage('Could not connect to gear shifter.', err, level='error')
 		try:
 			gearComms.close()
 			gearComms.open()
 			gearComms.write('S')
 		except Exception:
-			showGearMessage(f'Could not connect to gear shifter.', err, level='error')
+			showGearMessage('Could not connect to gear shifter.', err, level='error')
 		return False
 
 	return True
@@ -260,7 +260,7 @@ try:
 	powerMonitor.open(ChannelID(*config.powerPairing), searchTimeout=300)
 	showMessage('ANT started. Connecting to devices...')
 except ANTException as error:
-	showMessage(f'Could not start ANT.', error)
+	showMessage('Could not start ANT.', error)
 
 showMessage('Connecting to GPS service...')
 gpsd.connect()
@@ -338,7 +338,7 @@ showMessage('Shutting down...')
 try:
 	recording.stopRecordingVideo(camera)
 except Exception as error:
-	showMessage(f'Error during video recording.', error)
+	showMessage('Error during video recording.', error)
 recording.closeFiles()
 try:
 	if heartRateMonitor is not None:
@@ -347,5 +347,5 @@ try:
 		powerMonitor.close()
 	antNode.stop()
 except ANTException as error:
-	showMessage(f'Could not stop ANT.', error)
+	showMessage('Could not stop ANT.', error)
 display.stop()
