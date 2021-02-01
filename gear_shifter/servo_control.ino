@@ -75,7 +75,7 @@ int readGear() {
 /* Return the new gear number.                                           */
 /* Error if the two motors are not in the same position at the end.      */
 /*************************************************************************/
-int changeGear(int toGear) {
+int moveToGear(int toGear) {
 	int currentAngle1, currentAngle2, newAngle;
 	int currentGear = readGear();
 	if (currentGear < 0) {
@@ -115,6 +115,35 @@ int changeGear(int toGear) {
 	}
 
 	return readGear();
+}
+
+/*************************************************************************/
+/* For debug purposes only!                                              */
+/* Finds the gear angle closest to the servos current angles then moves  */
+/* them to that gear. If servos are already at a gear position then      */
+/* there is no change.                                                   */
+/* Returns the gear that the servos should now be at.                    */
+/*************************************************************************/
+int moveToNearestGear() {
+	int currentAngle1 = readAngle(FEEDBACK_PIN_1);
+	
+	int oldGearAngle = gearPositions[0];
+	for (int i = 1; i < MAX_GEARS; i++) {
+		int newGearAngle = gearPositions[i];
+		int halfWay = (newGearAngle + oldGearAngle) / 2;
+		if (currentAngle1 < halfWay) {
+			moveServo(oldGearAngle);
+			return i;   // Previous gear (i is zero based so no need to subtract 1)
+		}
+		else if (currentAngle1 >= halfWay && currentAngle1 <= newGearAngle) {
+			moveServo(newGearAngle);
+			return i + 1;
+		}
+		oldGearAngle = newGearAngle;
+	}
+	
+	// If it gets to here then the angle must be greater than the highest gear
+	return MAX_GEARS;
 }
 
 /*************************************************************************/

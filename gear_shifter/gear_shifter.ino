@@ -28,17 +28,14 @@ void setup() {
 	}
 	digitalWrite(LED_BUILTIN, LOW);
 	
-	// Note: Servo position needs to be set *before* attaching, otherwise it
-	// will move to a default position.
 	if (debug) {
 		Serial.println("Gear shifter debug mode");
-		currentGear = 1;
-		moveServo(0);
 	}
-	else {
-		currentGear = changeGear(readGear());
-	}
+	// Note: Servo position needs to be set *before* attaching, otherwise it
+	// will move to a default position.
+	changeGear(readGear());
 	initializeServo();
+	sendGearChanged(currentGear);
 }
 
 /*************************************************************************/
@@ -46,15 +43,30 @@ void setup() {
 /*************************************************************************/
 void loop() {
 	int change = waitForInput();
-	currentGear += change;   // + is up, - is down
+
+	currentGear += change;          // + is up, - is down
 	if (currentGear > MAX_GEARS) {
 		currentGear = MAX_GEARS;
 	}
 	else if (currentGear < 1) {
 		currentGear = 1;
 	}
-	currentGear = changeGear(currentGear);
+	
+	changeGear(currentGear);
 	sendGearChanged(currentGear);
+}
+
+/*************************************************************************/
+/* Move to the given gear and remember it.                               */
+/*************************************************************************/
+void changeGear(int gear) {
+	int newGear = moveToGear(gear);
+	if (newGear == -1 && debug) {    // This can happen if servos are out of alignment
+		currentGear = moveToNearestGear();
+	}
+	else {
+		currentGear = newGear;
+	}
 }
 
 /*************************************************************************/
