@@ -60,26 +60,31 @@ int readAngle(int pin) {
 int readGear() {
 	int gearAngle = 0;
 	int currentAngle1 = readAngle(FEEDBACK_PIN_1);
+	int currentAngle2 = readAngle(FEEDBACK_PIN_2);
+	if (currentAngle1 - currentAngle2) {
+		error("Servo motors not aligned. Motor 1: " + String(currentAngle1) + "°, Motor 2: " + String(currentAngle2) + "°");
+		return -1;
+	}
 	for (int i = 0; i < MAX_GEARS; i++) {
 		gearAngle = gearPositions[i];
 		if (currentAngle1 >= gearAngle - GEAR_POSITION_THRESHOLD && currentAngle1 <= gearAngle + GEAR_POSITION_THRESHOLD) {
 			return i + 1;
 		}
 	}
-	error("Gear not in correct position. Motor 1: " + String(currentAngle1) + "°, Motor 2: " + String(readAngle(FEEDBACK_PIN_2)) + "°");
-	return -1;  // Should not normally reach here
+	error("Gear not in correct position. Motor 1: " + String(currentAngle1) + "°, Motor 2: " + String(currentAngle2) + "°");
+	return -1;
 }
 
 /*************************************************************************/
 /* Move the servo motor to the <toGear> position.                        */
-/* Return the new gear number.                                           */
+/* Return true on success and false on error.                            */
 /* Error if the two motors are not in the same position at the end.      */
 /*************************************************************************/
-int moveToGear(int toGear) {
+boolean moveToGear(int toGear) {
 	int currentAngle1, currentAngle2, newAngle;
 	int currentGear = readGear();
 	if (currentGear < 0) {
-		return -1;
+		return false;
 	}
 	
 	// Incrementally move the servo motors with delays in between to control their speed
@@ -112,9 +117,10 @@ int moveToGear(int toGear) {
 	// Error if one or both servos are still not at the correct angle after waiting.
 	if (!isFinished1 || !isFinished2) {
 		error("Servo motors not aligned. Gear: " + String(toGear) + ", Motor 1: " + String(currentAngle1) + "°, Motor 2: " + String(currentAngle2) + "°");
+		return false;
 	}
 
-	return readGear();
+	return true;
 }
 
 /*************************************************************************/

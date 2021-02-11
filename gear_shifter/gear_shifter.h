@@ -29,7 +29,6 @@ struct Button {
 };
 
 
-void changeGear(int gear);
 void sendGearChanged(int gear);
 void error(String message);
 void sendError(String message);
@@ -42,6 +41,6 @@ void initializeServo();
 void stopServo();
 int readAngle(int servoPin);
 int readGear();
-int moveToGear(int toGear);
+boolean moveToGear(int toGear);
 int moveToNearestGear();
 void moveServo(int angle);

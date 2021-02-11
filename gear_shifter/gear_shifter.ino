@@ -33,7 +33,11 @@ void setup() {
 	}
 	// Note: Servo position needs to be set *before* attaching, otherwise it
 	// will move to a default position.
-	changeGear(readGear());
+	currentGear = readGear();
+	if (currentGear == -1 && debug) {    // This can happen if servos are out of alignment
+		currentGear = moveToNearestGear();
+	}
+	moveToGear(currentGear);
 	initializeServo();
 	sendGearChanged(currentGear);
 }
@@ -52,21 +56,8 @@ void loop() {
 		currentGear = 1;
 	}
 	
-	changeGear(currentGear);
+	moveToGear(currentGear);
 	sendGearChanged(currentGear);
-}
-
-/*************************************************************************/
-/* Move to the given gear and remember it.                               */
-/*************************************************************************/
-void changeGear(int gear) {
-	int newGear = moveToGear(gear);
-	if (newGear == -1 && debug) {    // This can happen if servos are out of alignment
-		currentGear = moveToNearestGear();
-	}
-	else {
-		currentGear = newGear;
-	}
 }
 
 /*************************************************************************/
