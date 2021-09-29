@@ -229,9 +229,6 @@ camera = picamera.PiCamera(sensor_mode=5)
 camera.exposure_mode = 'sports'  # To reduce motion blur.
 camera.framerate = 49  # Highest supported by mode 5
 
-# Top camera is mounted upside down
-camera.vflip = True
-camera.hflip = True
 
 display.start(camera)
 
