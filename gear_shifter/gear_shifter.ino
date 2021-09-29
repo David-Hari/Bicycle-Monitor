@@ -29,7 +29,7 @@ void setup() {
 	digitalWrite(LED_BUILTIN, LOW);
 	
 	if (debug) {
-		Serial.println("Gear shifter debug mode");
+		sendMessage("D", "Gear shifter in debug mode");
 	}
 	// Note: Servo position needs to be set *before* attaching, otherwise it
 	// will move to a default position.
@@ -61,17 +61,6 @@ void loop() {
 }
 
 /*************************************************************************/
-/* Send the given gear number over serial.                               */
-/*************************************************************************/
-void sendGearChanged(int gear) {
-	if (Serial.availableForWrite() > 0) {
-		Serial.print("G");
-		Serial.print(gear);
-		Serial.print("\n");
-	}
-}
-
-/*************************************************************************/
 /* The system has entered an error state.                                */
 /* Perform any necessary shut-down, then loop indefinitely.              */
 /* Blink the LED and periodically send the error message over serial.    */
@@ -98,11 +87,25 @@ void error(String message) {
 }
 
 /*************************************************************************/
+/* Send the given gear number over serial.                               */
+/*************************************************************************/
+void sendGearChanged(int gear) {
+	sendMessage("G", gear);
+}
+
+/*************************************************************************/
 /* Send an error message over serial.                                    */
 /*************************************************************************/
 void sendError(String message) {
+	sendMessage("E", message);
+}
+
+/*************************************************************************/
+/* Send a message over serial. Type should be a single character.        */
+/*************************************************************************/
+void sendMessage(String type, String message) {
 	if (Serial.availableForWrite() > 0) {
-		Serial.print("E");
+		Serial.print(type);
 		Serial.print(message);
 		Serial.print("\n");
 	}

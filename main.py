@@ -156,7 +156,7 @@ def handleGearShifterComms(data):
 		elif commsType == 'E':
 			showGearMessage(value, level='error')
 		else:
-			showGearMessage(f'Gear shifter:\n{line}', level='info')
+			showGearMessage(value, level='info')
 
 
 

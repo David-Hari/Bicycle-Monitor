@@ -29,9 +29,11 @@ struct Button {
 };
 
 
-void sendGearChanged(int gear);
 void error(String message);
+
+void sendGearChanged(int gear);
 void sendError(String message);
+void sendMessage(String type, String message);
 
 void initializeButtons();
 boolean areBothButtonsDown();
