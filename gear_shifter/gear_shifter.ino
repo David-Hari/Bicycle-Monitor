@@ -6,8 +6,17 @@ int currentGear = 0;
 boolean debug = false;
 
 
-// TODO:
-//  Stop servo from jumping all over the place when power is cut.
+/* TODO:
+ * Stop servo from jumping all over the place when power is cut.
+ 
+ * Could constantly check for errors in main loop.
+   Change waitForInput() to checkInput(), which will return immediately with either
+   1, -1, or 0 if time is less than debounce delay.
+
+ * Somehow detect if motor is not powered (or at least if there is no feedback signal).
+   Perhaps analogRead a bunch of times and check if they are all zero.
+*/
+
 
 /*************************************************************************/
 /* The setup function runs once when you press reset or power the board. */
@@ -29,7 +38,7 @@ void setup() {
 	digitalWrite(LED_BUILTIN, LOW);
 	
 	if (debug) {
-		sendMessage("D", "Gear shifter in debug mode");
+		sendMessage("D", "Debug mode");
 	}
 	// Note: Servo position needs to be set *before* attaching, otherwise it
 	// will move to a default position.

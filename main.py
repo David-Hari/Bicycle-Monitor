@@ -110,11 +110,11 @@ def showGearMessage(string, err=None, level='info'):
 #  Gear shifter functions                         #
 #-------------------------------------------------#
 
-def connectToGearShifter():
+def readFromGearShifter():
 	"""
-	Attempts to connect to the gear shifter, if not already connected.
+	Attempts to read from the gear shifter, connecting to it if not already connected.
 
-	:return: true if connected, false if not
+	:return: data or None if there is no data available
 	"""
 	global gearComms
 
@@ -122,23 +122,25 @@ def connectToGearShifter():
 		try:
 			# A timeout of 0 means non-blocking mode, read() returns immediately with whatever is in the buffer.
 			gearComms = Serial('/dev/serial/by-id/usb-Arduino_LLC_Arduino_Micro-if00', 9600, timeout=0)
+			gearComms.write('S'.encode('utf-8'))  # 'S' for Start
 		except Exception as err:
 			showGearMessage('Could not connect to gear shifter.', err, level='error')
-			return False
+			return None
+
 	try:
-		gearComms.in_waiting  # This throws if not connected
-		gearComms.write('S')  # 'S' for Start
+		numBytes = gearComms.in_waiting  # This throws if not connected
+		if numBytes > 1:
+			return gearComms.read(numBytes)
 	except Exception as err:
-		showGearMessage('Could not connect to gear shifter.', err, level='error')
+		showGearMessage('Could not read from gear shifter. Attempting to reconnect.', err, level='error')
 		try:
 			gearComms.close()
 			gearComms.open()
-			gearComms.write('S')
+			gearComms.write('S'.encode('utf-8'))
 		except Exception:
 			showGearMessage('Could not connect to gear shifter.', err, level='error')
-		return False
 
-	return True
+	return None
 
 
 def handleGearShifterComms(data):
@@ -148,15 +150,18 @@ def handleGearShifterComms(data):
 
 	:param data: Bytes from the serial port
 	"""
-	buffer = data.decode('ascii')
+	# Perhaps make the gear number go grey when gear is changing.
+	# Send 'C<num>' from Arduino, where <num> is the new gear.
+	# drawGearNumber could accept an isChanging parameter.
+	buffer = data.decode('utf-8')
 	for line in filter(None, buffer.split('\n')):
 		commsType, value = line[:1], line[1:]
 		if commsType == 'G':    # 'G' for gear number, 'E' for error message
 			display.drawGearNumber(int(value))
 		elif commsType == 'E':
-			showGearMessage(value, level='error')
+			showGearMessage(f'Gear shifter error:\n{line}', level='error')
 		else:
-			showGearMessage(value, level='info')
+			showGearMessage(f'Gear shifter:\n{value}', level='info')
 
 
 
@@ -232,8 +237,6 @@ camera.framerate = 49  # Highest supported by mode 5
 
 display.start(camera)
 
-connectToGearShifter()
-
 showMessage('Starting up ANT...')
 antNode = Node(driver.USB2Driver())
 try:
@@ -307,10 +310,9 @@ while True:
 			display.drawHeartRate(heartRate)
 
 		# Read serial communication from gear shifter, and update display if necessary
-		if connectToGearShifter():
-			numBytes = gearComms.in_waiting
-			if numBytes > 1:
-				handleGearShifterComms(gearComms.read(numBytes))
+		gearData = readFromGearShifter()
+		if gearData is not None:
+			handleGearShifterComms(gearData)
 
 		# Check CPU temperature once every 8 second
 		if counter % 32 == 0:

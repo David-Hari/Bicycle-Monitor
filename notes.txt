@@ -1,20 +1,4 @@
 
-Bicycle-Monitor TODO:
-
-* Perhaps make the gear number go grey when gear is changing.
-  Send 'C<num>' from Arduino, where <num> is the current gear.
-  drawGearNumber could accept an isChanging parameter.
-
-* Gear shifter could constantly check for errors in main loop.
-  Change waitForInput() to checkInput(), which will return immediately with either
-  1, -1, or 0 if time is less than debounce delay.
-
-* Gear shifter could somehow detect if motor is not powered (or at least if
-  there is no feedback signal).
-
-
-
-
 Useful commands:
 
 ### Check temperature of CPU ###
@@ -52,16 +36,19 @@ show current state:
 ### GPIO and other info (from gpiozero library) ###
 > pinout
 
-To run camera & display from command line, use:
-> raspivid -t 0 -f --mode 5 -ex sports -fps 49 -w 1296 -h 730 --flush
 
 
 
 Linux setup:
 
-For ANT USB device, create file /etc/udev/rules.d/garmin-ant2.rules containing the following:
+# For ANT USB device, create file /etc/udev/rules.d/garmin-ant2.rules containing the following:
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0fcf", ATTRS{idProduct}=="1008", RUN+="/sbin/modprobe usbserial vendor=0x0fcf product=0x1008", MODE="0666", OWNER="pi", GROUP="root"
 
+# To run camera & display from command line, use:
+> /usr/bin/raspivid -t 0 -f --mode 5 -ex sports -fps 49 -w 1296 -h 730 --flush
+
+# Allow Pi to be shutdown cleanly by connecting GPIO pin BCM 3 to ground
+dtoverlay=gpio-shutdown,debounce=1000
 
 
 
