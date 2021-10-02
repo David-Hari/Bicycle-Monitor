@@ -56,6 +56,7 @@ def closeFiles():
 	if cpuTemperatureFile:
 		cpuTemperatureFile.close()
 
+
 def makeUniqueDir(base):
 	"""
 	Creates a new directory with a unique number as it's name.
@@ -65,7 +66,7 @@ def makeUniqueDir(base):
 	num = 1
 	while True:
 		try:
-			os.mkdir(base + str(num))
+			os.mkdir(base + '{:0>3d}'.format(num))
 			return base + str(num) + '/'
 		except FileExistsError:
 			num = num + 1
@@ -77,6 +78,7 @@ def startRecordingVideo(camera):
 	camera.start_recording(currentDir + videoFileName, format='h264', resize=(648, 365),
 	                       intra_period=0)
 
+
 def stopRecordingVideo(camera):
 	camera.stop_recording()
 
@@ -86,6 +88,7 @@ def writeHeartRateEvent(eventTime, heartRate):
 	heartRateFile.write(',')
 	heartRateFile.write(str(heartRate))
 	heartRateFile.write('\n')
+
 
 def writePowerEvent(eventTime, instantaneousPower, accumulatedPower, ratio, cadence):
 	powerFile.write(str(eventTime))
@@ -99,6 +102,7 @@ def writePowerEvent(eventTime, instantaneousPower, accumulatedPower, ratio, cade
 	powerFile.write(str(cadence))
 	powerFile.write('\n')
 
+
 def writeTorqueEvent(eventTime, leftTorque, rightTorque, leftPedalSmoothness, rightPedalSmoothness):
 	torqueFile.write(str(eventTime))
 	torqueFile.write(',')
@@ -110,6 +114,7 @@ def writeTorqueEvent(eventTime, leftTorque, rightTorque, leftPedalSmoothness, ri
 	torqueFile.write(',')
 	torqueFile.write(str(rightPedalSmoothness))
 	torqueFile.write('\n')
+
 
 def writeGPS(info):
 	gpsFile.write(str(info.get_time()))
