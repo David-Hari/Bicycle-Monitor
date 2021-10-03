@@ -159,7 +159,7 @@ def handleGearShifterComms(data):
 		if commsType == 'G':    # 'G' for gear number, 'E' for error message
 			display.drawGearNumber(int(value))
 		elif commsType == 'E':
-			showGearMessage(f'Gear shifter error:\n{line}', level='error')
+			showGearMessage(f'Gear shifter error:\n{value}', level='error')
 		else:
 			showGearMessage(f'Gear shifter:\n{value}', level='info')
 
