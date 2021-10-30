@@ -1,9 +1,12 @@
 
+#include "buttons.h"
+
 const unsigned long debounceDelay = 100;   // Milliseconds delay before detecting another push
 unsigned long lastButtonTime = 0;          // Last time button was pressed or released
 
 Button upButton;
 Button downButton;
+
 
 /*************************************************************************/
 /* Initialize the button structures to hold state information.           */
@@ -17,12 +20,14 @@ void initializeButtons() {
 	downButton.state = HIGH;
 }
 
+
 /*************************************************************************/
 /* Check if both buttons are held down. Used for debugging.              */
 /*************************************************************************/
 boolean areBothButtonsDown() {
 	return digitalRead(UP_BUTTON_PIN) == LOW && digitalRead(DOWN_BUTTON_PIN) == LOW;
 }
+
 
 /*************************************************************************/
 /* Continuously check button state, waiting for a press.                 */
@@ -45,6 +50,7 @@ int waitForInput() {
 		}
 	}
 }
+
 
 /*************************************************************************/
 /* Return true if the button has been pressed.                           */

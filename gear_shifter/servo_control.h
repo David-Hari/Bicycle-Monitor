@@ -1,7 +1,9 @@
 
+#ifndef SERVO_CONTROL_H
+#define SERVO_CONTROL_H
+
+
 /* Digital pins */
-const int UP_BUTTON_PIN = 2;
-const int DOWN_BUTTON_PIN = 3;
 const int SERVO_PIN = 4;
 
 /* Analog pins */
@@ -22,23 +24,6 @@ const int GEAR_CHANGE_WAIT_TIME = 500;    // Milliseconds to wait after changing
 const int GEAR_POSITION_THRESHOLD = 8;    // Degrees +/- actual position.
 
 
-
-struct Button {
-	int pin;
-	int state;
-};
-
-
-void error(String message);
-
-void sendGearChanged(int gear);
-void sendError(String message);
-void sendMessage(String type, String message);
-
-void initializeButtons();
-boolean areBothButtonsDown();
-int waitForInput();
-
 void initializeServo();
 void stopServo();
 int readAngle(int servoPin);
@@ -46,3 +31,6 @@ int readGear();
 boolean moveToGear(int toGear);
 int moveToNearestGear();
 void moveServo(int angle);
+
+
+#endif   // SERVO_CONTROL_H

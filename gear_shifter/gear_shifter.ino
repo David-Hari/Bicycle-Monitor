@@ -1,21 +1,27 @@
+/**
+ *  Main program. Checks button state and drives servos to change gear.
+ *
+ * TODO:
+ *  - Stop servo from jumping all over the place when power is cut.
+ *
+ *  - Could constantly check for errors in main loop.
+ *    Change waitForInput() to checkInput(), which will return immediately with either
+ *    1, -1, or 0 if time is less than debounce delay.
+ *
+ *  - Somehow detect if motor is not powered (or at least if there is no feedback signal).
+ *    Perhaps analogRead a bunch of times and check if they are all zero.
+ */
+
+
 #include <Servo.h>
-#include "gear_shifter.h"
+#include "common.h"
+#include "buttons.h"
+#include "servo_control.h"
 
 
 int currentGear = 0;
 boolean debug = false;
 
-
-/* TODO:
- * Stop servo from jumping all over the place when power is cut.
- 
- * Could constantly check for errors in main loop.
-   Change waitForInput() to checkInput(), which will return immediately with either
-   1, -1, or 0 if time is less than debounce delay.
-
- * Somehow detect if motor is not powered (or at least if there is no feedback signal).
-   Perhaps analogRead a bunch of times and check if they are all zero.
-*/
 
 
 /*************************************************************************/
@@ -51,6 +57,7 @@ void setup() {
 	sendGearChanged(currentGear);
 }
 
+
 /*************************************************************************/
 /* The main loop runs continuously.                                      */
 /*************************************************************************/
@@ -68,6 +75,7 @@ void loop() {
 	moveToGear(currentGear);
 	sendGearChanged(currentGear);
 }
+
 
 /*************************************************************************/
 /* The system has entered an error state.                                */
@@ -95,11 +103,12 @@ void error(String message) {
 	} while (!debug);
 }
 
+
 /*************************************************************************/
 /* Send the given gear number over serial.                               */
 /*************************************************************************/
 void sendGearChanged(int gear) {
-	sendMessage("G", gear);
+	sendMessage("G", String(gear));
 }
 
 /*************************************************************************/

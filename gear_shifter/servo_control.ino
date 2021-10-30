@@ -1,4 +1,7 @@
 
+#include "servo_control.h"
+
+
 // Servo wires colours
 //---------------------
 // Brown  =  Ground
@@ -19,8 +22,8 @@ const int SERVO_MAX_PULSE = 2500;
 const int ANALOG_MIN = 620;   // 0 degrees.
 const int ANALOG_MAX = 60;    // 172 degrees.
 
-
 Servo servo;
+
 
 /*************************************************************************/
 /* Start sending pulses to the servo to control it.                      */
@@ -28,6 +31,7 @@ Servo servo;
 void initializeServo() {
 	servo.attach(SERVO_PIN, SERVO_MIN_PULSE, SERVO_MAX_PULSE);
 }
+
 
 /*************************************************************************/
 /* Stop sending pulses to the servo. This SHOULD turn off the servo and  */
@@ -37,6 +41,7 @@ void initializeServo() {
 void stopServo() {
 	servo.detach();
 }
+
 
 /*************************************************************************/
 /* Read the current position of the servo at the given pin, averaging it */
@@ -53,12 +58,12 @@ int readAngle(int pin) {
 	return map(average, ANALOG_MIN, ANALOG_MAX, SERVO_MIN_ANGLE, SERVO_MAX_ANGLE);
 }
 
+
 /*************************************************************************/
 /* Return the currently selected gear.                                   */
 /* Error if the servo position does not correspond to any gear.          */
 /*************************************************************************/
 int readGear() {
-	int gearAngle = 0;
 	int currentAngle1 = readAngle(FEEDBACK_PIN_1);
 	int currentAngle2 = readAngle(FEEDBACK_PIN_2);
 	if (currentAngle1 - currentAngle2) {
@@ -66,7 +71,7 @@ int readGear() {
 		return -1;
 	}
 	for (int i = 0; i < MAX_GEARS; i++) {
-		gearAngle = gearPositions[i];
+		int gearAngle = gearPositions[i];
 		if (currentAngle1 >= gearAngle - GEAR_POSITION_THRESHOLD && currentAngle1 <= gearAngle + GEAR_POSITION_THRESHOLD) {
 			return i + 1;
 		}
@@ -74,6 +79,7 @@ int readGear() {
 	error("Gear not in correct position. Motor 1: " + String(currentAngle1) + "°, Motor 2: " + String(currentAngle2) + "°");
 	return -1;
 }
+
 
 /*************************************************************************/
 /* Move the servo motor to the <toGear> position.                        */
@@ -123,6 +129,7 @@ boolean moveToGear(int toGear) {
 	return true;
 }
 
+
 /*************************************************************************/
 /* For debug purposes only!                                              */
 /* Finds the gear angle closest to the servos current angles then moves  */
@@ -151,6 +158,7 @@ int moveToNearestGear() {
 	// If it gets to here then the angle must be greater than the highest gear
 	return MAX_GEARS;
 }
+
 
 /*************************************************************************/
 /* Move the servo motor to the given angle.                              */
