@@ -60,24 +60,37 @@ int readAngle(int pin) {
 
 
 /*************************************************************************/
+/* Return the gear that corresponds to the given angle, or -1 if the     */
+/* angle is not aligned to any gear.                                     */
+/*************************************************************************/
+int getGearAtPosition(int angle) {
+	for (int i = 0; i < MAX_GEARS; i++) {
+		int gearAngle = gearPositions[i];
+		if (angle >= gearAngle - GEAR_POSITION_THRESHOLD && angle <= gearAngle + GEAR_POSITION_THRESHOLD) {
+			return i + 1;
+		}
+	}
+	return -1;
+}
+
+
+/*************************************************************************/
 /* Return the currently selected gear.                                   */
 /* Error if the servo position does not correspond to any gear.          */
 /*************************************************************************/
 int readGear() {
-	int currentAngle1 = readAngle(FEEDBACK_PIN_1);
-	int currentAngle2 = readAngle(FEEDBACK_PIN_2);
-	if (currentAngle1 - currentAngle2) {
-		error("Servo motors not aligned. Motor 1: " + String(currentAngle1) + "°, Motor 2: " + String(currentAngle2) + "°");
+	int angle1 = readAngle(FEEDBACK_PIN_1);
+	int angle2 = readAngle(FEEDBACK_PIN_2);
+	if (angle1 - angle2) {
+		error("Servo motors not aligned. Motor 1: " + String(angle1) + "°, Motor 2: " + String(angle2) + "°");
 		return -1;
 	}
-	for (int i = 0; i < MAX_GEARS; i++) {
-		int gearAngle = gearPositions[i];
-		if (currentAngle1 >= gearAngle - GEAR_POSITION_THRESHOLD && currentAngle1 <= gearAngle + GEAR_POSITION_THRESHOLD) {
-			return i + 1;
-		}
+	int currentGear = getGearAtPosition(angle1);
+	if (currentGear < 0) {
+		error("Gear not in correct position. Motor 1: " + String(angle1) + "°, Motor 2: " + String(angle2) + "°");
+		return -1;
 	}
-	error("Gear not in correct position. Motor 1: " + String(currentAngle1) + "°, Motor 2: " + String(currentAngle2) + "°");
-	return -1;
+	return currentGear;
 }
 
 

@@ -45,16 +45,17 @@ void setup() {
 	
 	if (debug) {
 		sendMessage("D", "Debug mode");
+		delay(1000);
+		testReadPositions();   // This never returns, preventing the main loop from executing
 	}
-	// Note: Servo position needs to be set *before* attaching, otherwise it
-	// will move to a default position.
-	currentGear = readGear();
-	if (currentGear == -1 && debug) {    // This can happen if servos are out of alignment
-		currentGear = moveToNearestGear();
+	else {
+		// Note: Servo position needs to be set *before* attaching, otherwise it
+		// will move to a default position.
+		currentGear = readGear();
+		moveToGear(currentGear);
+		initializeServo();
+		sendGearChanged(currentGear);
 	}
-	moveToGear(currentGear);
-	initializeServo();
-	sendGearChanged(currentGear);
 }
 
 
@@ -74,6 +75,36 @@ void loop() {
 	
 	moveToGear(currentGear);
 	sendGearChanged(currentGear);
+}
+
+/*************************************************************************/
+/* Used for testing/debugging to determine positions of servo motors.    */
+/*************************************************************************/
+void testReadPositions() {
+	while (true) {
+		int angle1 = readAngle(FEEDBACK_PIN_1);
+		int angle2 = readAngle(FEEDBACK_PIN_2);
+		int gear1 = getGearAtPosition(angle1);
+		int gear2 = getGearAtPosition(angle2);
+		
+		String message = "Angle/Gear - 1: " + String(angle1) + "°, ";
+		if (gear1 == -1) {
+			message = message + "none";
+		}
+		else {
+			message = message + String(gear1);
+		}
+		message = message + " - 2: " + String(angle2) + "°, ";
+		if (gear2 == -1) {
+			message = message + "none";
+		}
+		else {
+			message = message + String(gear2);
+		}
+		sendMessage("D", message);
+		
+		delay(200);  // Don't want to run too quickly, serial buffer might fill up
+	}
 }
 
 

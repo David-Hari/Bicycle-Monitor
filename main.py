@@ -156,12 +156,15 @@ def handleGearShifterComms(data):
 	buffer = data.decode('utf-8')
 	for line in filter(None, buffer.split('\n')):
 		commsType, value = line[:1], line[1:]
-		if commsType == 'G':    # 'G' for gear number, 'E' for error message
+		if commsType == 'G':    # Gear changed
 			display.drawGearNumber(int(value))
-		elif commsType == 'E':
-			showGearMessage(f'Gear shifter error:\n{value}', level='error')
 		else:
-			showGearMessage(f'Gear shifter:\n{value}', level='info')
+			level = 'info'
+			if commsType == 'E':
+				level = 'error'
+			elif commsType == 'D':
+				level = 'debug'
+			showGearMessage(f'Gear shifter:\n{value}', level=level)
 
 
 
