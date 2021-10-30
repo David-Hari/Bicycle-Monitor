@@ -81,7 +81,7 @@ int getGearAtPosition(int angle) {
 int readGear() {
 	int angle1 = readAngle(FEEDBACK_PIN_1);
 	int angle2 = readAngle(FEEDBACK_PIN_2);
-	if (angle1 - angle2) {
+	if (abs(angle1 - angle2) > GEAR_POSITION_THRESHOLD) {
 		error("Servo motors not aligned. Motor 1: " + String(angle1) + "°, Motor 2: " + String(angle2) + "°");
 		return -1;
 	}
