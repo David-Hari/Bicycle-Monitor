@@ -10,13 +10,14 @@ const int SERVO_PIN = 4;
 const int FEEDBACK_PIN_1 = 4;
 const int FEEDBACK_PIN_2 = 5;
 
+
 /* Config */
 const int gearPositions[] = {
-	  0, // 1st gear
-	 42, // 2nd gear
-	 84, // 3rd gear
-	126, // 4th gear
-	168  // 5th gear
+	 41, // 1st gear
+	 64, // 2nd gear
+	 98, // 3rd gear
+	132, // 4th gear
+	166  // 5th gear
 };
 const int MAX_GEARS = (sizeof(gearPositions)/sizeof((gearPositions)[0]));
 const int GEAR_CHANGE_DELAY = 50;         // Milliseconds to delay for each degree moved.
