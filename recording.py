@@ -66,8 +66,9 @@ def makeUniqueDir(base):
 	num = 1
 	while True:
 		try:
-			os.mkdir(base + '{:0>3d}'.format(num))
-			return base + str(num) + '/'
+			numString = '{:0>3d}'.format(num)
+			os.mkdir(base + numString)
+			return base + numString + '/'
 		except FileExistsError:
 			num = num + 1
 
