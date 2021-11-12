@@ -22,6 +22,14 @@ import display
 import recording
 
 
+# Gear changer message codes
+STARTUP_MSG        = 'S';
+SHUTDOWN_MSG       = 'X';
+ERROR_MSG          = 'E';
+DEBUG_MSG          = 'D';
+GEAR_CHANGING_MSG  = 'C';
+GEAR_CHANGED_MSG   = 'G';
+
 original_send_buffer = None
 tempMessage = None
 gpsMessage = None
@@ -122,7 +130,7 @@ def readFromGearShifter():
 		try:
 			# A timeout of 0 means non-blocking mode, read() returns immediately with whatever is in the buffer.
 			gearComms = Serial('/dev/serial/by-id/usb-Arduino_LLC_Arduino_Micro-if00', 9600, timeout=0)
-			gearComms.write('S'.encode('utf-8'))  # 'S' for Start
+			gearComms.write(STARTUP_MSG.encode('utf-8'))
 		except Exception as err:
 			showGearMessage('Could not connect to gear shifter.', err, level='error')
 			return None
@@ -136,7 +144,7 @@ def readFromGearShifter():
 		try:
 			gearComms.close()
 			gearComms.open()
-			gearComms.write('S'.encode('utf-8'))
+			gearComms.write(STARTUP_MSG.encode('utf-8'))
 		except Exception:
 			showGearMessage('Could not connect to gear shifter.', err, level='error')
 
@@ -156,13 +164,13 @@ def handleGearShifterComms(data):
 	buffer = data.decode('utf-8')
 	for line in filter(None, buffer.split('\n')):
 		commsType, value = line[:1], line[1:]
-		if commsType == 'G':    # Gear changed
+		if commsType == GEAR_CHANGED_MSG:
 			display.drawGearNumber(int(value))
 		else:
 			level = 'info'
-			if commsType == 'E':
+			if commsType == ERROR_MSG:
 				level = 'error'
-			elif commsType == 'D':
+			elif commsType == DEBUG_MSG:
 				level = 'debug'
 			showGearMessage(f'Gear shifter:\n{value}', level=level)
 
@@ -337,11 +345,19 @@ while True:
 
 
 showMessage('Shutting down...')
+
+if gearComms is not None:
+	try:
+		gearComms.write(SHUTDOWN_MSG.encode('utf-8'))
+	except Exception as err:
+		showGearMessage('Could not safely stop gear shifter.', err, level='error')
+
 try:
 	recording.stopRecordingVideo(camera)
 except Exception as error:
 	showMessage('Error during video recording.', error)
 recording.closeFiles()
+
 try:
 	if heartRateMonitor is not None:
 		heartRateMonitor.close()
@@ -350,4 +366,5 @@ try:
 	antNode.stop()
 except ANTException as error:
 	showMessage('Could not stop ANT.', error)
+
 display.stop()

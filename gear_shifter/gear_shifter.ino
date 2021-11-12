@@ -2,11 +2,7 @@
  *  Main program. Checks button state and drives servos to change gear.
  *
  * TODO:
- *  - Stop servo from jumping all over the place when power is cut.
- *
- *  - Could constantly check for errors in main loop.
- *    Change waitForInput() to checkInput(), which will return immediately with either
- *    1, -1, or 0 if time is less than debounce delay.
+ *  - Could constantly check for servo alignment in main loop.
  *
  *  - Somehow detect if motor is not powered (or at least if there is no feedback signal).
  *    Perhaps analogRead a bunch of times and check if they are all zero.
@@ -33,18 +29,18 @@ void setup() {
 	Serial.begin(9600);
 	
 	// Listen for startup message from Pi, or buttons are pressed.
-	digitalWrite(LED_BUILTIN, HIGH);
+	digitalWrite(LED_BUILTIN, LOW);
 	while (Serial.available() <= 0 && !(debug = areBothButtonsDown())) {}
 	if (Serial.available() >= 1) {
 		char incomingByte = (char)Serial.read();
-		if (incomingByte == 'D') {
+		if (incomingByte == DEBUG_MSG) {
 			debug = true;
 		}
 	}
-	digitalWrite(LED_BUILTIN, LOW);
+	digitalWrite(LED_BUILTIN, HIGH);
 	
 	if (debug) {
-		sendMessage("D", "Debug mode");
+		sendMessage(DEBUG_MSG, "Debug mode");
 		delay(1000);
 		testReadPositions();   // This never returns, preventing the main loop from executing
 	}
@@ -63,18 +59,29 @@ void setup() {
 /* The main loop runs continuously.                                      */
 /*************************************************************************/
 void loop() {
-	int change = waitForInput();
-
-	currentGear += change;          // + is up, - is down
-	if (currentGear > MAX_GEARS) {
-		currentGear = MAX_GEARS;
+	if (Serial.available() >= 1) {
+		char incomingByte = (char)Serial.read();
+		if (incomingByte == SHUTDOWN_MSG) {
+			shutdown();
+		}
 	}
-	else if (currentGear < 1) {
-		currentGear = 1;
+	else {
+		int buttonPressed = checkInput();
+		if (buttonPressed != NONE_PRESSED) {
+			if (buttonPressed == UP_PRESSED) {
+				if (currentGear < MAX_GEARS) {
+					currentGear++;
+				}
+			}
+			else if (buttonPressed == DOWN_PRESSED) {
+				if (currentGear > 1) {
+					currentGear--;
+				}
+			}
+			moveToGear(currentGear);
+			sendGearChanged(currentGear);
+		}
 	}
-	
-	moveToGear(currentGear);
-	sendGearChanged(currentGear);
 }
 
 /*************************************************************************/
@@ -101,7 +108,7 @@ void testReadPositions() {
 		else {
 			message = message + String(gear2);
 		}
-		sendMessage("D", message);
+		sendMessage(DEBUG_MSG, message);
 		
 		delay(200);  // Don't want to run too quickly, serial buffer might fill up
 	}
@@ -115,9 +122,7 @@ void testReadPositions() {
 /*************************************************************************/
 void error(String message) {
 	unsigned int count = 0;
-	if (!debug) {
-		stopServo();
-	}
+	stopServo();
 	do {
 		if (count % 4 == 0) {
 			sendError(message);
@@ -136,23 +141,33 @@ void error(String message) {
 
 
 /*************************************************************************/
+/* Perform any necessary shut-down, then loop indefinitely.              */
+/*************************************************************************/
+void shutdown() {
+	stopServo();
+	digitalWrite(LED_BUILTIN, LOW);
+	while (true) {}
+}
+
+
+/*************************************************************************/
 /* Send the given gear number over serial.                               */
 /*************************************************************************/
 void sendGearChanged(int gear) {
-	sendMessage("G", String(gear));
+	sendMessage(GEAR_CHANGED_MSG, String(gear));
 }
 
 /*************************************************************************/
 /* Send an error message over serial.                                    */
 /*************************************************************************/
 void sendError(String message) {
-	sendMessage("E", message);
+	sendMessage(ERROR_MSG, message);
 }
 
 /*************************************************************************/
-/* Send a message over serial. Type should be a single character.        */
+/* Send a message over serial. Type is defined in header file.           */
 /*************************************************************************/
-void sendMessage(String type, String message) {
+void sendMessage(char type, String message) {
 	if (Serial.availableForWrite() > 0) {
 		Serial.print(type);
 		Serial.print(message);

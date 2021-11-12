@@ -7,6 +7,11 @@
 const int UP_BUTTON_PIN = 2;
 const int DOWN_BUTTON_PIN = 3;
 
+/* Events */
+const int NONE_PRESSED = 0;
+const int UP_PRESSED = 1;
+const int DOWN_PRESSED = 2;
+
 
 struct Button {
 	int pin;

@@ -30,25 +30,25 @@ boolean areBothButtonsDown() {
 
 
 /*************************************************************************/
-/* Continuously check button state, waiting for a press.                 */
-/* Return +1 if up button is pressed, -1 if down button.                 */
+/* Check button state, return what button was pressed or none.           */
 /*************************************************************************/
-int waitForInput() {
-	lastButtonTime = millis();
-	while (true) {
-		if (checkButton(upButton)) {
-			return 1;
-		}
-		else if (checkButton(downButton)) {
-			return -1;
-		}
-		// If time since last button press or release is less than the
-		// debounce delay then wait for the remainder of the time.
-		long remainingTime = long(debounceDelay - (millis() - lastButtonTime));
-		if (remainingTime > 0) {
-			delay(remainingTime);
-		}
+int checkInput() {
+	// If time since last button press or release is less than the
+	// debounce delay then wait for the remainder of the time.
+	long remainingTime = long(debounceDelay - (millis() - lastButtonTime));
+	if (remainingTime > 0) {
+		delay(remainingTime);
 	}
+	
+	// Need to check both buttons to maintain the correct state of each
+	int event = NONE_PRESSED;
+	if (checkButton(upButton)) {
+		event = UP_PRESSED;
+	}
+	if (checkButton(downButton)) {
+		event = DOWN_PRESSED;
+	}
+	return event;
 }
 
 
