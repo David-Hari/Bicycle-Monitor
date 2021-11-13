@@ -4,8 +4,8 @@
 
 
 /* Digital pins */
-const int UP_BUTTON_PIN = 2;
-const int DOWN_BUTTON_PIN = 3;
+const int UP_BUTTON_PIN = 3;
+const int DOWN_BUTTON_PIN = 2;
 
 /* Events */
 const int NONE_PRESSED = 0;
