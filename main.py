@@ -344,6 +344,7 @@ while True:
 		break
 
 
+
 showMessage('Shutting down...')
 
 if gearComms is not None:

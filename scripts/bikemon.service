@@ -7,6 +7,9 @@ Type=simple
 WorkingDirectory=/home/pi/Bicycle-Monitor/
 ExecStart=/usr/local/bin/python3.7 /home/pi/Bicycle-Monitor/main.py
 Restart=on-failure
+TimeoutStopSec=120
+
+# Send SIGINT instead of the default SIGTERM, as SIGINT is interpreted by Python as KeyboardInterrupt
 KillSignal=SIGINT
 
 # Disable Python's buffering of STDOUT and STDERR, so that output from the
