@@ -5,6 +5,7 @@
 """
 
 import os
+from datetime import datetime, timezone
 
 
 baseDir = './data/'
@@ -90,7 +91,8 @@ def stopRecordingVideo(camera):
 
 
 def log(message)
-	# TODO: Write current time stamp
+	currentTime = datetime.now(timezone.utc).time()
+	logFile.write(currentTime.strftime("%H:%M:%S.%f   ")[:-3])
 	logFile.write(message)
 	logFile.write('\n')
 
