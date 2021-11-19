@@ -5,6 +5,7 @@
 
 const char STARTUP_MSG = 'S';
 const char SHUTDOWN_MSG = 'X';
+const char ACKNOWLEDGE_MSG = 'A';
 const char ERROR_MSG = 'E';
 const char DEBUG_MSG = 'D';
 const char GEAR_CHANGING_MSG = 'C';

@@ -25,6 +25,7 @@ import recording
 # Gear changer message codes
 STARTUP_MSG        = 'S';
 SHUTDOWN_MSG       = 'X';
+ACKNOWLEDGE_MSG    = 'A';
 ERROR_MSG          = 'E';
 DEBUG_MSG          = 'D';
 GEAR_CHANGING_MSG  = 'C';
@@ -166,13 +167,15 @@ def handleGearShifterComms(data):
 		commsType, value = line[:1], line[1:]
 		if commsType == GEAR_CHANGED_MSG:
 			display.drawGearNumber(int(value))
+		elif commsType == ACKNOWLEDGE_MSG:
+			recording.log(f'Gear shifter acknowledged message. Response: {value}')
 		else:
 			level = 'info'
 			if commsType == ERROR_MSG:
 				level = 'error'
 			elif commsType == DEBUG_MSG:
 				level = 'debug'
-			showGearMessage(f'Gear shifter:\n{value}', level=level)
+			showGearMessage(f'Gear shifter: {value}', level=level)
 
 
 
