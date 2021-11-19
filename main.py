@@ -61,7 +61,7 @@ def searchTimedOut(deviceProfile):
 
 
 def channelClosed(deviceProfile):
-	print(f'Channel closed for {deviceProfile.name}')
+	recording.log(f'Channel closed for {deviceProfile.name}')
 
 
 def heartRateData(hr, eventTime, interval):
@@ -87,8 +87,8 @@ def torqueAndPedalData(eventCount, leftTorque, rightTorque, leftPedalSmoothness,
 #-------------------------------------------------#
 
 def showMessage(string, err=None):
-	if err: print(string + '\n' + str(err))
-	else: print(string)
+	if err: recording.log(string + '    ' + str(err))
+	else: recording.log(string)
 	display.showStatusText(string, level=('error' if err is not None else 'info'))
 
 
@@ -96,20 +96,20 @@ def showHighTemperatureMessage(value):
 	global tempMessage
 	statusLevel = 'error' if temperature > cpuBadTemperature else 'warning'
 	string = f'CPU temperature at {value}°C'
-	print(string)
+	recording.log(string)
 	tempMessage = display.updateStatusText(tempMessage, string, level=statusLevel)
 
 
 def showGpsMessage(string, level):
 	global gpsMessage
-	print(string)
+	recording.log(string)
 	gpsMessage = display.updateStatusText(gpsMessage, string, level=level)
 
 
 def showGearMessage(string, err=None, level='info'):
 	global gearMessage
-	if err: print(string + '\n' + str(err))
-	else: print(string)
+	if err: recording.log(string + '    ' + str(err))
+	else: recording.log(string)
 	gearMessage = display.updateStatusText(gearMessage, string, level)
 
 
@@ -131,22 +131,22 @@ def readFromGearShifter():
 			# A timeout of 0 means non-blocking mode, read() returns immediately with whatever is in the buffer.
 			gearComms = Serial('/dev/serial/by-id/usb-Arduino_LLC_Arduino_Micro-if00', 9600, timeout=0)
 			gearComms.write(STARTUP_MSG.encode('utf-8'))
-		except Exception as err:
-			showGearMessage('Could not connect to gear shifter.', err, level='error')
+		except Exception as error:
+			showGearMessage('Could not connect to gear shifter.', error, level='error')
 			return None
 
 	try:
 		numBytes = gearComms.in_waiting  # This throws if not connected
 		if numBytes > 1:
 			return gearComms.read(numBytes)
-	except Exception as err:
-		showGearMessage('Could not read from gear shifter. Attempting to reconnect.', err, level='error')
+	except Exception as error:
+		showGearMessage('Could not read from gear shifter. Attempting to reconnect.', error, level='error')
 		try:
 			gearComms.close()
 			gearComms.open()
 			gearComms.write(STARTUP_MSG.encode('utf-8'))
-		except Exception:
-			showGearMessage('Could not connect to gear shifter.', err, level='error')
+		except Exception as error2:
+			showGearMessage('Could not connect to gear shifter.', error2, level='error')
 
 	return None
 
@@ -345,19 +345,18 @@ while True:
 
 
 
-showMessage('Shutting down...')
+recording.log('Shutting down...')
 
 if gearComms is not None:
 	try:
 		gearComms.write(SHUTDOWN_MSG.encode('utf-8'))
-	except Exception as err:
-		showGearMessage('Could not safely stop gear shifter.', err, level='error')
+	except Exception as error:
+		recording.log('Could not safely stop gear shifter.    ' + str(error))
 
 try:
 	recording.stopRecordingVideo(camera)
 except Exception as error:
-	showMessage('Error during video recording.', error)
-recording.closeFiles()
+	recording.log('Error during video recording.    ' + str(error))
 
 try:
 	if heartRateMonitor is not None:
@@ -366,6 +365,7 @@ try:
 		powerMonitor.close()
 	antNode.stop()
 except ANTException as error:
-	showMessage('Could not stop ANT.', error)
+	recording.log('Could not stop ANT.    ' + str(error))
 
 display.stop()
+recording.closeFiles()

@@ -8,6 +8,7 @@ import os
 
 
 baseDir = './data/'
+logFileName = 'log.txt'
 heartRateFileName = 'heart-rate.csv'
 powerFileName = 'power.csv'
 torqueFileName = 'torque.csv'
@@ -15,6 +16,7 @@ gpsFileName = 'gps.csv'
 videoFileName = 'video.h264'
 cpuTemperatureFileName = 'cpu_temperature.csv'
 currentDir = None
+logFile = None
 heartRateFile = None
 powerFile = None
 torqueFile = None
@@ -24,6 +26,7 @@ cpuTemperatureFile = None
 
 def openFiles():
 	global currentDir
+	global logFile
 	global heartRateFile
 	global powerFile
 	global torqueFile
@@ -33,6 +36,7 @@ def openFiles():
 	os.makedirs(baseDir, exist_ok=True)
 	currentDir = makeUniqueDir(baseDir)
 
+	logFile = open(currentDir + logFileName, 'w', encoding='utf-8')
 	heartRateFile = open(currentDir + heartRateFileName, 'w', encoding='utf-8')
 	heartRateFile.write('Time,Heart Rate (bpm)\n')
 	powerFile = open(currentDir + powerFileName, 'w', encoding='utf-8')
@@ -48,6 +52,7 @@ def openFiles():
 	################
 
 def closeFiles():
+	logFile.close()
 	heartRateFile.close()
 	powerFile.close()
 	torqueFile.close()
@@ -82,6 +87,12 @@ def startRecordingVideo(camera):
 
 def stopRecordingVideo(camera):
 	camera.stop_recording()
+
+
+def log(message)
+	# TODO: Write current time stamp
+	logFile.write(message)
+	logFile.write('\n')
 
 
 def writeHeartRateEvent(eventTime, heartRate):
