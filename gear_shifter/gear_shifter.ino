@@ -62,7 +62,7 @@ void loop() {
 	if (Serial.available() >= 1) {
 		char incomingByte = (char)Serial.read();
 		if (incomingByte == SHUTDOWN_MSG) {
-			sendMessage(ACKNOWLEDGE_MSG, "Shutting down.")
+			sendMessage(ACKNOWLEDGE_MSG, "Shutting down.");
 			shutdown();
 		}
 	}
