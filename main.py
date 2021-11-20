@@ -353,6 +353,10 @@ recording.log('Shutting down...')
 if gearComms is not None:
 	try:
 		gearComms.write(SHUTDOWN_MSG.encode('utf-8'))
+		time.sleep(0.5)   # Wait for response, if any
+		gearData = readFromGearShifter()
+		if gearData is not None:
+			handleGearShifterComms(gearData)
 	except Exception as error:
 		recording.log('Could not safely stop gear shifter.    ' + str(error))
 
