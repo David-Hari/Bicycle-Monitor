@@ -351,6 +351,7 @@ while True:
 recording.log('Shutting down...')
 
 if gearComms is not None:
+	recording.log('Telling gear shifter to shutdown.')
 	try:
 		gearComms.write(SHUTDOWN_MSG.encode('utf-8'))
 		time.sleep(0.5)   # Wait for response, if any
@@ -361,18 +362,24 @@ if gearComms is not None:
 		recording.log('Could not safely stop gear shifter.    ' + str(error))
 
 try:
+	recording.log('Stopping video recording.')
 	recording.stopRecordingVideo(camera)
 except Exception as error:
 	recording.log('Error during video recording.    ' + str(error))
 
 try:
 	if heartRateMonitor is not None:
+		recording.log('Stopping heart rate monitor.')
 		heartRateMonitor.close()
 	if powerMonitor is not None:
+		recording.log('Stopping power monitor.')
 		powerMonitor.close()
+	recording.log('Stopping ANT.')
 	antNode.stop()
 except ANTException as error:
 	recording.log('Could not stop ANT.    ' + str(error))
 
+recording.log('Turning off camera.')
 display.stop()
+recording.log('All done.')
 recording.closeFiles()
