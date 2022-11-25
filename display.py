@@ -165,6 +165,7 @@ def drawPowerBar(power, goalPower, powerRange, idealRange):
 	draw = ImageDraw.Draw(image)
 	barPadding = 20   # Leave room for text at the top and bottom
 	barHeight = powerBarOverlay.window[3] - (barPadding * 2) - titleHeight
+	# TODO: Draw statusBackgroundColour rectangle behind graphics. Same for speed and other info.
 	drawShadowedText(draw, (40,0), 'Power', font=titleFont)
 	fullRange = powerRange * 2
 	clampedPower = clamp(power, goalPower - powerRange, goalPower + powerRange)
