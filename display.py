@@ -154,10 +154,10 @@ def drawPowerBar(power, goalPower, powerRange, idealRange):
 	"""
 	Draws a bar graph indicating current power production.
 
-	:param power: Current power in Watts
-	:param goalPower: Power to try to achieve, in Watts
-	:param powerRange: The high and low bounds of the bar chart, in Watts
-	:param idealRange: The high and low bounds of the green (good) area, in Watts
+	:param power: Current power in Watts.
+	:param goalPower: Power to try to achieve, in Watts.
+	:param powerRange: The high and low bounds of the bar chart, in Watts.
+	:param idealRange: The high and low bounds of the green (good) area, in Watts.
 	"""
 	global powerBarOverlay
 
@@ -174,11 +174,11 @@ def drawPowerBar(power, goalPower, powerRange, idealRange):
 	idealHeight = idealRange / fullRange * barHeight
 	idealTop = mid - idealHeight
 	idealBottom = mid + idealHeight
-	draw.rectangle([70,idealTop,120,idealBottom], fill=powerIdealColour)
+	draw.rectangle((70,idealTop,120,idealBottom), fill=powerIdealColour)
 	if power < goalPower - idealRange:
-		draw.rectangle([72,idealBottom,118,y], fill=powerUnderColour)
+		draw.rectangle((72,idealBottom,118,y), fill=powerUnderColour)
 	elif power > goalPower + idealRange:
-		draw.rectangle([72,idealTop,118,y], fill=powerOverColour)
+		draw.rectangle((72,idealTop,118,y), fill=powerOverColour)
 	draw.line([65,y,125,y], fill=(0,0,0), width=5)
 	draw.line([67,y,123,y], fill=(255,255,255), width=3)
 	drawShadowedText(draw, (0,mid-20), str(goalPower), font=infoFont)
@@ -190,8 +190,8 @@ def drawSpeedAndDistance(speed, distance):
 	"""
 	Draws the speed on screen
 
-	:param speed: Speed in meters per second
-	:param distance: Distance to end in meters
+	:param speed: Speed in meters per second.
+	:param distance: Distance to end in meters.
 	"""
 	global gpsOverlay
 
@@ -229,7 +229,7 @@ def drawHeartRate(heartRate):
 
 def drawGearNumber(gear):
 	"""
-	:param gear: The number of gear the bike is currently in
+	:param gear: The number of gear the bike is currently in.
 	"""
 	global gearOverlay
 
@@ -248,8 +248,8 @@ def addOverlay(image, position):
 	"""
 	Adds a region of the screen that can be drawn to.
 
-	:param image: Initial image to draw
-	:param position: x,y position of the top-left corner of the overlay
+	:param image: Initial image to draw.
+	:param position: x,y position of the top-left corner of the overlay.
 	:return: The overlay object
 	"""
 	assert position[2] % 32 == 0 and position[3] % 16 == 0
