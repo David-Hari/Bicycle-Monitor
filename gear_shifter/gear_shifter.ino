@@ -27,7 +27,7 @@ void setup() {
 	pinMode(LED_BUILTIN, OUTPUT);
 	initializeButtons();
 	Serial.begin(9600);
-	
+
 	// Listen for startup message from Pi, or buttons are pressed.
 	digitalWrite(LED_BUILTIN, LOW);
 	while (Serial.available() <= 0 && !(debug = areBothButtonsDown())) {}
@@ -38,11 +38,16 @@ void setup() {
 		}
 	}
 	digitalWrite(LED_BUILTIN, HIGH);
-	
+
 	if (debug) {
 		sendMessage(DEBUG_MSG, "Debug mode");
 		delay(1000);
-		testReadPositions();   // This never returns, preventing the main loop from executing
+		if (isAdjustButtonDown()) {
+			adjustPositionsLoop();
+		}
+		else {
+			testReadPositionsLoop();
+		}
 	}
 	else {
 		// Note: Servo position needs to be set *before* attaching, otherwise it
@@ -88,30 +93,61 @@ void loop() {
 /*************************************************************************/
 /* Used for testing/debugging to determine positions of servo motors.    */
 /*************************************************************************/
-void testReadPositions() {
+void testReadPositionsLoop() {
 	while (true) {
-		int angle1 = readAngle(FEEDBACK_PIN_1);
-		int angle2 = readAngle(FEEDBACK_PIN_2);
-		int gear1 = getGearAtPosition(angle1);
-		int gear2 = getGearAtPosition(angle2);
-		
-		String message = "Angle/Gear - 1: " + String(angle1) + "°, ";
-		if (gear1 == -1) {
-			message = message + "none";
+		testReadPositions();
+		delay(200);  // Don't run too quickly, serial buffer might fill up
+	}
+}
+
+void testReadPositions() {
+	int angle1 = readAngle1();
+	int angle2 = readAngle2();
+	int gear1 = getGearAtPosition(angle1);
+	int gear2 = getGearAtPosition(angle2);
+
+	String message = "Angle/Gear   1: " + String(angle1) + "°, ";
+	if (gear1 == -1) {
+		message = message + "none";
+	}
+	else {
+		message = message + String(gear1);
+	}
+	message = message + "   2: " + String(angle2) + "°, ";
+	if (gear2 == -1) {
+		message = message + "none";
+	}
+	else {
+		message = message + String(gear2);
+	}
+	sendMessage(DEBUG_MSG, message);
+}
+
+/*************************************************************************/
+/* Moves the servo motors using the buttons.                             */
+/* Used for determining the motor angles of each gear position.          */
+/*************************************************************************/
+void adjustPositionsLoop() {
+	// Note: Servo position needs to be set *before* attaching, otherwise it
+	// will move to a default position.
+	int angle = readAngle1();
+	moveServo(angle);
+	initializeServo();
+	while (true) {
+		int buttonPressed = checkInput();
+		if (buttonPressed != NONE_PRESSED) {
+			if (buttonPressed == UP_PRESSED) {
+				angle++;
+			}
+			else if (buttonPressed == DOWN_PRESSED) {
+				angle--;
+			}
+			angle = clampAngle(angle);
+			moveServo(angle);
 		}
-		else {
-			message = message + String(gear1);
-		}
-		message = message + " - 2: " + String(angle2) + "°, ";
-		if (gear2 == -1) {
-			message = message + "none";
-		}
-		else {
-			message = message + String(gear2);
-		}
-		sendMessage(DEBUG_MSG, message);
-		
-		delay(200);  // Don't want to run too quickly, serial buffer might fill up
+
+		testReadPositions();
+		delay(200);
 	}
 }
 

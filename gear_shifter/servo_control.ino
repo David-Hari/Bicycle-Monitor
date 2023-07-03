@@ -19,8 +19,8 @@ const int SERVO_MAX_PULSE = 2500;
 // I actually measured a wider range when moving it by hand (21 (0.112V) to 649 (3.130V))
 // but this is what the servo can actually do when sent the min/max pulses.
 // Also note that the numbers are reversed, with the largest number representing 0 degrees.
-const int ANALOG_MIN = 620;   // 0 degrees.
-const int ANALOG_MAX = 60;    // 172 degrees.
+const int ANALOG_MIN = 620;   // SERVO_MIN_ANGLE.
+const int ANALOG_MAX = 60;    // SERVO_MAX_ANGLE.
 
 Servo servo;
 
@@ -57,6 +57,12 @@ int readAngle(int pin) {
 	int average = value / NUM_READS;
 	return map(average, ANALOG_MIN, ANALOG_MAX, SERVO_MIN_ANGLE, SERVO_MAX_ANGLE);
 }
+int readAngle1() {
+	return readAngle(FEEDBACK_PIN_1);
+}
+int readAngle2() {
+	return readAngle(FEEDBACK_PIN_2);
+}
 
 
 /*************************************************************************/
@@ -79,8 +85,8 @@ int getGearAtPosition(int angle) {
 /* Error if the servo position does not correspond to any gear.          */
 /*************************************************************************/
 int readGear() {
-	int angle1 = readAngle(FEEDBACK_PIN_1);
-	int angle2 = readAngle(FEEDBACK_PIN_2);
+	int angle1 = readAngle1();
+	int angle2 = readAngle2();
 	if (abs(angle1 - angle2) > GEAR_POSITION_THRESHOLD) {
 		error("Servo motors not aligned. Motor 1: " + String(angle1) + "°, Motor 2: " + String(angle2) + "°");
 		return -1;
@@ -105,7 +111,7 @@ boolean moveToGear(int toGear) {
 	if (currentGear < 0) {
 		return false;
 	}
-	
+
 	// Incrementally move the servo motors with delays in between to control their speed
 	currentAngle1 = gearPositions[currentGear-1];
 	newAngle = gearPositions[toGear-1];
@@ -121,14 +127,14 @@ boolean moveToGear(int toGear) {
 			delay(GEAR_CHANGE_DELAY);
 		}
 	}
-	
+
 	// Wait for servos to finish moving.
 	long startWaitTime = millis();
 	boolean isFinished1 = false;
 	boolean isFinished2 = false;
 	do {
-		currentAngle1 = readAngle(FEEDBACK_PIN_1);
-		currentAngle2 = readAngle(FEEDBACK_PIN_2);
+		currentAngle1 = readAngle1();
+		currentAngle2 = readAngle2();
 		isFinished1 = currentAngle1 >= newAngle - GEAR_POSITION_THRESHOLD && currentAngle1 <= newAngle + GEAR_POSITION_THRESHOLD;
 		isFinished2 = currentAngle2 >= newAngle - GEAR_POSITION_THRESHOLD && currentAngle2 <= newAngle + GEAR_POSITION_THRESHOLD;
 	} while ((!isFinished1 || !isFinished2) && millis() - startWaitTime < GEAR_CHANGE_WAIT_TIME);
@@ -151,8 +157,8 @@ boolean moveToGear(int toGear) {
 /* Returns the gear that the servos should now be at.                    */
 /*************************************************************************/
 int moveToNearestGear() {
-	int currentAngle1 = readAngle(FEEDBACK_PIN_1);
-	
+	int currentAngle1 = readAngle1();
+
 	int oldGearAngle = gearPositions[0];
 	for (int i = 1; i < MAX_GEARS; i++) {
 		int newGearAngle = gearPositions[i];
@@ -167,7 +173,7 @@ int moveToNearestGear() {
 		}
 		oldGearAngle = newGearAngle;
 	}
-	
+
 	// If it gets to here then the angle must be greater than the highest gear
 	return MAX_GEARS;
 }
@@ -177,11 +183,18 @@ int moveToNearestGear() {
 /* Move the servo motor to the given angle.                              */
 /*************************************************************************/
 void moveServo(int angle) {
+	servo.writeMicroseconds(map(clampAngle(angle), SERVO_MIN_ANGLE, SERVO_MAX_ANGLE, SERVO_MIN_PULSE, SERVO_MAX_PULSE));
+}
+
+/*************************************************************************/
+/* Clamp the given angle to within the range the servo can do.           */
+/*************************************************************************/
+int clampAngle(int angle) {
 	if (angle < 0) {
-		angle = 0;
+		return 0;
 	}
-	else if (angle > SERVO_MAX_ANGLE) {
-		angle = SERVO_MAX_ANGLE;
+	if (angle > SERVO_MAX_ANGLE) {
+		return SERVO_MAX_ANGLE;
 	}
-	servo.writeMicroseconds(map(angle, SERVO_MIN_ANGLE, SERVO_MAX_ANGLE, SERVO_MIN_PULSE, SERVO_MAX_PULSE));
+	return angle;
 }

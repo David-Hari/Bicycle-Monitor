@@ -6,6 +6,7 @@
 /* Digital pins */
 const int UP_BUTTON_PIN = 2;
 const int DOWN_BUTTON_PIN = 3;
+const int ADJUST_BUTTON_PIN = 5;
 
 /* Events */
 const int NONE_PRESSED = 0;
@@ -21,6 +22,7 @@ struct Button {
 
 void initializeButtons();
 boolean areBothButtonsDown();
+boolean isAdjustButtonDown();
 int waitForInput();
 
 

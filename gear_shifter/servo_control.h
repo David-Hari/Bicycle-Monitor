@@ -27,12 +27,14 @@ const int GEAR_POSITION_THRESHOLD = 8;    // Degrees +/- actual position.
 
 void initializeServo();
 void stopServo();
-int readAngle(int servoPin);
+int readAngle1();
+int readAngle2();
 int getGearAtPosition(int angle);
 int readGear();
 boolean moveToGear(int toGear);
 int moveToNearestGear();
 void moveServo(int angle);
+int clampAngle(int angle);
 
 
 #endif   // SERVO_CONTROL_H
