@@ -55,7 +55,7 @@ void setup() {
 		currentGear = readGear();
 		moveToGear(currentGear);
 		initializeServo();
-		sendGearChanged(currentGear);
+		sendMessage(GEAR_CHANGED_MSG, String(currentGear));
 	}
 }
 
@@ -84,8 +84,9 @@ void loop() {
 					currentGear--;
 				}
 			}
+			sendMessage(GEAR_CHANGING_MSG, String(currentGear));
 			moveToGear(currentGear);
-			sendGearChanged(currentGear);
+			sendMessage(GEAR_CHANGED_MSG, String(currentGear));
 		}
 	}
 }
@@ -186,13 +187,6 @@ void shutdown() {
 	while (true) {}
 }
 
-
-/*************************************************************************/
-/* Send the given gear number over serial.                               */
-/*************************************************************************/
-void sendGearChanged(int gear) {
-	sendMessage(GEAR_CHANGED_MSG, String(gear));
-}
 
 /*************************************************************************/
 /* Send an error message over serial.                                    */

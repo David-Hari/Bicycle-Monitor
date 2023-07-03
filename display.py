@@ -21,15 +21,20 @@ statusFont = ImageFont.truetype(fontPath, 35)
 infoFont = ImageFont.truetype(fontPath, 32)
 gearFont = ImageFont.truetype(fontPath, 50)
 titleFont = ImageFont.truetype(boldFontPath, 35)
+textPrimaryColour = (255, 255, 255)
+textDimColour = (128, 128, 128)
+statusBackgroundColour = (20, 20, 20, 128)
+statusColours = {
+	'info': (255, 255, 255),
+	'warning': (255, 128, 0),
+	'error': (255, 0, 0)
+}
+powerUnderColour = (207, 16, 26)
+powerIdealColour = (31, 160, 70)
+powerOverColour = (239, 122, 0)
 titleHeight = 45            # Best guess. Quicker than draw.textsize.
 statusOverlayHeight = 160   # Max height of image for overlay. Must be a multiple of 16.
 statusPadding = 10          # Size between each status message, in pixels.
-statusBackgroundColour = (20,20,20,128)
-statusColours = {
-	'info': (255,255,255),
-	'warning': (255,128,0),
-	'error': (255,0,0)
-}
 statusOverlays = {}
 statusIdCounter = 0
 #maxStatusOverlays = 4   # So we don't flood the screen with messages
@@ -38,9 +43,6 @@ powerBarOverlay = None
 gpsOverlay = None
 heartRateOverlay = None
 gearOverlay = None
-powerUnderColour = (207,16,26)
-powerIdealColour = (31,160,70)
-powerOverColour = (239, 122, 0)
 
 
 def start(piCamera):
@@ -174,11 +176,11 @@ def drawPowerBar(power, goalPower, powerRange, idealRange):
 	idealHeight = idealRange / fullRange * barHeight
 	idealTop = mid - idealHeight
 	idealBottom = mid + idealHeight
-	draw.rectangle((70,idealTop,120,idealBottom), fill=powerIdealColour)
+	draw.rectangle((70, idealTop, 120, idealBottom), fill=powerIdealColour)
 	if power < goalPower - idealRange:
-		draw.rectangle((72,idealBottom,118,y), fill=powerUnderColour)
+		draw.rectangle((72, idealBottom, 118, y), fill=powerUnderColour)
 	elif power > goalPower + idealRange:
-		draw.rectangle((72,idealTop,118,y), fill=powerOverColour)
+		draw.rectangle((72, idealTop, 118, y), fill=powerOverColour)
 	draw.line([65,y,125,y], fill=(0,0,0), width=5)
 	draw.line([67,y,123,y], fill=(255,255,255), width=3)
 	drawShadowedText(draw, (0,mid-20), str(goalPower), font=infoFont)
@@ -222,14 +224,16 @@ def drawHeartRate(heartRate):
 	global heartRateOverlay
 
 	image = Image.new('RGBA', heartRateOverlay.window[2:4])
-	image.paste(heartImage, [0,5,40,45])
+	image.paste(heartImage, (0, 5, 40, 45))
 	draw = ImageDraw.Draw(image)
 	drawShadowedText(draw, (45,2), str(int(heartRate)), font=infoFont)
 	updateOverlay(heartRateOverlay, image)
 
-def drawGearNumber(gear):
+
+def drawGearNumber(gear, isChanging=False):
 	"""
 	:param gear: The number of gear the bike is currently in.
+	:param isChanging: True if the bike is in the process of changing to this gear.
 	"""
 	global gearOverlay
 
@@ -237,9 +241,11 @@ def drawGearNumber(gear):
 	draw = ImageDraw.Draw(image)
 	text = str(gear)
 	textWidth, textHeight = draw.textsize(text, font=gearFont)
-	draw.rectangle([0,0,textWidth+60,textHeight+40], fill=statusBackgroundColour)
-	drawShadowedText(draw, (30,10), text, font=gearFont)
+	textColour = textDimColour if isChanging else textPrimaryColour
+	draw.rectangle((0, 0, textWidth+60, textHeight+40), fill=statusBackgroundColour)
+	drawShadowedText(draw, (30,10), text, fill=textColour, font=gearFont)
 	updateOverlay(gearOverlay, image)
+
 
 
 ### Private methods ###
@@ -270,12 +276,12 @@ def makeStatusTextImage(text, colour):
 	textWidth += 60  # Add some padding
 	textHeight += 40
 	x = (config.videoDisplayResolution[0] - textWidth) // 2
-	draw.rectangle([x,0,x+textWidth,textHeight], fill=statusBackgroundColour)
+	draw.rectangle((x, 0, x+textWidth, textHeight), fill=statusBackgroundColour)
 	drawShadowedText(draw, (x+30,20), text, font=statusFont, fill=colour)
 	return image, (textWidth, textHeight)
 
 
-def drawShadowedText(draw, position, text, font, fill=(255,255,255), shadow=(0,0,0)):
+def drawShadowedText(draw, position, text, font, fill=textPrimaryColour, shadow=(0,0,0)):
 	x = position[0]
 	y = position[1]
 	r = 3

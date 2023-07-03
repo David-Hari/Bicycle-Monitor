@@ -23,13 +23,13 @@ import recording
 
 
 # Gear changer message codes
-STARTUP_MSG        = 'S';
-SHUTDOWN_MSG       = 'X';
-ACKNOWLEDGE_MSG    = 'A';
-ERROR_MSG          = 'E';
-DEBUG_MSG          = 'D';
-GEAR_CHANGING_MSG  = 'C';
-GEAR_CHANGED_MSG   = 'G';
+STARTUP_MSG        = 'S'
+SHUTDOWN_MSG       = 'X'
+ACKNOWLEDGE_MSG    = 'A'
+ERROR_MSG          = 'E'
+DEBUG_MSG          = 'D'
+GEAR_CHANGING_MSG  = 'C'
+GEAR_CHANGED_MSG   = 'G'
 
 original_send_buffer = None
 tempMessage = None
@@ -165,7 +165,9 @@ def handleGearShifterComms(data):
 	buffer = data.decode('utf-8')
 	for line in filter(None, buffer.split('\n')):
 		commsType, value = line[:1], line[1:]
-		if commsType == GEAR_CHANGED_MSG:
+		if commsType == GEAR_CHANGING_MSG:
+			display.drawGearNumber(int(value), isChanging=True)
+		elif commsType == GEAR_CHANGED_MSG:
 			display.drawGearNumber(int(value))
 		elif commsType == ACKNOWLEDGE_MSG:
 			recording.log(f'Gear shifter acknowledged message. Response: {value}')
