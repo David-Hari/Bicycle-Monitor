@@ -37,7 +37,6 @@ statusOverlayHeight = 160   # Max height of image for overlay. Must be a multipl
 statusPadding = 10          # Size between each status message, in pixels.
 statusOverlays = {}
 statusIdCounter = 0
-#maxStatusOverlays = 4   # So we don't flood the screen with messages
 overlaysMutex = Lock()
 powerBarOverlay = None
 gpsOverlay = None
@@ -72,7 +71,7 @@ def showStatusText(text, timeout=10, level='info'):
 	:param text: The text to show
 	:param timeout: Text will be hidden after this many seconds
 	:param level: Status level. One of: 'info', 'warning' or 'error'.
-	:return: Id of the status that has been added to the screen
+	:return: Id of the status that has been added to the screen.
 	"""
 	global statusOverlays
 	global statusIdCounter

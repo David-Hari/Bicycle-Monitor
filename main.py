@@ -35,7 +35,7 @@ original_send_buffer = None
 tempMessage = None
 gpsMessage = None
 gearMessage = None
-gearComms = None
+gearComms: Serial | None = None
 heartRateMonitor = None
 powerMonitor = None
 power = 0
@@ -132,22 +132,22 @@ def readFromGearShifter():
 			# A timeout of 0 means non-blocking mode, read() returns immediately with whatever is in the buffer.
 			gearComms = Serial('/dev/serial/by-id/usb-Arduino_LLC_Arduino_Micro-if00', 9600, timeout=0)
 			gearComms.write(STARTUP_MSG.encode('utf-8'))
-		except Exception as error:
-			showGearMessage('Could not connect to gear shifter.', error, level='error')
+		except Exception as error1:
+			showGearMessage('Could not connect to gear shifter.', error1, level='error')
 			return None
 
 	try:
 		numBytes = gearComms.in_waiting  # This throws if not connected
 		if numBytes > 1:
 			return gearComms.read(numBytes)
-	except Exception as error:
-		showGearMessage('Could not read from gear shifter. Attempting to reconnect.', error, level='error')
+	except Exception as error2:
+		showGearMessage('Could not read from gear shifter. Attempting to reconnect.', error2, level='error')
 		try:
 			gearComms.close()
 			gearComms.open()
 			gearComms.write(STARTUP_MSG.encode('utf-8'))
-		except Exception as error2:
-			showGearMessage('Could not connect to gear shifter.', error2, level='error')
+		except Exception as error3:
+			showGearMessage('Could not connect to gear shifter.', error3, level='error')
 
 	return None
 
