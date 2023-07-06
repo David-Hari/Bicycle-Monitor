@@ -79,10 +79,10 @@ def changeSpeedAndDist():
 	sd = (12.3, 1234) if sd[0] is None else (None, None)
 	display.drawSpeedAndDistance(sd[0], sd[1])
 
-root.bind('<w>', lambda e: changeGear(1))
-root.bind('<s>', lambda e: changeGear(-1))
-root.bind('<Up>', lambda e: changePower(1))
-root.bind('<Down>', lambda e: changePower(-1))
+root.bind('<w>', lambda e: changePower(1))
+root.bind('<s>', lambda e: changePower(-1))
+root.bind('<Up>', lambda e: changeGear(1))
+root.bind('<Down>', lambda e: changeGear(-1))
 root.bind('<space>', lambda e: changeSpeedAndDist())
 
 root.after_idle(initialDisplay)
