@@ -242,7 +242,7 @@ def drawGearNumber(gear, isChanging=False):
 	textWidth, textHeight = draw.textsize(text, font=gearFont)
 	textColour = textDimColour if isChanging else textPrimaryColour
 	draw.rectangle((0, 0, textWidth+60, textHeight+40), fill=statusBackgroundColour)
-	drawShadowedText(draw, (30, 12), text, fill=textColour, font=gearFont)
+	drawShadowedText(draw, (30, 15), text, fill=textColour, font=gearFont)
 	updateOverlay(gearOverlay, image)
 
 
