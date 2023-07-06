@@ -41,6 +41,9 @@ class MockOverlay:
 
 
 
+gear = 1
+power = 0
+sd = (None, None)
 root = tk.Tk()
 root.title('Bicycle Display Test')
 width = config.videoDisplayResolution[0]
@@ -55,9 +58,32 @@ root.configure(background='grey')
 display.start(MockCamera(root))
 
 def initialDisplay():
-	display.drawPowerBar(0, config.powerGoal, config.powerRange, config.powerIdealRange)
-	display.drawSpeedAndDistance(None, None)
-	display.drawHeartRate(0)
+	display.drawPowerBar(power, config.powerGoal, config.powerRange, config.powerIdealRange)
+	display.drawSpeedAndDistance(sd[0], sd[1])
+	display.drawHeartRate(123)
+	display.drawGearNumber(gear)
+
+def changeGear(num):
+	global gear
+	gear += num
+	display.drawGearNumber(gear, isChanging=True)
+	root.after(1000, lambda: display.drawGearNumber(gear))
+
+def changePower(num):
+	global power
+	power += num
+	display.drawPowerBar(power, config.powerGoal, config.powerRange, config.powerIdealRange)
+
+def changeSpeedAndDist():
+	global sd
+	sd = (12.3, 1234) if sd[0] is None else (None, None)
+	display.drawSpeedAndDistance(sd[0], sd[1])
+
+root.bind('<w>', lambda e: changeGear(1))
+root.bind('<s>', lambda e: changeGear(-1))
+root.bind('<Up>', lambda e: changePower(1))
+root.bind('<Down>', lambda e: changePower(-1))
+root.bind('<space>', lambda e: changeSpeedAndDist())
 
 root.after_idle(initialDisplay)
 root.mainloop()
