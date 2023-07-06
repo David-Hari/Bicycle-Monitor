@@ -167,7 +167,7 @@ def drawPowerBar(power, goalPower, powerRange, idealRange):
 	barPadding = 20   # Leave room for text at the top and bottom
 	barHeight = powerBarOverlay.window[3] - (barPadding * 2) - titleHeight
 	# TODO: Draw statusBackgroundColour rectangle behind graphics. Same for speed and other info.
-	drawShadowedText(draw, (40,0), 'Power', font=titleFont)
+	drawShadowedText(draw, (40, 0), 'Power', font=titleFont)
 	fullRange = powerRange * 2
 	clampedPower = clamp(power, goalPower - powerRange, goalPower + powerRange)
 	mid = (barHeight // 2) + barPadding + titleHeight
@@ -180,10 +180,10 @@ def drawPowerBar(power, goalPower, powerRange, idealRange):
 		draw.rectangle((72, idealBottom, 118, y), fill=powerUnderColour)
 	elif power > goalPower + idealRange:
 		draw.rectangle((72, idealTop, 118, y), fill=powerOverColour)
-	draw.line([65,y,125,y], fill=(0,0,0), width=5)
-	draw.line([67,y,123,y], fill=(255,255,255), width=3)
-	drawShadowedText(draw, (0,mid-20), str(goalPower), font=infoFont)
-	drawShadowedText(draw, (135,y-20), str(int(power)), font=infoFont)
+	draw.line([65, y, 125, y], fill=(0, 0, 0), width=5)
+	draw.line([67, y, 123, y], fill=(255, 255, 255), width=3)
+	drawShadowedText(draw, (0, mid-20), str(goalPower), font=infoFont)
+	drawShadowedText(draw, (135, y-20), str(int(power)), font=infoFont)
 	updateOverlay(powerBarOverlay, image)
 
 
@@ -199,17 +199,17 @@ def drawSpeedAndDistance(speed, distance):
 	image = Image.new('RGBA', gpsOverlay.window[2:4])
 	draw = ImageDraw.Draw(image)
 
-	drawShadowedText(draw, (0,0), 'Speed', font=titleFont)
+	drawShadowedText(draw, (0, 0), 'Speed', font=titleFont)
 	kmhText = '--' if speed is None else str(int(speed*3.6))
 	mphText = '--' if speed is None else str(int(speed*2.237))
-	drawShadowedText(draw, (2,titleHeight+5), kmhText + ' km/h', font=infoFont)
-	drawShadowedText(draw, (2,titleHeight+45), mphText + ' mph', font=infoFont)
+	drawShadowedText(draw, (2, titleHeight+5), kmhText + ' km/h', font=infoFont)
+	drawShadowedText(draw, (2, titleHeight+45), mphText + ' mph', font=infoFont)
 
 	drawShadowedText(draw, (200, 0), 'Dist.', font=titleFont)
 	kmText = '--' if distance is None else '{0:.2f}'.format(distance/1000)
 	miText = '--' if distance is None else '{0:.2f}'.format(distance/1609.344)
-	drawShadowedText(draw, (202,titleHeight+5), kmText + ' km', font=infoFont)
-	drawShadowedText(draw, (202,titleHeight+45), miText + ' mi.', font=infoFont)
+	drawShadowedText(draw, (202, titleHeight+5), kmText + ' km', font=infoFont)
+	drawShadowedText(draw, (202, titleHeight+45), miText + ' mi.', font=infoFont)
 
 	updateOverlay(gpsOverlay, image)
 
@@ -223,9 +223,9 @@ def drawHeartRate(heartRate):
 	global heartRateOverlay
 
 	image = Image.new('RGBA', heartRateOverlay.window[2:4])
-	image.paste(heartImage, (0, 5, 40, 45))
+	image.paste(heartImage, (0, 3, 40, 43))
 	draw = ImageDraw.Draw(image)
-	drawShadowedText(draw, (45,2), str(int(heartRate)), font=infoFont)
+	drawShadowedText(draw, (45, 2), str(int(heartRate)), font=infoFont)
 	updateOverlay(heartRateOverlay, image)
 
 
@@ -242,7 +242,7 @@ def drawGearNumber(gear, isChanging=False):
 	textWidth, textHeight = draw.textsize(text, font=gearFont)
 	textColour = textDimColour if isChanging else textPrimaryColour
 	draw.rectangle((0, 0, textWidth+60, textHeight+40), fill=statusBackgroundColour)
-	drawShadowedText(draw, (30,10), text, fill=textColour, font=gearFont)
+	drawShadowedText(draw, (30, 12), text, fill=textColour, font=gearFont)
 	updateOverlay(gearOverlay, image)
 
 
@@ -276,11 +276,11 @@ def makeStatusTextImage(text, colour):
 	textHeight += 40
 	x = (config.videoDisplayResolution[0] - textWidth) // 2
 	draw.rectangle((x, 0, x+textWidth, textHeight), fill=statusBackgroundColour)
-	drawShadowedText(draw, (x+30,20), text, font=statusFont, fill=colour)
+	drawShadowedText(draw, (x+30, 20), text, font=statusFont, fill=colour)
 	return image, (textWidth, textHeight)
 
 
-def drawShadowedText(draw, position, text, font, fill=textPrimaryColour, shadow=(0,0,0)):
+def drawShadowedText(draw, position, text, font, fill=textPrimaryColour, shadow=(0, 0, 0)):
 	x = position[0]
 	y = position[1]
 	r = 3
