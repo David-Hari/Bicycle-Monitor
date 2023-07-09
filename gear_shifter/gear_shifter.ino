@@ -134,9 +134,14 @@ void adjustPositionsLoop() {
 	int angle = readAngle1();
 	moveServo(angle);
 	initializeServo();
+	int count = 0;
+	boolean buttonHeld = false;
 	while (true) {
 		int buttonPressed = checkInput();
-		if (buttonPressed != NONE_PRESSED) {
+		if (buttonPressed == NONE_PRESSED) {
+			buttonHeld = false;
+		}
+		else {
 			if (buttonPressed == UP_PRESSED) {
 				angle++;
 			}
@@ -145,10 +150,17 @@ void adjustPositionsLoop() {
 			}
 			angle = clampAngle(angle);
 			moveServo(angle);
+			if (!buttonHeld) {  // Delay between first press and repeating
+				delay(200);
+			}
+			buttonHeld = true;
 		}
 
-		testReadPositions();
-		delay(200);
+		if (count % 20 == 0) {  // Don't run too quickly, serial buffer might fill up
+			testReadPositions();
+		}
+		delay(10);
+		count++;
 	}
 }
 
