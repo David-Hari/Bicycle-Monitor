@@ -23,7 +23,8 @@ struct Button {
 void initializeButtons();
 boolean areBothButtonsDown();
 boolean isAdjustButtonDown();
-int waitForInput();
+int checkInput();
+int checkInputNoDelay();
 
 
 #endif   // BUTTONS_H

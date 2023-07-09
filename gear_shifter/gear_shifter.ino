@@ -137,7 +137,7 @@ void adjustPositionsLoop() {
 	int count = 0;
 	boolean buttonHeld = false;
 	while (true) {
-		int buttonPressed = checkInput();
+		int buttonPressed = checkInputNoDelay();
 		if (buttonPressed == NONE_PRESSED) {
 			buttonHeld = false;
 		}

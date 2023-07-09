@@ -190,11 +190,5 @@ void moveServo(int angle) {
 /* Clamp the given angle to within the range the servo can do.           */
 /*************************************************************************/
 int clampAngle(int angle) {
-	if (angle < 0) {
-		return 0;
-	}
-	if (angle > SERVO_MAX_ANGLE) {
-		return SERVO_MAX_ANGLE;
-	}
-	return angle;
+	return constrain(angle, 0, SERVO_MAX_ANGLE);
 }
