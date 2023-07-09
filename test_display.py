@@ -58,7 +58,7 @@ root.configure(background='grey')
 display.start(MockCamera(root))
 
 def initialDisplay():
-	display.drawPowerBar(power, config.powerGoal, config.powerRange, config.powerIdealRange)
+	display.drawPower(power, config.powerGoal)
 	display.drawSpeedAndDistance(sd[0], sd[1])
 	display.drawHeartRate(123)
 	display.drawGearNumber(gear)
@@ -72,7 +72,7 @@ def changeGear(num):
 def changePower(num):
 	global power
 	power += num
-	display.drawPowerBar(power, config.powerGoal, config.powerRange, config.powerIdealRange)
+	display.drawPower(power, config.powerGoal)
 
 def changeSpeedAndDist():
 	global sd

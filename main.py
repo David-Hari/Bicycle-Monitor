@@ -296,7 +296,7 @@ isGpsActive = False
 while True:
 	try:
 		# Update the power info on display
-		display.drawPowerBar(power, config.powerGoal, config.powerRange, config.powerIdealRange)
+		display.drawPower(power, config.powerGoal)
 
 		# Check to see if GPS is active. Give it some time to start up first.
 		if not isGpsActive and counter > 40 and counter % 8 == 0:

@@ -17,10 +17,11 @@ camera = None
 fontPath = '/usr/share/fonts/truetype/roboto/Roboto-Regular.ttf'
 boldFontPath = '/usr/share/fonts/truetype/roboto/Roboto-Bold.ttf'
 heartImage = Image.open('./heart.png').convert('RGBA')
+titleFont = ImageFont.truetype(boldFontPath, 35)
 statusFont = ImageFont.truetype(fontPath, 35)
 infoFont = ImageFont.truetype(fontPath, 32)
 gearFont = ImageFont.truetype(fontPath, 50)
-titleFont = ImageFont.truetype(boldFontPath, 35)
+powerFont = ImageFont.truetype(fontPath, 40)
 textPrimaryColour = (255, 255, 255)
 textDimColour = (128, 128, 128)
 statusBackgroundColour = (20, 20, 20, 128)
@@ -53,8 +54,8 @@ def start(piCamera):
 
 	camera = piCamera
 	camera.start_preview(fullscreen=True)
-	powerBarOverlay = addOverlay(Image.new('RGBA', (256, 240)), (20, 0, 256, 240))
-	gpsOverlay = addOverlay(Image.new('RGBA', (512, 128)), (320, 0, 512, 128))
+	powerBarOverlay = addOverlay(Image.new('RGBA', (256, 240)), (10, 10, 256, 240))
+	gpsOverlay = addOverlay(Image.new('RGBA', (512, 128)), (320, 10, 512, 128))
 	heartRateOverlay = addOverlay(Image.new('RGBA', (256, 128)), (1780, 20, 256, 128))
 	gearOverlay = addOverlay(Image.new('RGBA', (128, 128)), (1780, 600, 128, 128))
 
@@ -151,46 +152,30 @@ def hideStatusText(statusId):
 					each.overlay.window = (w[0], each.yPos, w[2], w[3])
 
 
-def drawPowerBar(power, goalPower, powerRange, idealRange):
+def drawPower(power, goalPower):
 	"""
-	Draws a bar graph indicating current power production.
-
 	:param power: Current power in Watts.
 	:param goalPower: Power to try to achieve, in Watts.
-	:param powerRange: The high and low bounds of the bar chart, in Watts.
-	:param idealRange: The high and low bounds of the green (good) area, in Watts.
 	"""
 	global powerBarOverlay
 
+	# TODO: Remove colour bar and ideal power, and draw power number larger and closer to corner
 	image = Image.new('RGBA', powerBarOverlay.window[2:4])
 	draw = ImageDraw.Draw(image)
-	barPadding = 20   # Leave room for text at the top and bottom
-	barHeight = powerBarOverlay.window[3] - (barPadding * 2) - titleHeight
-	# TODO: Draw statusBackgroundColour rectangle behind graphics. Same for speed and other info.
-	drawShadowedText(draw, (40, 0), 'Power', font=titleFont)
-	fullRange = powerRange * 2
-	clampedPower = clamp(power, goalPower - powerRange, goalPower + powerRange)
-	mid = (barHeight // 2) + barPadding + titleHeight
-	y = ((goalPower + powerRange - clampedPower) / fullRange * barHeight) + barPadding + titleHeight
-	idealHeight = idealRange / fullRange * barHeight
-	idealTop = mid - idealHeight
-	idealBottom = mid + idealHeight
-	draw.rectangle((70, idealTop, 120, idealBottom), fill=powerIdealColour)
-	if power < goalPower - idealRange:
-		draw.rectangle((72, idealBottom, 118, y), fill=powerUnderColour)
-	elif power > goalPower + idealRange:
-		draw.rectangle((72, idealTop, 118, y), fill=powerOverColour)
-	draw.line([65, y, 125, y], fill=(0, 0, 0), width=5)
-	draw.line([67, y, 123, y], fill=(255, 255, 255), width=3)
-	drawShadowedText(draw, (0, mid-20), str(goalPower), font=infoFont)
-	drawShadowedText(draw, (135, y-20), str(int(power)), font=infoFont)
+
+	textWidth1, textHeight1 = draw.textsize('Power', font=titleFont)
+	textWidth2, textHeight2 = draw.textsize('000', font=powerFont)
+	textWidth = max(textWidth1, textWidth2)
+	textHeight = textHeight1 + textHeight2
+
+	draw.rectangle((0, 0, textWidth+40, textHeight+60), fill=statusBackgroundColour)
+	drawShadowedText(draw, (20, 10), 'Power', font=titleFont)
+	drawShadowedText(draw, (105, textHeight1+35), str(int(power)), font=powerFont, align='r')
 	updateOverlay(powerBarOverlay, image)
 
 
 def drawSpeedAndDistance(speed, distance):
 	"""
-	Draws the speed on screen
-
 	:param speed: Speed in meters per second.
 	:param distance: Distance to end in meters.
 	"""
@@ -216,8 +201,6 @@ def drawSpeedAndDistance(speed, distance):
 
 def drawHeartRate(heartRate):
 	"""
-	Draws heart rate on screen.
-
 	:param heartRate:
 	"""
 	global heartRateOverlay
@@ -280,15 +263,16 @@ def makeStatusTextImage(text, colour):
 	return image, (textWidth, textHeight)
 
 
-def drawShadowedText(draw, position, text, font, fill=textPrimaryColour, shadow=(0, 0, 0)):
+def drawShadowedText(draw, position, text, font, fill=textPrimaryColour, shadow=(0, 0, 0), align='l'):
 	x = position[0]
 	y = position[1]
 	r = 3
-	draw.text((x, y-r), text, font=font, fill=shadow)
-	draw.text((x+r, y), text, font=font, fill=shadow)
-	draw.text((x, y+r), text, font=font, fill=shadow)
-	draw.text((x-r, y), text, font=font, fill=shadow)
-	draw.text(position, text, font=font, fill=fill)
+	anchor = align + 'a'  # 'a' = ascender, 'l'/'r' = left/right
+	draw.text((x, y-r), text, font=font, fill=shadow, anchor=anchor)
+	draw.text((x+r, y), text, font=font, fill=shadow, anchor=anchor)
+	draw.text((x, y+r), text, font=font, fill=shadow, anchor=anchor)
+	draw.text((x-r, y), text, font=font, fill=shadow, anchor=anchor)
+	draw.text(position, text, font=font, fill=fill, anchor=anchor)
 
 
 def clamp(value, minValue, maxValue):
