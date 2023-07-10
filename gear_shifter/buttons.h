@@ -21,10 +21,11 @@ struct Button {
 
 
 void initializeButtons();
-boolean areBothButtonsDown();
-boolean isAdjustButtonDown();
+boolean isUpButtonPressed();
+boolean isDownButtonPressed();
+boolean areBothButtonsPressed();
+boolean isAdjustButtonPressed();
 int checkInput();
-int checkInputNoDelay();
 
 
 #endif   // BUTTONS_H

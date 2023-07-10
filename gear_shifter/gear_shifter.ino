@@ -30,7 +30,7 @@ void setup() {
 
 	// Listen for startup message from Pi, or buttons are pressed.
 	digitalWrite(LED_BUILTIN, LOW);
-	while (Serial.available() <= 0 && !(debug = areBothButtonsDown())) {}
+	while (Serial.available() <= 0 && !(debug = areBothButtonsPressed())) {}
 	if (Serial.available() >= 1) {
 		char incomingByte = (char)Serial.read();
 		if (incomingByte == DEBUG_MSG) {
@@ -40,12 +40,13 @@ void setup() {
 	digitalWrite(LED_BUILTIN, HIGH);
 
 	if (debug) {
-		sendMessage(DEBUG_MSG, "Debug mode");
 		delay(1000);
-		if (isAdjustButtonDown()) {
+		if (isAdjustButtonPressed()) {
+			sendMessage(DEBUG_MSG, "Adjust mode");
 			adjustPositionsLoop();
 		}
 		else {
+			sendMessage(DEBUG_MSG, "Test mode");
 			testReadPositionsLoop();
 		}
 	}
@@ -137,15 +138,13 @@ void adjustPositionsLoop() {
 	int count = 0;
 	boolean buttonHeld = false;
 	while (true) {
-		int buttonPressed = checkInputNoDelay();
-		if (buttonPressed == NONE_PRESSED) {
-			buttonHeld = false;
-		}
-		else {
-			if (buttonPressed == UP_PRESSED) {
+		boolean upPressed = isUpButtonPressed();
+		boolean downPressed = isDownButtonPressed();
+		if (upPressed || downPressed) {
+			if (upPressed) {
 				angle++;
 			}
-			else if (buttonPressed == DOWN_PRESSED) {
+			else if (downPressed) {
 				angle--;
 			}
 			angle = clampAngle(angle);
@@ -155,11 +154,14 @@ void adjustPositionsLoop() {
 			}
 			buttonHeld = true;
 		}
+		else {
+			buttonHeld = false;
+		}
 
-		if (count % 20 == 0) {  // Don't run too quickly, serial buffer might fill up
+		if (count % 4 == 0) {  // Don't run too quickly, serial buffer might fill up
 			testReadPositions();
 		}
-		delay(10);
+		delay(50);
 		count++;
 	}
 }

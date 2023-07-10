@@ -23,25 +23,45 @@ void initializeButtons() {
 
 
 /*************************************************************************/
+/* Check if "up" button is held down.                                    */
+/*************************************************************************/
+boolean isUpButtonPressed() {
+	return digitalRead(UP_BUTTON_PIN) == LOW;
+}
+
+/*************************************************************************/
+/* Check if "down" button is held down.                                    */
+/*************************************************************************/
+boolean isDownButtonPressed() {
+	return digitalRead(DOWN_BUTTON_PIN) == LOW;
+}
+
+/*************************************************************************/
 /* Check if both buttons are held down. Used for debugging.              */
 /*************************************************************************/
-boolean areBothButtonsDown() {
-	return digitalRead(UP_BUTTON_PIN) == LOW && digitalRead(DOWN_BUTTON_PIN) == LOW;
+boolean areBothButtonsPressed() {
+	return isUpButtonPressed() && isDownButtonPressed();
 }
 
 /*************************************************************************/
 /* Check if adjust "button" is held down/connected. Used for debugging.  */
 /*************************************************************************/
-boolean isAdjustButtonDown() {
+boolean isAdjustButtonPressed() {
 	return digitalRead(ADJUST_BUTTON_PIN) == LOW;
 }
 
 
 /*************************************************************************/
-/* Check button state.                                                   */
-/* Return immediately what button was pressed or none.                   */
+/* Check button state, return what button was pressed or none.           */
 /*************************************************************************/
-int checkInputNoDelay() {
+int checkInput() {
+	// If time since last button press or release is less than the
+	// debounce delay then wait for the remainder of the time.
+	long remainingTime = long(debounceDelay - (millis() - lastButtonTime));
+	if (remainingTime > 0) {
+		delay(remainingTime);
+	}
+
 	// Need to check both buttons to maintain the correct state of each
 	int event = NONE_PRESSED;
 	if (checkButton(upButton)) {
@@ -51,19 +71,6 @@ int checkInputNoDelay() {
 		event = DOWN_PRESSED;
 	}
 	return event;
-}
-
-
-/*************************************************************************/
-/* Check button state, return what button was pressed or none.           */
-/* Uses a debounce delay.                                                */
-/*************************************************************************/
-int checkInput() {
-	// If time since last button press or release is less than the
-	// debounce delay then wait for the remainder of the time.
-	long remainingTime = long(debounceDelay - (millis() - lastButtonTime));
-	delay(max(remainingTime, 0));
-	return checkInputNoDelay();
 }
 
 
