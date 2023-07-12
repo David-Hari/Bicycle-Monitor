@@ -149,10 +149,10 @@ void adjustPositionsLoop() {
 		boolean downPressed = isDownButtonPressed();
 		if (upPressed || downPressed) {
 			if (upPressed) {
-				angle++;
+				angle--;
 			}
 			else if (downPressed) {
-				angle--;
+				angle++;
 			}
 			angle = clampAngle(angle);
 			moveServo(angle);
