@@ -88,12 +88,12 @@ int readGear() {
 	int angle1 = readAngle1();
 	int angle2 = readAngle2();
 	if (abs(angle1 - angle2) > GEAR_POSITION_THRESHOLD) {
-		error("Servo motors not aligned. Motor 1: " + String(angle1) + "°, Motor 2: " + String(angle2) + "°");
+		reportError("Servo motors not aligned. Motor 1: " + String(angle1) + "°, Motor 2: " + String(angle2) + "°");
 		return -1;
 	}
 	int currentGear = getGearAtPosition(angle1);
 	if (currentGear < 0) {
-		error("Gear not in correct position. Motor 1: " + String(angle1) + "°, Motor 2: " + String(angle2) + "°");
+		reportError("Gear not in correct position. Motor 1: " + String(angle1) + "°, Motor 2: " + String(angle2) + "°");
 		return -1;
 	}
 	return currentGear;
@@ -109,6 +109,7 @@ boolean moveToGear(int toGear) {
 	int currentAngle1, currentAngle2, newAngle;
 	int currentGear = readGear();
 	if (currentGear < 0) {
+		reportError("Cannot move to gear " + String(toGear));
 		return false;
 	}
 
@@ -141,7 +142,7 @@ boolean moveToGear(int toGear) {
 
 	// Error if one or both servos are still not at the correct angle after waiting.
 	if (!isFinished1 || !isFinished2) {
-		error("Servo motors not aligned. Gear: " + String(toGear) + ", Motor 1: " + String(currentAngle1) + "°, Motor 2: " + String(currentAngle2) + "°");
+		reportError("Servo motors not aligned moving to gear " + String(toGear) + ". Motor 1: " + String(currentAngle1) + "°, Motor 2: " + String(currentAngle2) + "°");
 		return false;
 	}
 

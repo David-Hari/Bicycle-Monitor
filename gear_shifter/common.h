@@ -11,7 +11,7 @@ const char DEBUG_MSG = 'D';
 const char GEAR_CHANGING_MSG = 'C';
 const char GEAR_CHANGED_MSG = 'G';
 
-void error(String message);
+void reportError(String message);
 void sendMessage(String type, String message);
 
 

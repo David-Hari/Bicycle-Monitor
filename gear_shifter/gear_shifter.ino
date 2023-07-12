@@ -1,11 +1,5 @@
 /**
  *  Main program. Checks button state and drives servos to change gear.
- *
- * TODO:
- *  - Could constantly check for servo alignment in main loop.
- *
- *  - Somehow detect if motor is not powered (or at least if there is no feedback signal).
- *    Perhaps analogRead a bunch of times and check if they are all zero.
  */
 
 
@@ -29,7 +23,7 @@ void setup() {
 	Serial.begin(9600);
 
 	// Listen for startup message from Pi, or buttons are pressed.
-	digitalWrite(LED_BUILTIN, LOW);
+	digitalWrite(LED_BUILTIN, HIGH);
 	while (Serial.available() <= 0 && !(debug = areBothButtonsPressed())) {}
 	if (Serial.available() >= 1) {
 		char incomingByte = (char)Serial.read();
@@ -37,8 +31,6 @@ void setup() {
 			debug = true;
 		}
 	}
-	digitalWrite(LED_BUILTIN, HIGH);
-
 	if (debug) {
 		delay(1000);
 		if (isAdjustButtonPressed()) {
@@ -58,6 +50,7 @@ void setup() {
 		initializeServo();
 		sendMessage(GEAR_CHANGED_MSG, String(currentGear));
 	}
+	digitalWrite(LED_BUILTIN, LOW);
 }
 
 
@@ -86,11 +79,24 @@ void loop() {
 				}
 			}
 			sendMessage(GEAR_CHANGING_MSG, String(currentGear));
-			moveToGear(currentGear);
-			sendMessage(GEAR_CHANGED_MSG, String(currentGear));
+			if (moveToGear(currentGear)) {
+				sendMessage(GEAR_CHANGED_MSG, String(currentGear));
+			}
+		}
+		else {
+			// Check to make sure that gear is still in position
+			int oldGear = currentGear;
+			currentGear = readGear();
+			if (currentGear != oldGear) {
+				sendMessage(ERROR_MSG, "Unexpected gear change from " + String(oldGear) + " to " + String(currentGear));
+				sendMessage(GEAR_CHANGED_MSG, String(currentGear));
+			}
+			// TODO: Somehow detect if motor is not powered (or at least if there is no feedback signal).
+			//  Perhaps analogRead a bunch of times and check if they are all zero.
 		}
 	}
 }
+
 
 /*************************************************************************/
 /* Used for testing/debugging to determine positions of servo motors.    */
@@ -124,6 +130,7 @@ void testReadPositions() {
 	}
 	sendMessage(DEBUG_MSG, message);
 }
+
 
 /*************************************************************************/
 /* Moves the servo motors using the buttons.                             */
@@ -168,27 +175,11 @@ void adjustPositionsLoop() {
 
 
 /*************************************************************************/
-/* The system has entered an error state.                                */
-/* Perform any necessary shut-down, then loop indefinitely.              */
-/* Blink the LED and periodically send the error message over serial.    */
+/* Report that an error has occurred.                                    */
 /*************************************************************************/
-void error(String message) {
-	unsigned int count = 0;
-	stopServo();
-	do {
-		if (count % 4 == 0) {
-			sendError(message);
-		}
-		// 3 short on/off pulses every second
-		for (int i = 0; i < 3; i++) {
-			digitalWrite(LED_BUILTIN, HIGH);
-			delay(100);
-			digitalWrite(LED_BUILTIN, LOW);
-			delay(100);
-		}
-		delay(900);
-		count++;
-	} while (!debug);
+void reportError(String message) {
+	sendMessage(ERROR_MSG, message);
+	digitalWrite(LED_BUILTIN, HIGH);
 }
 
 
@@ -201,13 +192,6 @@ void shutdown() {
 	while (true) {}
 }
 
-
-/*************************************************************************/
-/* Send an error message over serial.                                    */
-/*************************************************************************/
-void sendError(String message) {
-	sendMessage(ERROR_MSG, message);
-}
 
 /*************************************************************************/
 /* Send a message over serial. Type is defined in header file.           */

@@ -30,7 +30,7 @@ boolean isUpButtonPressed() {
 }
 
 /*************************************************************************/
-/* Check if "down" button is held down.                                    */
+/* Check if "down" button is held down.                                  */
 /*************************************************************************/
 boolean isDownButtonPressed() {
 	return digitalRead(DOWN_BUTTON_PIN) == LOW;
@@ -55,11 +55,11 @@ boolean isAdjustButtonPressed() {
 /* Check button state, return what button was pressed or none.           */
 /*************************************************************************/
 int checkInput() {
-	// If time since last button press or release is less than the
-	// debounce delay then wait for the remainder of the time.
+	// Ignore button press if time since last press or release is less
+	// than the debounce delay.
 	long remainingTime = long(debounceDelay - (millis() - lastButtonTime));
 	if (remainingTime > 0) {
-		delay(remainingTime);
+		return NONE_PRESSED;
 	}
 
 	// Need to check both buttons to maintain the correct state of each
