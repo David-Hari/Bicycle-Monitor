@@ -159,7 +159,6 @@ def drawPower(power, goalPower):
 	"""
 	global powerBarOverlay
 
-	# TODO: Remove colour bar and ideal power, and draw power number larger and closer to corner
 	image = Image.new('RGBA', powerBarOverlay.window[2:4])
 	draw = ImageDraw.Draw(image)
 
