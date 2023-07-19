@@ -187,6 +187,7 @@ void moveServo(int angle) {
 	servo.writeMicroseconds(map(clampAngle(angle), SERVO_MIN_ANGLE, SERVO_MAX_ANGLE, SERVO_MIN_PULSE, SERVO_MAX_PULSE));
 }
 
+
 /*************************************************************************/
 /* Clamp the given angle to within the range the servo can do.           */
 /*************************************************************************/
