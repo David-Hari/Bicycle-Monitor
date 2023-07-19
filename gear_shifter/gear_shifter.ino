@@ -43,12 +43,18 @@ void setup() {
 		}
 	}
 	else {
-		// Note: Servo position needs to be set *before* attaching, otherwise it
-		// will move to a default position.
 		currentGear = readGear();
-		moveToGear(currentGear);
-		initializeServo();
-		sendMessage(GEAR_CHANGED_MSG, String(currentGear));
+		if (currentGear > 0) {
+			// Note: Servo position needs to be set *before* attaching, otherwise it
+			// will move to a default position.
+			moveServo(readAngle1());
+			initializeServo();
+			sendMessage(GEAR_CHANGED_MSG, String(currentGear));
+		}
+		else {
+			sendMessage(ERROR_MSG, "Entering test mode due to invalid gear");
+			testReadPositionsLoop();
+		}
 	}
 	digitalWrite(LED_BUILTIN, LOW);
 }
@@ -156,8 +162,8 @@ void adjustPositionsLoop() {
 			}
 			angle = clampAngle(angle);
 			moveServo(angle);
-			if (!buttonHeld) {  // Delay between first press and repeating
-				delay(200);
+			if (!buttonHeld) {
+				delay(200);   // Delay between first press and repeating
 			}
 			buttonHeld = true;
 		}
