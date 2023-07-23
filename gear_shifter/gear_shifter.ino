@@ -52,7 +52,9 @@ void setup() {
 			sendMessage(GEAR_CHANGED_MSG, String(currentGear));
 		}
 		else {
+			delay(2000);
 			sendMessage(ERROR_MSG, "Entering test mode due to invalid gear");
+			delay(2000);
 			testReadPositionsLoop();
 		}
 	}
