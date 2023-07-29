@@ -133,7 +133,7 @@ def readFromGearShifter():
 			gearComms = Serial('/dev/serial/by-id/usb-Arduino_LLC_Arduino_Micro-if00', 9600, timeout=0)
 			gearComms.write(STARTUP_MSG.encode('utf-8'))
 		except Exception as error1:
-			showGearMessage('Could not connect to gear shifter.', error1, level='error')
+			showMessage('Could not connect to gear shifter.', error1, level='error')
 			return None
 
 	try:
@@ -141,13 +141,13 @@ def readFromGearShifter():
 		if numBytes > 1:
 			return gearComms.read(numBytes)
 	except Exception as error2:
-		showGearMessage('Could not read from gear shifter. Attempting to reconnect.', error2, level='error')
+		showMessage('Could not read from gear shifter. Attempting to reconnect.', error2, level='error')
 		try:
 			gearComms.close()
 			gearComms.open()
 			gearComms.write(STARTUP_MSG.encode('utf-8'))
 		except Exception as error3:
-			showGearMessage('Could not connect to gear shifter.', error3, level='error')
+			showMessage('Could not connect to gear shifter.', error3, level='error')
 
 	return None
 
@@ -236,6 +236,48 @@ def patchPiCamera():
 
 
 #-------------------------------------------------#
+#  Shutdown functions                             #
+#-------------------------------------------------#
+def shutDownGearShifter():
+	if gearComms is not None:
+		showMessage('Telling gear shifter to shutdown.')
+		try:
+			gearComms.write(SHUTDOWN_MSG.encode('utf-8'))
+			waitCount = 0
+			while waitCount < 10 and gearComms.in_waiting < 2: # Wait for response, if any
+				time.sleep(0.2)
+				waitCount += 1
+			gearData = readFromGearShifter()
+			if gearData is not None:
+				handleGearShifterComms(gearData)
+		except Exception as error:
+			raise Exception('Could not stop gear shifter.    ' + str(error))
+
+
+def stopRecordingVideo():
+	try:
+		showMessage('Stopping video recording.')
+		recording.stopRecordingVideo(camera)
+	except Exception as error:
+		showMessage('Error during video recording.', error)
+
+
+def shutDownSensors():
+	try:
+		if heartRateMonitor is not None:
+			showMessage('Stopping heart rate monitor.')
+			heartRateMonitor.close()
+		if powerMonitor is not None:
+			showMessage('Stopping power monitor.')
+			powerMonitor.close()
+		showMessage('Stopping ANT.')
+		antNode.stop()
+	except ANTException as error:
+		showMessage('Could not stop ANT.', error)
+
+
+
+#-------------------------------------------------#
 #  Initialization                                 #
 #-------------------------------------------------#
 
@@ -275,8 +317,8 @@ try:
 	heartRateMonitor.open(ChannelID(*config.heartRatePairing), searchTimeout=300)
 	powerMonitor.open(ChannelID(*config.powerPairing), searchTimeout=300)
 	showMessage('ANT started. Connecting to devices...')
-except ANTException as error:
-	showMessage('Could not start ANT.', error)
+except ANTException as antError:
+	showMessage('Could not start ANT.', antError)
 
 showMessage('Connecting to GPS service...')
 gpsd.connect()
@@ -304,8 +346,8 @@ while True:
 				info = gpsd.get_current()
 				if info.mode >= 2 and info.sats_valid:  # Check if it has a fix on position
 					isGpsActive = True
-			except Exception as e:
-				showGpsMessage(str(e), level='warning')
+			except Exception as gpsError:
+				showGpsMessage(str(gpsError), level='warning')
 
 		# Get GPS info once a second after we have a fix
 		if isGpsActive and counter % 4 == 0:
@@ -318,8 +360,8 @@ while True:
 				else:
 					display.drawSpeedAndDistance(None, None)
 					isGpsActive = False
-			except Exception as e:
-				showGpsMessage(str(e), level='error')
+			except Exception as gpsError:
+				showGpsMessage(str(gpsError), level='error')
 
 		# Update heart rate once a second
 		if counter % 4 == 0:
@@ -346,40 +388,22 @@ while True:
 		# NOTE: If this time is changed, all the modulo operands will have to be changed too.
 		time.sleep(0.250)  # 250ms
 	except KeyboardInterrupt:
-		break
+		try:
+			shutDownGearShifter()
+			stopRecordingVideo()
+			shutDownSensors()
+			break
+		except Exception as e:
+			showMessage('Could not safely shut down.', e)
 
 
 
+
+
+# TODO: Maybe see if GPIO pin can trigger this service to stop first rather than shutting down the whole OS
+#  That way if something goes wrong during shutdown it can abort.
 showMessage('Shutting down...')
 
-if gearComms is not None:
-	showMessage('Telling gear shifter to shutdown.')
-	try:
-		gearComms.write(SHUTDOWN_MSG.encode('utf-8'))
-		time.sleep(0.5)   # Wait for response, if any
-		gearData = readFromGearShifter()
-		if gearData is not None:
-			handleGearShifterComms(gearData)
-	except Exception as error:
-		showMessage('Could not safely stop gear shifter.    ' + str(error))
-
-try:
-	showMessage('Stopping video recording.')
-	recording.stopRecordingVideo(camera)
-except Exception as error:
-	showMessage('Error during video recording.    ' + str(error))
-
-try:
-	if heartRateMonitor is not None:
-		showMessage('Stopping heart rate monitor.')
-		heartRateMonitor.close()
-	if powerMonitor is not None:
-		showMessage('Stopping power monitor.')
-		powerMonitor.close()
-	showMessage('Stopping ANT.')
-	antNode.stop()
-except ANTException as error:
-	showMessage('Could not stop ANT.    ' + str(error))
 
 showMessage('Turning off camera.')
 display.stop()
