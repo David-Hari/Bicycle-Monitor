@@ -44,6 +44,7 @@ class MockOverlay:
 gear = 1
 power = 0
 sd = (None, None)
+messageNum = 1
 root = tk.Tk()
 root.title('Bicycle Display Test')
 width = config.videoDisplayResolution[0]
@@ -79,11 +80,17 @@ def changeSpeedAndDist():
 	sd = (12.3, 1234) if sd[0] is None else (None, None)
 	display.drawSpeedAndDistance(sd[0], sd[1])
 
+def showMessage():
+	global messageNum
+	display.showStatusText('this is message ' + str(messageNum) + '\nanother line')
+	messageNum += 1
+
 root.bind('<w>', lambda e: changePower(1))
 root.bind('<s>', lambda e: changePower(-1))
 root.bind('<Up>', lambda e: changeGear(1))
 root.bind('<Down>', lambda e: changeGear(-1))
 root.bind('<space>', lambda e: changeSpeedAndDist())
+root.bind('<m>', lambda e: showMessage())
 
 root.after_idle(initialDisplay)
 root.mainloop()
