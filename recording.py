@@ -92,8 +92,8 @@ def stopRecordingVideo(camera):
 
 def log(message):
 	currentTime = datetime.now(timezone.utc).time()
-	logFile.write(currentTime.strftime("%H:%M:%S.%f")[:-3])
-	logFile.write("   ")
+	logFile.write(currentTime.strftime('%H:%M:%S.%f')[:-3])
+	logFile.write('   ')
 	logFile.write(message)
 	logFile.write('\n')
 
