@@ -106,24 +106,24 @@ def updateStatusText(statusId, text, timeout=10, level='info'):
 	Updates an existing status overlay with new text.
 	If the overlay does not exist, a new one will be created.
 
-	:param statusId: Id of the existing status
+	:param statusId: ID of the existing status
 	:param text: The new text to show
 	:param timeout: Text will be hidden after this many seconds
 	:param level: Status level if new overlay. One of: 'info', 'warning' or 'error'.
 	:return: The id of the new or existing status
 	"""
-	if statusId is not None:
-		with overlaysMutex:
-			existingStatus = statusOverlays.get(statusId)
-		if existingStatus is not None:
-			existingStatus.timer.cancel()
-			image, size = makeStatusTextImage(text, statusColours[level])
-			updateOverlay(existingStatus.overlay, image)
-			existingStatus.timer = Timer(timeout, hideStatusText, args=[statusId])
-			existingStatus.timer.start()
-			return statusId
+	if statusId is None:
+		return showStatusText(text, timeout, level)
 
-	return showStatusText(text, timeout, level)
+	with overlaysMutex:
+		existingStatus = statusOverlays.get(statusId)
+	if existingStatus is not None:
+		existingStatus.timer.cancel()
+		image, size = makeStatusTextImage(text, statusColours[level])
+		updateOverlay(existingStatus.overlay, image)
+		existingStatus.timer = Timer(timeout, hideStatusText, args=[statusId])
+		existingStatus.timer.start()
+		return statusId
 
 
 def hideStatusText(statusId):

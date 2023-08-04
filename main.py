@@ -4,10 +4,12 @@
 
 """
 
+import os
 import time
 import math
 from serial import Serial
 
+import RPi.GPIO as GPIO
 from ant.core import driver
 from ant.core.node import Node, Network, ChannelID
 from ant.core.constants import *
@@ -32,9 +34,9 @@ GEAR_CHANGING_MSG  = 'C'
 GEAR_CHANGED_MSG   = 'G'
 
 original_send_buffer = None
-tempMessage = None
-gpsMessage = None
-gearMessage = None
+tempMessageId = None
+gpsMessageId = None
+gearMessageId = None
 gearComms = None
 heartRateMonitor = None
 powerMonitor = None
@@ -88,30 +90,30 @@ def torqueAndPedalData(eventCount, leftTorque, rightTorque, leftPedalSmoothness,
 #-------------------------------------------------#
 
 def showMessage(string, err=None):
-	if err: recording.log(string + '    ' + str(err))
-	else: recording.log(string)
-	display.showStatusText(string, level=('error' if err is not None else 'info'))
+	recording.log((string + '    ' + str(err)) if err else string)
+	msg = (string + '\n' + str(err)) if err else string
+	display.showStatusText(msg, level=('error' if err is not None else 'info'))
 
 
 def showHighTemperatureMessage(value):
-	global tempMessage
+	global tempMessageId
 	statusLevel = 'error' if temperature > cpuBadTemperature else 'warning'
 	string = f'CPU temperature at {value}°C'
 	recording.log(string)
-	tempMessage = display.updateStatusText(tempMessage, string, level=statusLevel)
+	tempMessageId = display.updateStatusText(tempMessageId, string, level=statusLevel)
 
 
 def showGpsMessage(string, level):
-	global gpsMessage
+	global gpsMessageId
 	recording.log(string)
-	gpsMessage = display.updateStatusText(gpsMessage, string, level=level)
+	gpsMessageId = display.updateStatusText(gpsMessageId, string, level=level)
 
 
 def showGearMessage(string, err=None, level='info'):
-	global gearMessage
-	if err: recording.log(string + '    ' + str(err))
-	else: recording.log(string)
-	gearMessage = display.updateStatusText(gearMessage, string, level)
+	global gearMessageId
+	recording.log((string + '    ' + str(err)) if err else string)
+	msg = (string + '\n' + str(err)) if err else string
+	gearMessageId = display.updateStatusText(gearMessageId, msg, level)
 
 
 
@@ -262,7 +264,7 @@ def stopRecordingVideo():
 		showMessage('Error during video recording.', error)
 
 
-def shutDownSensors():
+def stopSensors():
 	try:
 		if heartRateMonitor is not None:
 			showMessage('Stopping heart rate monitor.')
@@ -327,6 +329,10 @@ time.sleep(1)
 display.drawSpeedAndDistance(None, None)
 recording.startRecordingVideo(camera)
 
+# Set up shutdown button
+shutdownPin = 3    # Physical/Board pin 5, GPIO/BCM pin 3
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(shutdownPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 
 #-------------------------------------------------#
@@ -335,8 +341,21 @@ recording.startRecordingVideo(camera)
 
 counter = 0
 isGpsActive = False
+shutdownHeld = False       # Track if shut-down button is held down
+shouldShutdown = False     # If terminating should also shut down the operating system
+hasAbortedBefore = False   # Track if shut down was aborted once already
 while True:
 	try:
+		# Check once a second if shut-down button is held down for more than a second.
+		if counter % 4 == 0:
+			if GPIO.input(shutdownPin) == GPIO.LOW:
+				if shutdownHeld:
+					raise KeyboardInterrupt
+				else:
+					shutdownHeld = True
+			else:
+				shutdownHeld = False
+
 		# Update the power info on display
 		display.drawPower(power, config.powerGoal)
 
@@ -391,21 +410,27 @@ while True:
 		try:
 			shutDownGearShifter()
 			stopRecordingVideo()
-			shutDownSensors()
+			stopSensors()
 			break
 		except Exception as e:
-			showMessage('Could not safely shut down.', e)
+			if hasAbortedBefore:
+				showMessage('Shutdown failed again but shutting down anyway.', e)
+				break
+			else:
+				hasAbortedBefore = True
+				shutdownHeld = False
+				shouldShutdown = False
+				showMessage('Shutdown aborted due to error.', e)
 
 
+if shouldShutdown:
+	showMessage('Shutting down...')
+	time.sleep(1.0)
 
-
-
-# TODO: Maybe see if GPIO pin can trigger this service to stop first rather than shutting down the whole OS
-#  That way if something goes wrong during shutdown it can abort.
-showMessage('Shutting down...')
-
-
-showMessage('Turning off camera.')
 display.stop()
 recording.log('All done.')
 recording.closeFiles()
+GPIO.cleanup(shutdownPin)
+
+if shouldShutdown:
+	os.system('sudo shutdown -h now')
