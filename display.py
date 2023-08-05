@@ -45,6 +45,7 @@ heartRateOverlay = None
 gearOverlay = None
 
 
+
 def start(piCamera):
 	global camera
 	global powerBarOverlay
