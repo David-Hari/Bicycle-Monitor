@@ -96,6 +96,7 @@ def log(message):
 	logFile.write('   ')
 	logFile.write(message)
 	logFile.write('\n')
+	logFile.flush()
 
 
 def writeHeartRateEvent(eventTime, heartRate):
@@ -103,6 +104,7 @@ def writeHeartRateEvent(eventTime, heartRate):
 	heartRateFile.write(',')
 	heartRateFile.write(str(heartRate))
 	heartRateFile.write('\n')
+	heartRateFile.flush()
 
 
 def writePowerEvent(eventTime, instantaneousPower, accumulatedPower, ratio, cadence):
@@ -116,6 +118,7 @@ def writePowerEvent(eventTime, instantaneousPower, accumulatedPower, ratio, cade
 	powerFile.write(',')
 	powerFile.write(str(cadence))
 	powerFile.write('\n')
+	powerFile.flush()
 
 
 def writeTorqueEvent(eventTime, leftTorque, rightTorque, leftPedalSmoothness, rightPedalSmoothness):
@@ -129,6 +132,7 @@ def writeTorqueEvent(eventTime, leftTorque, rightTorque, leftPedalSmoothness, ri
 	torqueFile.write(',')
 	torqueFile.write(str(rightPedalSmoothness))
 	torqueFile.write('\n')
+	torqueFile.flush()
 
 
 def writeGPS(info):
@@ -146,6 +150,7 @@ def writeGPS(info):
 	gpsFile.write(',')
 	gpsFile.write(str(info.error['s']))
 	gpsFile.write('\n')
+	gpsFile.flush()
 
 
 def writeCPUTemperature(temperature):
