@@ -47,8 +47,15 @@ SUBSYSTEM=="usb", ATTRS{idVendor}=="0fcf", ATTRS{idProduct}=="1008", RUN+="/sbin
 # To run camera & display from command line, use:
 > /usr/bin/raspivid -t 0 -f --mode 5 -ex sports -fps 49 -w 1296 -h 730 --flush
 
-# Allow Pi to be shutdown cleanly by connecting GPIO pin BCM 3 to ground
+# Allow Pi to be shutdown cleanly by connecting GPIO pin BCM 3 to ground.
+# Not needed if detecting button press from Python code.
 dtoverlay=gpio-shutdown,debounce=1000
+
+
+Physical setup:
+
+* Connect button to ground (pin 6) and GPIO 3 (pin 5) for shutdown.
+  Connect LED of button to GPIO 14 UART Transmit (pin 8) to have it light up when the Pi is on.
 
 
 
