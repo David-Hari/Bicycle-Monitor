@@ -332,7 +332,7 @@ recording.startRecordingVideo(camera)
 # Set up shutdown button
 shutdownPin = 3    # Physical/Board pin 5, GPIO/BCM pin 3
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(shutdownPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(shutdownPin, GPIO.IN)  # Pin includes a fixed 1.8 kΩ pull-up to 3.3v, so no need to set in software
 
 
 #-------------------------------------------------#
@@ -346,7 +346,7 @@ shouldShutdown = False     # If terminating should also shut down the operating 
 hasAbortedBefore = False   # Track if shut down was aborted once already
 while True:
 	try:
-		# Check once a second if shut-down button is held down for more than a second.
+		# Check once a second if shut-down button is held down for 1 to 2 seconds.
 		if counter % 4 == 0:
 			if GPIO.input(shutdownPin) == GPIO.LOW:
 				if shutdownHeld:
