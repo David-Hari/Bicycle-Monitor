@@ -94,10 +94,14 @@ void loop() {
 		else {
 			// Check to make sure that gear is still in position
 			int oldGear = currentGear;
-			currentGear = readGear();
-			if (currentGear != oldGear) {
-				sendMessage(ERROR_MSG, "Unexpected gear change from " + String(oldGear) + " to " + String(currentGear));
+			int tempGear = readGear();
+			if (tempGear == -1) {
+				// Error will have been reported by readGear
+			}
+			else if (tempGear != oldGear) {
+				sendMessage(ERROR_MSG, "Unexpected gear change from " + String(oldGear) + " to " + String(tempGear));
 				sendMessage(GEAR_CHANGED_MSG, String(currentGear));
+				currentGear = tempGear
 			}
 			// TODO: Somehow detect if motor is not powered (or at least if there is no feedback signal).
 			//  Perhaps analogRead a bunch of times and check if they are all zero.
@@ -187,7 +191,6 @@ void adjustPositionsLoop() {
 /*************************************************************************/
 void reportError(String message) {
 	sendMessage(ERROR_MSG, message);
-	digitalWrite(LED_BUILTIN, HIGH);
 }
 
 
@@ -196,7 +199,6 @@ void reportError(String message) {
 /*************************************************************************/
 void shutdown() {
 	stopServo();
-	digitalWrite(LED_BUILTIN, LOW);
 	while (true) {}
 }
 
