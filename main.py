@@ -394,7 +394,7 @@ while True:
 					shouldShutdown = True
 					raise KeyboardInterrupt
 				else:
-					recording.log('Shutdown button is pressed. Will shut down if it stays pressed.')
+					showMessage('Shutdown button is pressed. Will shut down if it stays pressed.')
 					shutdownHeld = True
 			else:
 				shutdownHeld = False
