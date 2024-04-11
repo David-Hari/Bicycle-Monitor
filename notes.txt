@@ -1,4 +1,33 @@
 
+Linux setup:
+
+# For ANT USB device, create file /etc/udev/rules.d/garmin-ant2.rules containing the following:
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0fcf", ATTRS{idProduct}=="1008", RUN+="/sbin/modprobe usbserial vendor=0x0fcf product=0x1008", MODE="0666", OWNER="pi", GROUP="root"
+
+# To run camera & display from command line, use:
+> /usr/bin/raspivid -t 0 -f --mode 5 -ex sports -fps 49 -w 1296 -h 730 --flush
+
+# Allow Pi to be shutdown cleanly by connecting GPIO pin BCM 3 to ground.
+# Not needed if detecting button press from Python code.
+Add in /boot/config.txt:
+  dtoverlay=gpio-shutdown,debounce=1000
+
+# To allow login over serial connection:
+# Disable Bluetooth to allow UART0 to be on the GPIO pins
+Add in /boot/config.txt:
+  dtoverlay=disable-bt
+Then disable bluetooth with:
+> sudo systemctl disable hciuart
+
+
+Physical setup:
+
+* Connect button to ground (pin 6) and GPIO 3 (pin 5) for shutdown.
+  Connect LED of button to GPIO 14 UART Transmit (pin 8) to have it light up when the Pi is on.
+
+
+
+
 Useful commands:
 
 ### Check temperature of CPU ###
@@ -23,51 +52,10 @@ list supported modes:
 show current state:
 > tvservice -s
 
-### Bluetooth stuff ###
+### Bluetooth ###
 > sudo modprobe btusb
-> sudo systemctl start bluetooth
 > service bluetooth status
 > service hciuart status
-> bluetoothctl
-  # power on
-  # agent on
-  # default-agent
 
 ### GPIO and other info (from gpiozero library) ###
 > pinout
-
-
-
-
-Linux setup:
-
-# For ANT USB device, create file /etc/udev/rules.d/garmin-ant2.rules containing the following:
-SUBSYSTEM=="usb", ATTRS{idVendor}=="0fcf", ATTRS{idProduct}=="1008", RUN+="/sbin/modprobe usbserial vendor=0x0fcf product=0x1008", MODE="0666", OWNER="pi", GROUP="root"
-
-# To run camera & display from command line, use:
-> /usr/bin/raspivid -t 0 -f --mode 5 -ex sports -fps 49 -w 1296 -h 730 --flush
-
-# Allow Pi to be shutdown cleanly by connecting GPIO pin BCM 3 to ground.
-# Not needed if detecting button press from Python code.
-dtoverlay=gpio-shutdown,debounce=1000
-
-
-Physical setup:
-
-* Connect button to ground (pin 6) and GPIO 3 (pin 5) for shutdown.
-  Connect LED of button to GPIO 14 UART Transmit (pin 8) to have it light up when the Pi is on.
-
-
-
-
-
-Python-Ant TODO:
-
-* Only call callback on each new event, ignore identical messages
-  in between. For example, a new power event should come on each crank rotation.
-  Same for heart rate monitor.
-
-* Log time of each bicycle power message.
-
-* Startup message sometimes times-out after calling reset. Must have something to do with
-  the driver, because it only happens in Node.start and never in Node.stop.

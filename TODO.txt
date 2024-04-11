@@ -1,0 +1,21 @@
+
+
+* Somehow pipe console standard out/err to log file so I don't have to look at journalctl.
+  If it can't be done in Python, set it up to re-direct to a different log file.
+  Maybe then don't need PYTHONUNBUFFERED=1 in bikemon.service
+
+* Set up serial on the second Pi
+
+
+
+
+Python-Ant TODO:
+
+* Only call callback on each new event, ignore identical messages
+  in between. For example, a new power event should come on each crank rotation.
+  Same for heart rate monitor.
+
+* Log time of each bicycle power message.
+
+* Startup message sometimes times-out after calling reset. Must have something to do with
+  the driver, because it only happens in Node.start and never in Node.stop.
