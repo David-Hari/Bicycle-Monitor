@@ -101,7 +101,7 @@ void loop() {
 			else if (tempGear != oldGear) {
 				sendMessage(ERROR_MSG, "Unexpected gear change from " + String(oldGear) + " to " + String(tempGear));
 				sendMessage(GEAR_CHANGED_MSG, String(currentGear));
-				currentGear = tempGear
+				currentGear = tempGear;
 			}
 			// TODO: Somehow detect if motor is not powered (or at least if there is no feedback signal).
 			//  Perhaps analogRead a bunch of times and check if they are all zero.
