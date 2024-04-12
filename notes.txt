@@ -13,11 +13,13 @@ Add in /boot/config.txt:
   dtoverlay=gpio-shutdown,debounce=1000
 
 # To allow login over serial connection:
-# Disable Bluetooth to allow UART0 to be on the GPIO pins
 Add in /boot/config.txt:
-  dtoverlay=disable-bt
+  # Enable serial communication to allow login via USB adapter
+  enable_uart=1
+  dtoverlay=disable-bt   # This is needed to force primary UART (the one on GPIO) to be ttyAMA0/PL011
 Then disable bluetooth with:
 > sudo systemctl disable hciuart
+> sudo systemctl disable bluetooth
 
 
 Physical setup:
