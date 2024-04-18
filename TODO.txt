@@ -6,6 +6,8 @@
 
 * Set up serial on the second Pi
 
+* Print or download pinout page and put on laptop
+
 
 
 

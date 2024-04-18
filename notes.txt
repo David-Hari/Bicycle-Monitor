@@ -1,4 +1,7 @@
 
+Username: pi
+Password: d2Cq0zkISO
+
 Linux setup:
 
 # For ANT USB device, create file /etc/udev/rules.d/garmin-ant2.rules containing the following:
@@ -21,11 +24,28 @@ Then disable bluetooth with:
 > sudo systemctl disable hciuart
 > sudo systemctl disable bluetooth
 
+# To disable Wi-Fi:
+Add in /boot/config.txt:
+  dtoverlay=disable-wifi
+
 
 Physical setup:
 
 * Connect button to ground (pin 6) and GPIO 3 (pin 5) for shutdown.
   Connect LED of button to GPIO 14 UART Transmit (pin 8) to have it light up when the Pi is on.
+
+
+For serial communication using UART-to-USB Bridge:
+  * Black ground pin of the Bridge to Pin 6 (GND) of the RPi
+  * White RX Pin of the Bridge to Pin 8 (GPIO 14 / TXD) of the RPi
+  * Green TX Pin of the Bridge to Pin 10 (GPIO 15 / RXD) of the RPi
+  Settings:
+   Speed (baud): 115200  (set in device properties)
+   Data bits: 8
+   Stop bits: 1
+   Parity: None
+   Flow control: None
+  When connecting via PuTTY or MobaXterm, press Enter to get login prompt
 
 
 
