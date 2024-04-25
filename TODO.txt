@@ -4,8 +4,6 @@
   If it can't be done in Python, set it up to re-direct to a different log file.
   Maybe then don't need PYTHONUNBUFFERED=1 in bikemon.service
 
-* Set up serial on the second Pi
-
 * Print or download pinout page and put on laptop
 
 
