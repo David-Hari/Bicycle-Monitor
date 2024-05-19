@@ -24,8 +24,8 @@ const int MAX_GEARS = (sizeof(gearPositions)/sizeof((gearPositions)[0]));
 const int GEAR_CHANGE_DELAY = 50;         // Milliseconds to delay for each degree moved.
 const int GEAR_CHANGE_WAIT_TIME = 500;    // Milliseconds to wait after changing to make sure gear is in correct position.
 const int READ_ANGLE_THRESHOLD = 8;       // Degrees +/- relative to gear position that servos must be in to be considered in gear when reading.
-const int MOVE_ANGLE_THRESHOLD = 4;       // Degrees +/- relative to gear that servos must be in to be considered moved to that gear.
-const int ALIGNMENT_THRESHOLD = 4;        // Degrees +/- that each servo must be from each other to be considered aligned.
+const int MOVE_ANGLE_THRESHOLD = 6;       // Degrees +/- relative to gear that servos must be in to be considered moved to that gear.
+const int ALIGNMENT_THRESHOLD = 6;        // Degrees +/- that each servo must be from each other to be considered aligned.
 
 
 void initializeServo();
