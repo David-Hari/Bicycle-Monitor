@@ -72,7 +72,7 @@ int readAngle2() {
 int getGearAtPosition(int angle) {
 	for (int i = 0; i < MAX_GEARS; i++) {
 		int gearAngle = gearPositions[i];
-		if (angle >= gearAngle - GEAR_POSITION_THRESHOLD && angle <= gearAngle + GEAR_POSITION_THRESHOLD) {
+		if (angle >= gearAngle - READ_ANGLE_THRESHOLD && angle <= gearAngle + READ_ANGLE_THRESHOLD) {
 			return i + 1;
 		}
 	}
@@ -87,7 +87,7 @@ int getGearAtPosition(int angle) {
 int readGear() {
 	int angle1 = readAngle1();
 	int angle2 = readAngle2();
-	if (abs(angle1 - angle2) > GEAR_POSITION_THRESHOLD) {
+	if (abs(angle1 - angle2) > ALIGNMENT_THRESHOLD) {
 		reportError("Servo motors not aligned. Motor 1: " + String(angle1) + "°, Motor 2: " + String(angle2) + "°");
 		return -1;
 	}
@@ -136,8 +136,8 @@ boolean moveToGear(int toGear) {
 	do {
 		currentAngle1 = readAngle1();
 		currentAngle2 = readAngle2();
-		isFinished1 = currentAngle1 >= newAngle - GEAR_POSITION_THRESHOLD && currentAngle1 <= newAngle + GEAR_POSITION_THRESHOLD;
-		isFinished2 = currentAngle2 >= newAngle - GEAR_POSITION_THRESHOLD && currentAngle2 <= newAngle + GEAR_POSITION_THRESHOLD;
+		isFinished1 = currentAngle1 >= newAngle - MOVE_ANGLE_THRESHOLD && currentAngle1 <= newAngle + MOVE_ANGLE_THRESHOLD;
+		isFinished2 = currentAngle2 >= newAngle - MOVE_ANGLE_THRESHOLD && currentAngle2 <= newAngle + MOVE_ANGLE_THRESHOLD;
 	} while ((!isFinished1 || !isFinished2) && millis() - startWaitTime < GEAR_CHANGE_WAIT_TIME);
 
 	// Error if one or both servos are still not at the correct angle after waiting.
