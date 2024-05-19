@@ -14,7 +14,7 @@ Button downButton;
 void initializeButtons() {
 	pinMode(UP_BUTTON_PIN, INPUT_PULLUP);
 	pinMode(DOWN_BUTTON_PIN, INPUT_PULLUP);
-	pinMode(ADJUST_BUTTON_PIN, INPUT_PULLUP);
+	pinMode(DEBUG_BUTTON_PIN, INPUT_PULLUP);
 	upButton.pin = UP_BUTTON_PIN;
 	upButton.state = HIGH;
 	downButton.pin = DOWN_BUTTON_PIN;
@@ -37,17 +37,10 @@ boolean isDownButtonPressed() {
 }
 
 /*************************************************************************/
-/* Check if both buttons are held down. Used for debugging.              */
+/* Check if debug button is held down.                                   */
 /*************************************************************************/
-boolean areBothButtonsPressed() {
-	return isUpButtonPressed() && isDownButtonPressed();
-}
-
-/*************************************************************************/
-/* Check if adjust "button" is held down/connected. Used for debugging.  */
-/*************************************************************************/
-boolean isAdjustButtonPressed() {
-	return digitalRead(ADJUST_BUTTON_PIN) == LOW;
+boolean isDebugButtonPressed() {
+	return digitalRead(DEBUG_BUTTON_PIN) == LOW;
 }
 
 
