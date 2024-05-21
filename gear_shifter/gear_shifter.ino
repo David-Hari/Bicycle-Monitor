@@ -84,13 +84,19 @@ void loop() {
 			if (moveToGear(currentGear)) {
 				sendMessage(GEAR_CHANGED_MSG, String(currentGear));
 			}
+			else {
+				// Error moving to gear. Wait a bit then check what gear it is currently in.
+				delay(2000);
+				currentGear = readGear();
+				sendMessage(GEAR_CHANGED_MSG, String(currentGear));
+			}
 		}
 		else {
-			// Check to make sure that gear is still in position
+			// Check to make sure that gear is still in position.
 			int oldGear = currentGear;
 			int tempGear = readGear();
 			if (tempGear == -1) {
-				// Error will have been reported by readGear
+				// Error will have been reported by readGear.
 			}
 			else if (tempGear != oldGear) {
 				sendMessage(ERROR_MSG, "Unexpected gear change from " + String(oldGear) + " to " + String(tempGear));
