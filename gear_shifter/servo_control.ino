@@ -142,7 +142,7 @@ boolean moveToGear(int toGear) {
 
 	// Error if one or both servos are still not at the correct angle after waiting.
 	if (!isFinished1 || !isFinished2) {
-		reportError("Servo motors not aligned moving to gear " + String(toGear) + ". Motor 1: " + String(currentAngle1) + "°, Motor 2: " + String(currentAngle2) + "°");
+		reportError("Servo motors didn't move to gear " + String(toGear) + ". Motor 1: " + String(currentAngle1) + "°, Motor 2: " + String(currentAngle2) + "°");
 		return false;
 	}
 
