@@ -37,6 +37,7 @@ int readGear();
 boolean moveToGear(int toGear);
 int moveToNearestGear();
 void moveServo(int angle);
+void moveServoSlowly(int startAngle, int endAngle, int moveDelay);
 int clampAngle(int angle);
 
 

@@ -116,18 +116,7 @@ boolean moveToGear(int toGear) {
 	// Incrementally move the servo motors with delays in between to control their speed
 	currentAngle1 = gearPositions[currentGear-1];
 	newAngle = gearPositions[toGear-1];
-	if (newAngle >= currentAngle1) {
-		for (int angle = currentAngle1; angle <= newAngle; angle++) {
-			moveServo(angle);
-			delay(GEAR_CHANGE_DELAY);
-		}
-	}
-	else {
-		for (int angle = currentAngle1; angle >= newAngle; angle--) {
-			moveServo(angle);
-			delay(GEAR_CHANGE_DELAY);
-		}
-	}
+	moveServoSlowly(currentAngle1, newAngle, GEAR_CHANGE_DELAY);
 
 	// Wait for servos to finish moving.
 	long startWaitTime = millis();
@@ -158,18 +147,18 @@ boolean moveToGear(int toGear) {
 /* Returns the gear that the servos should now be at.                    */
 /*************************************************************************/
 int moveToNearestGear() {
-	int currentAngle1 = readAngle1();
+	int currentAngle = readAngle1();
 
 	int oldGearAngle = gearPositions[0];
 	for (int i = 1; i < MAX_GEARS; i++) {
 		int newGearAngle = gearPositions[i];
 		int halfWay = (newGearAngle + oldGearAngle) / 2;
-		if (currentAngle1 < halfWay) {
-			moveServo(oldGearAngle);
+		if (currentAngle < halfWay) {
+			moveServoSlowly(currentAngle, oldGearAngle, GEAR_CHANGE_DELAY);
 			return i;   // Previous gear (i is zero based so no need to subtract 1)
 		}
-		else if (currentAngle1 >= halfWay && currentAngle1 <= newGearAngle) {
-			moveServo(newGearAngle);
+		else if (currentAngle >= halfWay && currentAngle <= newGearAngle) {
+			moveServoSlowly(currentAngle, newGearAngle, GEAR_CHANGE_DELAY);
 			return i + 1;
 		}
 		oldGearAngle = newGearAngle;
@@ -185,6 +174,26 @@ int moveToNearestGear() {
 /*************************************************************************/
 void moveServo(int angle) {
 	servo.writeMicroseconds(map(clampAngle(angle), SERVO_MIN_ANGLE, SERVO_MAX_ANGLE, SERVO_MIN_PULSE, SERVO_MAX_PULSE));
+}
+
+
+/*************************************************************************/
+/* Move the servo motor slowly (one degree at a time) from the initial   */
+/* angle to the final angle, with the given delay between each movement. */
+/*************************************************************************/
+void moveServoSlowly(int startAngle, int endAngle, int moveDelay) {
+	if (endAngle >= startAngle) {
+		for (int angle = startAngle; angle <= endAngle; angle++) {
+			moveServo(angle);
+			delay(moveDelay);
+		}
+	}
+	else {
+		for (int angle = startAngle; angle >= endAngle; angle--) {
+			moveServo(angle);
+			delay(moveDelay);
+		}
+	}
 }
 
 
