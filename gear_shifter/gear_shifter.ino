@@ -124,24 +124,37 @@ void debugLoop() {
 	int count = 0;
 	boolean buttonHeld = false;
 	while (true) {
-		boolean upPressed = isUpButtonPressed();
-		boolean downPressed = isDownButtonPressed();
-		if (upPressed || downPressed) {
-			if (upPressed) {
-				angle--;
+		if (isDebugButtonPressed()) {
+			// Wait and check if button is still pressed after some time
+			for (int i = 0; i < 8; i++) {
+				digitalWrite(LED_BUILTIN, i % 2 == 0 ? LOW : HIGH);
+				delay(250);
 			}
-			else if (downPressed) {
-				angle++;
+			if (isDebugButtonPressed()) {
+				moveToNearestGear();
 			}
-			angle = clampAngle(angle);
-			moveServo(angle);
-			if (!buttonHeld) {
-				delay(200);   // Delay between first press and repeating
-			}
-			buttonHeld = true;
+			digitalWrite(LED_BUILTIN, LOW);
 		}
 		else {
-			buttonHeld = false;
+			boolean upPressed = isUpButtonPressed();
+			boolean downPressed = isDownButtonPressed();
+			if (upPressed || downPressed) {
+				if (upPressed) {
+					angle--;
+				}
+				else if (downPressed) {
+					angle++;
+				}
+				angle = clampAngle(angle);
+				moveServo(angle);
+				if (!buttonHeld) {
+					delay(200);   // Delay between first press and repeating
+				}
+				buttonHeld = true;
+			}
+			else {
+				buttonHeld = false;
+			}
 		}
 
 		if (count % 4 == 0) {  // Don't run too quickly, serial buffer might fill up
