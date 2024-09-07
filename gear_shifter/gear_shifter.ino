@@ -37,7 +37,12 @@ void setup() {
 		debugLoop();
 	}
 	else {
-		currentGear = readGear();
+		// Check a few times just in case first read was not accurate.
+		int count = 0;
+		while ((currentGear = readGear()) <= 0 && count < 5) {
+			count++;
+			delay(1000);
+		}
 		if (currentGear > 0) {
 			// Note: Servo position needs to be set *before* attaching, otherwise it
 			// will move to a default position.
@@ -46,7 +51,6 @@ void setup() {
 			sendMessage(GEAR_CHANGED_MSG, String(currentGear));
 		}
 		else {
-			delay(2000);
 			sendMessage(ERROR_MSG, "Entering debug mode due to invalid gear");
 			delay(2000);
 			debugLoop();
@@ -54,6 +58,7 @@ void setup() {
 	}
 	digitalWrite(LED_BUILTIN, LOW);
 }
+
 
 
 /*************************************************************************/
