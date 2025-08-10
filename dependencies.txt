@@ -1,5 +1,4 @@
 picamera
 python-ant
-Pillow
-recordclass
+Pillow==6.0.0
 gpsd-py3

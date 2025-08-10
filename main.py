@@ -400,7 +400,8 @@ while True:
 				shutdownHeld = False
 
 		# Update the power info on display
-		display.drawPower(power, config.powerGoal)
+        # Disable for now.
+		#display.drawPower(power, config.powerGoal)
 
 		# Check to see if GPS is active. Give it some time to start up first.
 		if not isGpsActive and counter > 40 and counter % 8 == 0:
@@ -426,8 +427,9 @@ while True:
 				showGpsMessage(str(gpsError), level='error')
 
 		# Update heart rate once a second
-		if counter % 4 == 0:
-			display.drawHeartRate(heartRate)
+		# Disable for now.
+		#if counter % 4 == 0:
+		#	display.drawHeartRate(heartRate)
 
 		# Read serial communication from gear shifter, and update display if necessary
 		gearData = readFromGearShifter()

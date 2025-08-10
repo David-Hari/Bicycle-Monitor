@@ -5,22 +5,27 @@
 """
 
 from threading import Timer, Lock
-from recordclass import recordclass
 from PIL import Image, ImageDraw, ImageFont
 
 import config
 
 
-StatusOverlay = recordclass('StatusOverlay', 'overlay timer yPos height')
+class StatusOverlay:
+	def __init__(self, overlay, timer, yPos, height):
+		self.overlay = overlay
+		self.timer = timer
+		self.yPos = yPos
+		self.height = height
+
 
 camera = None
 fontPath = '/usr/share/fonts/truetype/roboto/Roboto-Regular.ttf'
 boldFontPath = '/usr/share/fonts/truetype/roboto/Roboto-Bold.ttf'
 heartImage = Image.open('./heart.png').convert('RGBA')
-titleFont = ImageFont.truetype(boldFontPath, 35)
+titleFont = ImageFont.truetype(boldFontPath, 60)
 statusFont = ImageFont.truetype(fontPath, 35)
-infoFont = ImageFont.truetype(fontPath, 32)
-gearFont = ImageFont.truetype(fontPath, 50)
+infoFont = ImageFont.truetype(fontPath, 80)
+gearFont = ImageFont.truetype(fontPath, 160)
 powerFont = ImageFont.truetype(fontPath, 40)
 textPrimaryColour = (255, 255, 255)
 textDimColour = (128, 128, 128)
@@ -33,7 +38,6 @@ statusColours = {
 powerUnderColour = (207, 16, 26)
 powerIdealColour = (31, 160, 70)
 powerOverColour = (239, 122, 0)
-titleHeight = 45            # Best guess. Quicker than draw.textsize.
 statusOverlayHeight = 160   # Max height of image for overlay. Must be a multiple of 16.
 statusPadding = 10          # Size between each status message, in pixels.
 statusOverlays = {}
@@ -56,9 +60,9 @@ def start(piCamera):
 	camera = piCamera
 	camera.start_preview(fullscreen=True)
 	powerBarOverlay = addOverlay(Image.new('RGBA', (256, 240)), (10, 10, 256, 240))
-	gpsOverlay = addOverlay(Image.new('RGBA', (512, 128)), (320, 10, 512, 128))
+	gpsOverlay = addOverlay(Image.new('RGBA', (512, 256)), (20, 800, 512, 256))
 	heartRateOverlay = addOverlay(Image.new('RGBA', (256, 128)), (1780, 20, 256, 128))
-	gearOverlay = addOverlay(Image.new('RGBA', (128, 128)), (1780, 600, 128, 128))
+	gearOverlay = addOverlay(Image.new('RGBA', (256, 256)), (1740, 860, 256, 256))
 
 
 def stop():
@@ -187,14 +191,15 @@ def drawSpeedAndDistance(speed, distance):
 	drawShadowedText(draw, (0, 0), 'Speed', font=titleFont)
 	kmhText = '--' if speed is None else str(int(speed*3.6))
 	mphText = '--' if speed is None else str(int(speed*2.237))
-	drawShadowedText(draw, (2, titleHeight+5), kmhText + ' km/h', font=infoFont)
-	drawShadowedText(draw, (2, titleHeight+45), mphText + ' mph', font=infoFont)
+	drawShadowedText(draw, (2, 70), kmhText + ' km/h', font=infoFont)
+	drawShadowedText(draw, (2, 160), mphText + ' mph', font=infoFont)
 
-	drawShadowedText(draw, (200, 0), 'Dist.', font=titleFont)
-	kmText = '--' if distance is None else '{0:.2f}'.format(distance/1000)
-	miText = '--' if distance is None else '{0:.2f}'.format(distance/1609.344)
-	drawShadowedText(draw, (202, titleHeight+5), kmText + ' km', font=infoFont)
-	drawShadowedText(draw, (202, titleHeight+45), miText + ' mi.', font=infoFont)
+	# Disable drawing distance for now.
+	#drawShadowedText(draw, (200, 0), 'Dist.', font=titleFont)
+	#kmText = '--' if distance is None else '{0:.2f}'.format(distance/1000)
+	#miText = '--' if distance is None else '{0:.2f}'.format(distance/1609.344)
+	#drawShadowedText(draw, (202, 50), kmText + ' km', font=infoFont)
+	#drawShadowedText(draw, (202, 90), miText + ' mi.', font=infoFont)
 
 	updateOverlay(gpsOverlay, image)
 
@@ -225,7 +230,7 @@ def drawGearNumber(gear, isChanging=False):
 	textWidth, textHeight = draw.textsize(text, font=gearFont)
 	textColour = textDimColour if isChanging else textPrimaryColour
 	draw.rectangle((0, 0, textWidth+60, textHeight+40), fill=statusBackgroundColour)
-	drawShadowedText(draw, (30, 15), text, fill=textColour, font=gearFont)
+	drawShadowedText(draw, (30, 0), text, fill=textColour, font=gearFont)
 	updateOverlay(gearOverlay, image)
 
 

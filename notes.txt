@@ -27,6 +27,12 @@ Then disable bluetooth with:
 Add in /boot/config.txt:
   dtoverlay=disable-wifi
 
+# To create service:
+> sudo mv bikemon.service /lib/systemd/system/
+> sudo chmod 644 /lib/systemd/system/bikemon.service
+> sudo systemctl daemon-reload
+> sudo systemctl enable bikemon
+
 
 Physical setup:
 
@@ -51,19 +57,38 @@ For serial communication using UART-to-USB Bridge:
 
 Useful commands:
 
+### To check status ###
+> systemctl status bikemon
+
+
+### To see standard out/err ###
+> journalctl -u bikemon
+
+
+### Mount and copy to USB ###
+> lsblk -f                                (to find out what USB device name is)
+> sudo mkdir /media/usb-drive             (if folder does not already exist)
+> sudo mount /dev/sda1 /media/usb-drive   (assuming "sda1" is USB device)
+> cp -r ~/Bicycle-Monitor/data /media/usb-drive
+> sudo umount /media/usb-drive
+
+
 ### Check temperature of CPU ###
 > vcgencmd measure_temp
 or
 > cat /sys/class/thermal/thermal_zone0/temp
 
+
 ### Check if GPS daemon is running ###
 > sudo systemctl status gpsd.socket
+
 
 ### Test/debug GPS daemon ###
 > sudo systemctl stop gpsd.socket
 > sudo gpsd /dev/ttyUSB1 -F /var/run/gpsd.sock
 > cgps
 > sudo killall gpsd
+
 
 ### Test video display ###
 (currently set as hdmi_group=1, hdmi_mode=16 in /boot/config.txt)
@@ -72,6 +97,7 @@ list supported modes:
 > tvservice –m DMT
 show current state:
 > tvservice -s
+
 
 ### Bluetooth ###
 > sudo modprobe btusb
