@@ -19,18 +19,20 @@ boolean debug = false;
 /*************************************************************************/
 void setup() {
 	pinMode(LED_BUILTIN, OUTPUT);
+	digitalWrite(LED_BUILTIN, HIGH);
 	initializeButtons();
 	Serial.begin(9600);
 
 	// Listen for startup message from Pi, or debug button is pressed.
-	digitalWrite(LED_BUILTIN, HIGH);
+	// NOTE: We are no longer using the code on the Pi, so serial will never be available.
+	/*
 	while (Serial.available() <= 0 && !(debug = isDebugButtonPressed())) {}
 	if (Serial.available() >= 1) {
 		char incomingByte = (char)Serial.read();
 		if (incomingByte == DEBUG_MSG) {
 			debug = true;
 		}
-	}
+	}*/
 	if (debug) {
 		delay(1000);
 		sendMessage(DEBUG_MSG, "Debug mode. Adjust servos with up/down buttons");
